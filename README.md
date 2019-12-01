@@ -1,5 +1,7 @@
 # Hung-Yi's Advent of Code
 
+These are solutions for the puzzles at https://adventofcode.com/
+
 To get all solutions logged in the console: `npm start`.  
 To run all tests: `npm test`
 
