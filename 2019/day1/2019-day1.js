@@ -26,11 +26,11 @@ const sumReducer = (sum, curr) => sum + curr;
 
 // Part 1 answer
 const answer1 = input.map(mass => calculateRequiredFuel(mass)).reduce(sumReducer);
-console.log('Answer 1:', answer1);
+console.log('2019 Day 1 Part 1:', answer1);
 
 // Part 2 answer
 const answer2 = input.map(mass => calculateRequiredFuel(mass, true)).reduce(sumReducer);
-console.log('Answer 2:', answer2);
+console.log('2019 Day 1 Part 2:', answer2);
 
 // Export key components for testing
 module.exports = {

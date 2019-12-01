@@ -47,10 +47,10 @@ const finalFloor = instructions => getFloorHistory(instructions).pop();
 const firstBasementEntry = instructions => getFloorHistory(instructions).indexOf(-1) + 1;
 
 const answer1 = finalFloor(input);
-console.log('Part 1:', answer1);
+console.log('2015 Day 1 Part 1:', answer1);
 
 const answer2 = firstBasementEntry(input);
-console.log('Part 2:', answer2);
+console.log('2015 Day 1 Part 2:', answer2);
 
 module.exports = {
   finalFloor,
