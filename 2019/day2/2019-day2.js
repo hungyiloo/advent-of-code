@@ -12,13 +12,13 @@ const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x);
  * Functional currying operator
  * @param {function} fn - function to curry
  */
-const curry = fn => {
-  const curried = (...args) => 
-    args.length >= fn.length 
-      ? fn.apply(this, args) 
-      : (...args2) => curried.apply(this, args.concat(args2));
-  return curried;
-}
+const curry = (
+  f, arr = []
+) => (...args) => (
+  a => a.length === f.length ?
+    f(...a) :
+    curry(f, a)
+)([...arr, ...args]);
 
 /**
  * Cartesian product of two arrays
