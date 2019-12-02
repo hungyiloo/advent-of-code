@@ -43,6 +43,7 @@ const readTapeToMemory = tape => tape.split(',').map(x => parseInt(x));
  * Replaces a value in memory at the specified address
  * @param {number} address - the address/position to write the new value to
  * @param {number} newValue - the new value to write at the address
+ * @param {number[]} memory - the memory to replace the value in
  */
 const replaceValueInMemory = curry((address, newValue, memory) => [...memory.slice(0, address), newValue, ...memory.slice(address + 1, memory.length)]);
 
