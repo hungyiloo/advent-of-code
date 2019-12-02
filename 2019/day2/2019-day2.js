@@ -35,17 +35,6 @@ const readTapeToMemory = tape => tape.split(',').map(x => parseInt(x));
 const replaceValueInMemory = (address, newValue) => memory => [...memory.slice(0, address), newValue, ...memory.slice(address + 1, memory.length)];
 
 /**
- * Replace the noun and verb in program memory, returning the new memory snapshot without mutating initial memory.
- * The noun and the verb addresses are defined by the puzzle conditions in Advent of Code 2019 Day 2 Part 2.
- * @param {number} noun - new value of the noun
- * @param {number} verb - new value of the verb
- */
-const replaceNounAndVerbInMemory = (noun, verb) => pipe(
-  replaceValueInMemory(1, noun),
-  replaceValueInMemory(2, verb)
-);
-
-/**
  * Read the program memory and execute instructions until it halts
  * @param {number[]} memory - the memory snapshot to start executing
  */
@@ -87,7 +76,8 @@ const executeProgramInMemory = pipe(
  */
 const getProgramOutput = (noun, verb) => pipe(
   readTapeToMemory,
-  replaceNounAndVerbInMemory(noun, verb),
+  replaceValueInMemory(1, noun),
+  replaceValueInMemory(2, verb),
   executeProgramInMemory,
   memory => memory[0]
 )(inputTape);
