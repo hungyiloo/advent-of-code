@@ -17,7 +17,11 @@ function calculateRequiredFuel(mass, recurse = false) {
     return fuel;
   } else {
     // Part 2
-    return fuel > 0 ? fuel + calculateRequiredFuel(fuel, recurse) : 0;
+    if (fuel > 0) {
+      return fuel + calculateRequiredFuel(fuel, recurse);
+    } else {
+      return 0;
+    }
   }
 }
 
