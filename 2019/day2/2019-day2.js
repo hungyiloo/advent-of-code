@@ -7,12 +7,12 @@ const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf8');
  * @param  {...any} fns - functions to compose, applied left to right
  */
 const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x);
-const tap = fn => x => { fn(x); return x; }
-
-const parseTape = tape => tape.split(',').map(x => parseInt(x));
-
-const execute = pipe(
-  initialMemory => initialMemory.reduce((state, _value, address) => {
+const product = (xs, ys) => [].concat(...xs.map(x => ys.map(y => [].concat(x, y))));
+const range = size => Array(size).fill().map((_, i) => i);
+const parseTapeToMemory = tape => tape.split(',').map(x => parseInt(x));
+const replaceMemoryNounAndVerb = (noun, verb) => memory => [memory[0], noun, verb, ...memory.slice(3, memory.length)];
+const executeProgramInMemory = pipe(
+  initialMemory => initialMemory.reduce((state, _initialValue, address) => {
     const [halted, operation, x, y, memory] = state;
     const value = memory[address];
     if (halted) {
@@ -35,21 +35,30 @@ const execute = pipe(
         return [halted, null, null, null, [...memory.slice(0, value), operation(x,y), ...memory.slice(value + 1, memory.length)]]
     }
   }, [false, null, null, null, initialMemory]),
-  state => state[4], // Returns the final state of the program,
+  state => state[4], // Returns the final memory contents of the running program,
 );
 
-const answer1 = pipe(
-  parseTape,
-  inputMemory => [inputMemory[0], 12, 2, ...inputMemory.slice(3, inputMemory.length)],
-  execute,
-  outputMemory => outputMemory[0]
+const getProgramOutput = (noun, verb) => pipe(
+  parseTapeToMemory,
+  replaceMemoryNounAndVerb(noun, verb),
+  executeProgramInMemory,
+  memory => memory[0]
 )(input);
-console.log(answer1);
 
-const answer2 = []
+const answer1 = getProgramOutput(12, 2);
+console.log('2019 Day 2 Part 1:', answer1);
+
+const answer2 = product(range(100),range(100))
+  .map(([noun, verb]) => [noun, verb, getProgramOutput(noun, verb)])
+  .filter(([_noun, _verb, programOutput]) => programOutput === 19690720)
+  .map(([noun, verb]) => 100 * noun + verb)
+  [0];
+console.log('2019 Day 2 Part 2:', answer2);
 
 module.exports = {
-  execute,
+  executeProgramInMemory,
+  product,
+  range,
   answer1,
   answer2
 }
