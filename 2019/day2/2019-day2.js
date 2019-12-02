@@ -102,9 +102,10 @@ console.log('2019 Day 2 Part 1:', answer1);
 // is required for an output of 19690720.
 // The answer is also transformed with some basic math (100 * noun + verb).
 const answer2 = pipe(
+  inputRange => product(inputRange, inputRange),
   searchSpace => searchSpace.find(([noun, verb]) => getProgramOutput(noun, verb) === 19690720),
   ([noun, verb]) => 100 * noun + verb
-)(product(range(100),range(100)));
+)(range(100));
 console.log('2019 Day 2 Part 2:', answer2);
 
 module.exports = {
