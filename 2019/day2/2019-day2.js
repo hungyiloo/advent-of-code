@@ -9,6 +9,18 @@ const inputTape = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf8');
 const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x);
 
 /**
+ * Functional currying operator
+ * @param {function} fn - function to curry
+ */
+const curry = fn => {
+  const curried = (...args) => 
+    args.length >= fn.length 
+      ? fn.apply(this, args) 
+      : (...args2) => curried.apply(this, args.concat(args2));
+  return curried;
+}
+
+/**
  * Cartesian product of two arrays
  * @param {any[]} xs - array of values
  * @param {any[]} ys - another array of values
@@ -32,7 +44,7 @@ const readTapeToMemory = tape => tape.split(',').map(x => parseInt(x));
  * @param {number} address - the address/position to write the new value to
  * @param {number} newValue - the new value to write at the address
  */
-const replaceValueInMemory = (address, newValue) => memory => [...memory.slice(0, address), newValue, ...memory.slice(address + 1, memory.length)];
+const replaceValueInMemory = curry((address, newValue, memory) => [...memory.slice(0, address), newValue, ...memory.slice(address + 1, memory.length)]);
 
 /**
  * Read the program memory and execute instructions until it halts
@@ -60,7 +72,7 @@ const executeProgramInMemory = pipe(
         case 2:
           return { ...state, y: memory[value] };
         case 3:
-          return { ...state, memory: replaceValueInMemory(value, operation(x,y))(memory) }
+          return { ...state, memory: replaceValueInMemory(value, operation(x,y), memory) }
       }
     }, 
     { halted: false, operation: null, x: null, y: null, memory: initialMemory }
