@@ -28,42 +28,55 @@ const range = size => Array(size).fill().map((_, i) => i);
 const readTapeToMemory = tape => tape.split(',').map(x => parseInt(x));
 
 /**
+ * Replaces a value in memory at the specified address
+ * @param {number} address - the address/position to write the new value to
+ * @param {number} newValue - the new value to write at the address
+ */
+const replaceValueInMemory = (address, newValue) => memory => [...memory.slice(0, address), newValue, ...memory.slice(address + 1, memory.length)];
+
+/**
  * Replace the noun and verb in program memory, returning the new memory snapshot without mutating initial memory.
  * The noun and the verb addresses are defined by the puzzle conditions in Advent of Code 2019 Day 2 Part 2.
  * @param {number} noun - new value of the noun
  * @param {number} verb - new value of the verb
  */
-const replaceNounAndVerbInMemory = (noun, verb) => memory => [memory[0], noun, verb, ...memory.slice(3, memory.length)];
+const replaceNounAndVerbInMemory = (noun, verb) => pipe(
+  replaceValueInMemory(1, noun),
+  replaceValueInMemory(2, verb)
+);
 
 /**
  * Read the program memory and execute instructions until it halts
  * @param {number[]} memory - the memory snapshot to start executing
  */
 const executeProgramInMemory = pipe(
-  initialMemory => initialMemory.reduce((state, _initialValue, address) => {
-    const [halted, operation, x, y, memory] = state;
-    const value = memory[address];
-    if (halted) {
-      return state;
-    }
+  initialMemory => initialMemory.reduce(
+    (state, _initialValue, address) => {
+      const { halted, memory, operation, x, y } = state;
+      const value = memory[address];
+      if (halted) {
+        return state;
+      }
 
-    switch (address % 4) {
-      case 0:
-        switch (value) {
-          case 1: return [halted, (a, b) => a + b, x, y, memory];
-          case 2: return [halted, (a, b) => a * b, x, y, memory];
-          case 99: return [true, operation, x, y, memory];
-          default: throw new Error(`Parsing error! ${value} is not a value operation code`)
-        }
-      case 1:
-        return [halted, operation, memory[value], y, memory];
-      case 2:
-        return [halted, operation, x, memory[value], memory];
-      case 3:
-        return [halted, null, null, null, [...memory.slice(0, value), operation(x,y), ...memory.slice(value + 1, memory.length)]]
-    }
-  }, [false, null, null, null, initialMemory]),
-  state => state[4], // Returns the final memory contents of the running program,
+      switch (address % 4) {
+        case 0:
+          switch (value) {
+            case 1: return { ...state, operation: (a, b) => a + b };
+            case 2: return { ...state, operation: (a, b) => a * b };
+            case 99: return { ...state, halted: true };
+            default: throw new Error(`Parsing error! ${value} is not a value operation code`)
+          }
+        case 1:
+          return { ...state, x: memory[value] };
+        case 2:
+          return { ...state, y: memory[value] };
+        case 3:
+          return { ...state, memory: replaceValueInMemory(value, operation(x,y))(memory) }
+      }
+    }, 
+    { halted: false, operation: null, x: null, y: null, memory: initialMemory }
+  ),
+  state => state.memory
 );
 
 /**
