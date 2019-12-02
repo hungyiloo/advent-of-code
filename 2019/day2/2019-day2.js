@@ -86,11 +86,10 @@ console.log('2019 Day 2 Part 1:', answer1);
 // Part 2 asks us for what noun + verb (possible values [0,99])
 // is required for an output of 19690720.
 // The answer is also transformed with some basic math (100 * noun + verb).
-const answer2 = product(range(100),range(100))
-  .map(([noun, verb]) => [noun, verb, getProgramOutput(noun, verb)])
-  .filter(([_noun, _verb, programOutput]) => programOutput === 19690720)
-  .map(([noun, verb]) => 100 * noun + verb)
-  [0];
+const answer2 = pipe(
+  searchSpace => searchSpace.find(([noun, verb]) => getProgramOutput(noun, verb) === 19690720),
+  ([noun, verb]) => 100 * noun + verb
+)(product(range(100),range(100)));
 console.log('2019 Day 2 Part 2:', answer2);
 
 module.exports = {
