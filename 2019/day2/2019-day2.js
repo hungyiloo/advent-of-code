@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const input = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf8');
+const inputTape = fs.readFileSync(path.join(__dirname, 'input.txt'), 'utf8');
 
 /**
  * Functional pipe operator used to compose functions together
@@ -25,7 +25,7 @@ const range = size => Array(size).fill().map((_, i) => i);
  * Parse a tape string into an array of numbers
  * @param {string} tape - a program tape string, formatted as comma-separated integers
  */
-const parseTapeToMemory = tape => tape.split(',').map(x => parseInt(x));
+const readTapeToMemory = tape => tape.split(',').map(x => parseInt(x));
 
 /**
  * Replace the noun and verb in program memory, returning the new memory snapshot without mutating initial memory.
@@ -33,7 +33,7 @@ const parseTapeToMemory = tape => tape.split(',').map(x => parseInt(x));
  * @param {number} noun - new value of the noun
  * @param {number} verb - new value of the verb
  */
-const replaceMemoryNounAndVerb = (noun, verb) => memory => [memory[0], noun, verb, ...memory.slice(3, memory.length)];
+const replaceNounAndVerbInMemory = (noun, verb) => memory => [memory[0], noun, verb, ...memory.slice(3, memory.length)];
 
 /**
  * Read the program memory and execute instructions until it halts
@@ -68,16 +68,16 @@ const executeProgramInMemory = pipe(
 
 /**
  * Run the provided tape/program as defined by Advent of Code 2019 Day 2 Part 2  
- * and output value at the beginning of the address space.
+ * and, after halting, output value at the beginning of the address space.
  * @param {number} noun - the noun input to the program
  * @param {number} verb - the verb input to the program
  */
 const getProgramOutput = (noun, verb) => pipe(
-  parseTapeToMemory,
-  replaceMemoryNounAndVerb(noun, verb),
+  readTapeToMemory,
+  replaceNounAndVerbInMemory(noun, verb),
   executeProgramInMemory,
   memory => memory[0]
-)(input);
+)(inputTape);
 
 // Part 1 asks us for the program output when run with noun=12 and verb=2
 const answer1 = getProgramOutput(12, 2);
