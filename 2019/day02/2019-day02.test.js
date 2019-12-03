@@ -1,4 +1,4 @@
-const { executeProgramInMemory, product, range, answer1, answer2 } = require('./2019-day2');
+const { executeProgramInMemory, product, range, answer1, answer2 } = require('./2019-day02');
 
 test('2019 day 2 part 1 examples', () => {
   expect(executeProgramInMemory([1,9,10,3,2,3,11,0,99,30,40,50])).toStrictEqual([3500,9,10,70,2,3,11,0,99,30,40,50]);

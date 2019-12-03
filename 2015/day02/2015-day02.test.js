@@ -1,4 +1,4 @@
-const { calculateWrappingPaper, calculateRibbonLength, answer1, answer2 } = require('./2015-day2');
+const { calculateWrappingPaper, calculateRibbonLength, answer1, answer2 } = require('./2015-day02');
 
 test('2015 day 2 part 1 examples', () => {
   expect(calculateWrappingPaper('2x3x4')).toBe(58);

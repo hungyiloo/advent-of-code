@@ -1,4 +1,4 @@
-const { calculateRequiredFuel, sumReducer, answer1, answer2 } = require('./2019-day1');
+const { calculateRequiredFuel, sumReducer, answer1, answer2 } = require('./2019-day01');
 
 test('2019 day 1 part 1 examples', () => {
   expect(calculateRequiredFuel(12)).toBe(2);
@@ -32,7 +32,7 @@ test('reducing just X with sumReducer equals X', () => {
   expect([0].reduce(sumReducer)).toBe(0);
 });
 
-const day1Compact = require('./2019-day1.compact');
+const day1Compact = require('./2019-day01.compact');
 
 test('2019 day 1 part 1 code golf answer', () => {
   expect(day1Compact.answer1).toBe(3471229);

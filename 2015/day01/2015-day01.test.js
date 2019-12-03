@@ -1,4 +1,4 @@
-const { finalFloor, firstBasementEntry, answer1, answer2 } = require('./2015-day1')
+const { finalFloor, firstBasementEntry, answer1, answer2 } = require('./2015-day01')
 
 test('2015 day 1 part 1 examples', () => {
   expect(finalFloor('(())')).toBe(0);
