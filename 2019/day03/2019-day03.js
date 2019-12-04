@@ -26,6 +26,13 @@ const increment = x => x + 1;
  * @param {[number, number]} fromPoint - the point to move from
  * @param {number} distance - the number of steps to take 
  */
+
+/**
+ * Get the destination coordinate after moving in the specified direction and distance from a known point
+ * @param {string} direction - the direction to move toward
+ * @param {[number, number]} fromPoint - the point to move from
+ * @returns {moveWithDirectionFromPoint} a function to move in a direction from a point for a given distance
+ */
 const move = (direction, [fromX, fromY]) => distance => {
   switch (direction) {
     case 'R': return [fromX + distance, fromY];
@@ -34,6 +41,13 @@ const move = (direction, [fromX, fromY]) => distance => {
     case 'D': return [fromX, fromY - distance];
   }
 };
+
+/**
+ * @callback moveWithDirectionFromPoint
+ * @param {string} direction - the direction to move toward
+ * @param {[number, number]} fromPoint - the point to move from
+ * @param {number} distance - the number of steps to take 
+ */
 
 /**
  * Trace a path and output all of its coordinates, step by step
@@ -45,12 +59,11 @@ const tracePath = directions =>
       const [direction, ...distanceChars] = vector.split('');
       const distance = parseInt(distanceChars.join(''));
       const lastPosition = path[path.length - 1];
-      return [
-        ...path,
-        ...range(distance)
+      return path.concat(
+        range(distance)
           .map(increment)
           .map(move(direction, lastPosition))
-      ];
+      );
     },
     [[0, 0]]
   );
@@ -71,13 +84,13 @@ const binaryIntersection = (set1, set2) =>
 
 /**
  * Find the intersection of all given sets
- * @param  {...Set[]} sets - sets to intersect
+ * @param  {...Set} sets - sets to intersect
  */
 const intersection = (...sets) => sets.reduce((result, currSet) => binaryIntersection(result, currSet));
 
 /**
  * Find all coordinates where the given paths intersect
- * @param  {...[number,number][]} paths
+ * @param  {...[number,number]} paths
  */
 const findCrossingPoints = (...paths) =>
   pipe(
@@ -89,14 +102,14 @@ const findCrossingPoints = (...paths) =>
 
 /**
  * Find the Manhattan Distance from the origin for a given coordinate
- * @param  {...[number,number][]} paths
+ * @param  {...[number,number]} paths
  * @param  {[number,number]} coordinate
  */
 const manhattanDistanceFromOrigin = (...paths) => ([x, y]) => Math.abs(x) + Math.abs(y);
 
 /**
  * For a given point, find the total number of steps for all given paths to get to that point
- * @param  {...[number,number][]} paths
+ * @param  {...[number,number]} paths
  * @param  {[number,number]} coordinate
  */
 const combinedStepsDistance = (...paths) => ([x, y]) =>
@@ -107,16 +120,21 @@ const combinedStepsDistance = (...paths) => ([x, y]) =>
 
 /**
  * Find the closest crossing point for all given paths, measured by the given distance measure function
- * @param {[number,number][] => [number,number] => number} distanceMeasure 
- * @param  {...string[]} directions 
+ * @param  {distanceMeasure} distanceMeasure 
+ * @param  {...string} directions 
  */
 const shortestCrossingPointDistance = (distanceMeasure, ...directions) =>
   pipe(
     directions => directions.map(tracePath),
     paths => findCrossingPoints(...paths).map(distanceMeasure(...paths)),
-    crossingPointDistances => crossingPointDistances.sort((a, b) => a - b),
-    sortedDistances => sortedDistances[1] // Ignore the origin
+    crossingPointDistances => crossingPointDistances.reduce((min, d) => d !== 0 && d < min ? d : min, Infinity),
   )(directions);
+
+/**
+ * @callback distanceMeasure
+ * @param  {...[number,number]} paths
+ * @param  {[number,number]} coordinate
+ */
 
 const answer1 = shortestCrossingPointDistance(manhattanDistanceFromOrigin, ...input);
 console.log('2019 Day 3 Part 1:', answer1);
