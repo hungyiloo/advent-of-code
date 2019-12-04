@@ -1,7 +1,7 @@
 const input = [124075, 580769];
 
 const pipe = (...fns) => x => fns.reduce((v, f) => f(v), x);
-const and = (...fns) => x => fns.reduce((v, f) => v && f(x), x);
+const all = (...fns) => x => fns.reduce((v, f) => v && f(x), true);
 const range = size => Array(size).fill().map((_, i) => i);
 const rangeFrom = (from, to) => range(to - from).map(x => x + from);
 
@@ -28,8 +28,8 @@ const digitsIncrease = digits =>
     true
   );
 
-const isValid = pipe(digitizePassword, and(hasRepeats(r => r >= 2), digitsIncrease));
-const isStrictlyValid = pipe(digitizePassword, and(hasRepeats(r => r === 2), digitsIncrease));
+const isValid = pipe(digitizePassword, all(hasRepeats(r => r >= 2), digitsIncrease));
+const isStrictlyValid = pipe(digitizePassword, all(hasRepeats(r => r === 2), digitsIncrease));
 
 const answer1 = rangeFrom(input[0], input[1] + 1).filter(isValid).length;
 console.log('2019 Day 4 Part 1:', answer1);
