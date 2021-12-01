@@ -61,7 +61,7 @@ async function reduce<T, U>(
 const upticks = (numbers$: AsyncIterableIterator<number>) =>
   reduce(
     slidingWindow(numbers$, 2),
-    (uptickCount, [x, y]) => y > x ? uptickCount + 1 : uptickCount,
+    (uptickCount, [x, y]) => uptickCount + (y > x ? 1 : 0),
     0,
   );
 
