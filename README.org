@@ -1,0 +1,6 @@
+* Advent of Code with deno
+This year I felt like doing [[https://adventofcode.com/][Advent of Code]] using TypeScript and [[https://deno.land/][deno]]. Let's hope I have the motivation to do it all, for once.
+
+** How to run
+- ~cd 2021~
+- ~deno run --allow-read=. 01.ts~
