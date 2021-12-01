@@ -31,17 +31,17 @@ async function* slidingWindow<T>(
 }
 
 /**
- * Count the number of adjacent increases in a generated sequence of numbers
- **/
-async function countIncreases(numberGenerator: AsyncGenerator<number>) {
-  let increaseCount = 0;
+ * Count the number of adjacent value upticks in a generated sequence of numbers
+ */
+async function upticks(numberGenerator: AsyncGenerator<number>) {
+  let uptickCount = 0;
   for await (const [x, y] of slidingWindow(numberGenerator, 2)) {
-    if (y > x) increaseCount++;
+    if (y > x) uptickCount++;
   }
-  return increaseCount
+  return uptickCount;
 }
 
-const sinkCountPart1 = await countIncreases(depths())
+const sinkCountPart1 = await upticks(depths());
 console.log("Part 1:", sinkCountPart1);
 
 /**
@@ -53,5 +53,5 @@ async function* sums(arrayGenerator: AsyncGenerator<number[]>) {
   }
 }
 
-const sinkCountPart2 = await countIncreases(sums(slidingWindow(depths(), 3)))
+const sinkCountPart2 = await upticks(sums(slidingWindow(depths(), 3)));
 console.log("Part 2:", sinkCountPart2);
