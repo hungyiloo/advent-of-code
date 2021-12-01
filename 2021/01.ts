@@ -1,6 +1,9 @@
 import { readLines } from "https://deno.land/std@0.116.0/io/mod.ts";
 import * as path from "https://deno.land/std@0.116.0/path/mod.ts";
 
+/**
+ * Yields all the depth measurements from the input
+ */
 async function* depths() {
   const filename = path.join(Deno.cwd(), "./01.input.txt");
   const fileReader = await Deno.open(filename);
@@ -9,25 +12,13 @@ async function* depths() {
   }
 }
 
-async function* pairwise<T>(generator: AsyncGenerator<T>) {
-  let previous: T | null = null;
-
-  for await (const element of generator) {
-    if (previous !== null) {
-      yield [previous, element];
-    }
-    previous = element;
-  }
-}
-
-let sinking = 0;
-for await (const [previousDepth, currentDepth] of pairwise(depths())) {
-  if (currentDepth > previousDepth) sinking++;
-}
-
-console.log("Part 1:", sinking);
-
-async function* windows<T>(generator: AsyncGenerator<T>, windowSize: number) {
+/**
+ * Yields a sliding window of elements from another generator source
+ */
+async function* slidingWindow<T>(
+  generator: AsyncGenerator<T>,
+  windowSize: number,
+) {
   const win: T[] = [];
 
   for await (const element of generator) {
@@ -39,13 +30,28 @@ async function* windows<T>(generator: AsyncGenerator<T>, windowSize: number) {
   }
 }
 
-function sum(arr: number[]) {
-  return arr.reduce((acc, curr) => acc + curr)
+/**
+ * Count the number of adjacent increases in a generated sequence of numbers
+ **/
+async function countIncreases(numberGenerator: AsyncGenerator<number>) {
+  let increaseCount = 0;
+  for await (const [x, y] of slidingWindow(numberGenerator, 2)) {
+    if (y > x) increaseCount++;
+  }
+  return increaseCount
 }
 
-sinking = 0;
-for await (const [previousDepths, currentDepths] of pairwise(windows(depths(), 3))) {
-  if (sum(currentDepths) > sum(previousDepths)) sinking++;
+const sinkCountPart1 = await countIncreases(depths())
+console.log("Part 1:", sinkCountPart1);
+
+/**
+ * Yields sums of arrays generated from another source
+ */
+async function* sums(arrayGenerator: AsyncGenerator<number[]>) {
+  for await (const arr of arrayGenerator) {
+    yield arr.reduce((acc, curr) => acc + curr);
+  }
 }
 
-console.log("Part 2:", sinking);
+const sinkCountPart2 = await countIncreases(sums(slidingWindow(depths(), 3)))
+console.log("Part 2:", sinkCountPart2);
