@@ -3,4 +3,7 @@ This year I felt like doing [[https://adventofcode.com/][Advent of Code]] using 
 
 ** How to run
 - ~cd 2021~
-- ~deno run --allow-read=. 01.ts~
+- ~deno run --allow-read=. 01.ts~ (replace =01= with the day number)
+
+** Don't have deno installed?
+Follow the [[https://deno.land/#installation][official instructions]].
