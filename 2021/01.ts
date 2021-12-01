@@ -56,17 +56,11 @@ async function reduce<T, U>(
 }
 
 /**
- * Yields overlapping pairs of elements
- */
-const pairwise = <T>(elements$: AsyncIterableIterator<T>) =>
-  slidingWindow(elements$, 2);
-
-/**
  * Count the number of upticks (i.e. adjacent value increases) in a stream of numbers
  */
 const upticks = (numbers$: AsyncIterableIterator<number>) =>
   reduce(
-    pairwise(numbers$),
+    slidingWindow(numbers$, 2),
     (uptickCount, [x, y]) => y > x ? uptickCount + 1 : uptickCount,
     0,
   );
