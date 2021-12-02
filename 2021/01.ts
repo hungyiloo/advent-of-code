@@ -1,4 +1,4 @@
-import { getLines, map, reduce, slidingWindow } from "./lib.ts";
+import { map,getLines,reduce,slidingWindow } from "../lib/streams.ts";
 
 const depths = () => map(getLines("01.input.txt"), parseInt);
 

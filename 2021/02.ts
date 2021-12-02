@@ -1,4 +1,4 @@
-import { getLines, map, reduce } from "./lib.ts";
+import { map,getLines,reduce } from "../lib/streams.ts";
 
 enum Direction {
   Forward = "forward",
