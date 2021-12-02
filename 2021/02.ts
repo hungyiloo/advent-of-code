@@ -10,8 +10,8 @@ const vectors = () =>
   map(
     getLines("02.input.txt"),
     (line) => {
-      const parts = line.split(" ");
-      return [parts[0], parseInt(parts[1])] as [Direction, number];
+      const [p1, p2] = line.split(" ");
+      return [p1, parseInt(p2)] as [Direction, number];
     },
   );
 
