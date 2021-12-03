@@ -22,7 +22,7 @@ const tallyBits = (numbers: ReturnType<typeof data>) =>
 function chooseBit(
   reportElement: { one: number; zero: number },
   invert?: boolean,
-): "1" | "0" {
+) {
   return (invert
       ? reportElement.zero > reportElement.one
       : reportElement.one >= reportElement.zero)
