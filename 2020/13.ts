@@ -1,8 +1,8 @@
-import { getLines } from "../lib/streams.ts";
+import { getLines, pop } from "../lib/streams.ts";
 
-const inputData = getLines("13.input.txt");
-const { value: timestampRaw } = await inputData.next();
-const { value: scheduleRaw } = await inputData.next();
+const inputData$ = getLines("13.input.txt");
+const timestampRaw = await pop(inputData$)
+const scheduleRaw = await pop(inputData$)
 // const scheduleRaw = "17,x,13,19";
 
 if (!timestampRaw || !scheduleRaw) Deno.exit();
