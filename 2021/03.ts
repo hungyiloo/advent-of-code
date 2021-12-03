@@ -1,15 +1,15 @@
 import { range } from "../lib/array.ts";
 import { getLines, map, from, pop, reduce, toArray } from "../lib/streams.ts";
 
-const numbers = () =>
+const data = () =>
   map(
     getLines("03.input.txt"),
     (x) => x.split("") as ("1" | "0")[],
   );
 
-const bits = (await pop(numbers()))?.length ?? 0
+const bits = (await pop(data()))?.length ?? 0
 
-const diagnosticReport = (numbers: AsyncIterableIterator<string[]>) =>
+const tallyBits = (numbers: ReturnType<typeof data>) =>
   reduce(
     numbers,
     (acc, curr) =>
@@ -35,7 +35,7 @@ function chooseBit(
 }
 
 const gamma = parseInt(
-  (await diagnosticReport(numbers()))
+  (await tallyBits(data()))
     .map((x) => chooseBit(x))
     .join(""),
   2,
@@ -46,13 +46,13 @@ const epsilon = ~gamma & parseInt("1".repeat(bits), 2);
 console.log("Part 1:", gamma * epsilon);
 
 async function search(invert?: boolean) {
-  let filteredNumbers = await toArray(numbers());
-  let report = await diagnosticReport(from(filteredNumbers));
+  let filteredNumbers = await toArray(data());
+  let tallies = await tallyBits(from(filteredNumbers));
 
   for (const i of range(bits)) {
-    const common = chooseBit(report[i], invert);
+    const common = chooseBit(tallies[i], invert);
     filteredNumbers = filteredNumbers.filter((num) => num[i] === common);
-    report = await diagnosticReport(from(filteredNumbers));
+    tallies = await tallyBits(from(filteredNumbers));
     if (filteredNumbers.length <= 1) break;
   }
 
