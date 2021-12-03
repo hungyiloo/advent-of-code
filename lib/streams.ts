@@ -60,7 +60,7 @@ export async function reduce<T, U>(
 /**
  * Converts any regular iterable into an async iterable iterator
  **/
-export async function* of<T>(elements: Iterable<T>) {
+export async function* from<T>(elements: Iterable<T>) {
   for (const element of elements) {
     yield element
   }
