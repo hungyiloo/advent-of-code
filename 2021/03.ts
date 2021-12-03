@@ -17,7 +17,7 @@ const tallyBits = (numbers: ReturnType<typeof data>) =>
         one: tally.one + (curr[i] === "1" ? 1 : 0),
         zero: tally.zero + (curr[i] === "0" ? 1 : 0),
       })),
-    new Array(bits).fill(null).map(() => ({
+    range(bits).map(() => ({
       one: 0,
       zero: 0,
     })),
