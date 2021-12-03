@@ -1,11 +1,7 @@
 import { range } from "../lib/array.ts";
-import { getLines, map, from, pop, reduce, toArray } from "../lib/streams.ts";
+import { getLines, from, pop, reduce, toArray } from "../lib/streams.ts";
 
-const data = () =>
-  map(
-    getLines("03.input.txt"),
-    (x) => x.split("") as ("1" | "0")[],
-  );
+const data = () => getLines("03.input.txt")
 
 const bits = (await pop(data()))?.length ?? 0
 
@@ -57,7 +53,7 @@ async function search(invert?: boolean) {
   }
 
   const result = filteredNumbers[0];
-  return result ? parseInt(result.join(""), 2) : 0;
+  return result ? parseInt(result, 2) : 0;
 }
 
 const o2GeneratorRating = await search();
