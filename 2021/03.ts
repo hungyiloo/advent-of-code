@@ -1,5 +1,5 @@
 import { range } from "../lib/array.ts";
-import { getLines, map, of, reduce, toArray } from "../lib/streams.ts";
+import { getLines, map, from, pop, reduce, toArray } from "../lib/streams.ts";
 
 const numbers = () =>
   map(
@@ -7,7 +7,7 @@ const numbers = () =>
     (x) => x.split("") as ("1" | "0")[],
   );
 
-const bits = (await numbers().next()).value?.length ?? 0;
+const bits = (await pop(numbers()))?.length ?? 0
 
 const diagnosticReport = (numbers: AsyncIterableIterator<string[]>) =>
   reduce(
@@ -47,12 +47,12 @@ console.log("Part 1:", gamma * epsilon);
 
 async function search(invert?: boolean) {
   let filteredNumbers = await toArray(numbers());
-  let report = await diagnosticReport(of(filteredNumbers));
+  let report = await diagnosticReport(from(filteredNumbers));
 
   for (const i of range(bits)) {
     const common = chooseBit(report[i], invert);
     filteredNumbers = filteredNumbers.filter((num) => num[i] === common);
-    report = await diagnosticReport(of(filteredNumbers));
+    report = await diagnosticReport(from(filteredNumbers));
     if (filteredNumbers.length <= 1) break;
   }
 
