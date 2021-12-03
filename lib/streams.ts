@@ -15,80 +15,79 @@ export async function* getLines(inputFilePath: string) {
 /**
  * Yields elements mapped through a transformation function
  */
-export async function* map<T, U>(
-  elements$: AsyncIterableIterator<T>,
-  fn: (x: T) => U,
-) {
-  for await (const element of elements$) {
-    yield fn(element);
-  }
+export function map<T, U>(fn: (x: T) => U) {
+  return async function* map(elements$: AsyncIterableIterator<T>) {
+    for await (const element of elements$) {
+      yield fn(element);
+    }
+  };
 }
 
 /**
  * Yields a sliding window of elements of a given window size
  */
-export async function* slidingWindow<T>(
-  elements$: AsyncIterableIterator<T>,
-  windowSize: number,
-) {
-  const win: T[] = [];
+export function slidingWindow<T>(windowSize: number) {
+  return async function* (elements$: AsyncIterableIterator<T>) {
+    const win: T[] = [];
 
-  for await (const element of elements$) {
-    win.push(element);
-    if (win.length === windowSize) {
-      yield [...win];
-      win.shift();
+    for await (const element of elements$) {
+      win.push(element);
+      if (win.length === windowSize) {
+        yield [...win];
+        win.shift();
+      }
     }
-  }
+  };
 }
 
 /**
  * Reduce over a stream of values to a single output value
  */
-export async function reduce<T, U>(
-  elements$: AsyncIterableIterator<T>,
+export function reduce<T, U>(
   reducer: (a: U, x: T) => U,
   initialValue: U,
 ) {
-  let accumulator = initialValue;
-  for await (const element of elements$) {
-    accumulator = reducer(accumulator, element);
-  }
-  return accumulator;
+  return async function (elements$: AsyncIterableIterator<T>) {
+    let accumulator = initialValue;
+    for await (const element of elements$) {
+      accumulator = reducer(accumulator, element);
+    }
+    return accumulator;
+  };
 }
 
 /**
  * Converts any regular iterable into an async iterable iterator
- **/
-export async function* from<T>(elements: Iterable<T>) {
+ */
+export async function* from<T>(elements: Iterable<T> | Promise<Iterable<T>>) {
+  elements = await Promise.resolve(elements);
   for (const element of elements) {
-    yield element
+    yield element;
   }
 }
 
 /**
  * Yields elements filtered through a query function
  */
-export async function* filter<T>(
-  elements$: AsyncIterableIterator<T>,
-  fn: (x: T) => boolean,
-) {
-  for await (const element of elements$) {
-    if (fn(element)) {
-      yield element
+export function filter<T>(fn: (x: T) => boolean) {
+  return async function* (elements$: AsyncIterableIterator<T>) {
+    for await (const element of elements$) {
+      if (fn(element)) {
+        yield element;
+      }
     }
-  }
+  };
 }
 
 /**
  * Convert a stream of elements to an in-memory array
  */
 export async function toArray<T>(
-  elements$: AsyncIterableIterator<T>
+  elements$: AsyncIterableIterator<T>,
 ) {
-  const arr: T[] = []
+  const arr: T[] = [];
   for await (const element of elements$) {
-    arr.push(element)
+    arr.push(element);
   }
   return arr;
 }
@@ -96,16 +95,15 @@ export async function toArray<T>(
 /**
  * Take N elements from the stream
  */
-export async function* take<T>(
-  elements$: AsyncIterableIterator<T>,
-  n: number
-) {
-  let count = 0
-  for await (const element of elements$) {
-    yield element;
-    count++;
-    if (count === n) break;
-  }
+export function take<T>(n: number) {
+  return async function* (elements$: AsyncIterableIterator<T>) {
+    let count = 0;
+    for await (const element of elements$) {
+      yield element;
+      count++;
+      if (count === n) break;
+    }
+  };
 }
 
 /**
@@ -114,5 +112,9 @@ export async function* take<T>(
 export async function pop<T>(
   elements$: AsyncIterableIterator<T>,
 ) {
-  return (await elements$.next())?.value as T | undefined
+  return (await elements$.next())?.value as T | undefined;
+}
+
+export function then<T, U>(fn: (x: T) => U) {
+  return async (p: T | Promise<T>) => fn(await Promise.resolve(p));
 }
