@@ -2,10 +2,11 @@ import { transpose } from "../lib/array.ts";
 import { pipe } from "../lib/pipe.ts";
 import { getLines, reduce, then } from "../lib/streams.ts";
 
-type Board = {
+type Place = {
   n: number;
-  mark: boolean;
-}[][];
+  marked: boolean;
+}
+type Board = Place[][];
 
 const startState = await pipe(
   getLines("04.input.txt"),
@@ -59,8 +60,8 @@ function makeBoard(lines: string[]): Board {
       ...acc,
       curr.trim().split(/\s+/).map((x) => ({
         n: parseInt(x, 10),
-        mark: false,
-      })),
+        marked: false,
+      } as Place)),
     ],
     [] as Board,
   );
@@ -72,14 +73,14 @@ function marker(n: number) {
     board.map((row) =>
       row.map((col) => ({
         n: col.n,
-        mark: col.mark || col.n === n,
-      }))
+        marked: col.marked || col.n === n,
+      } as Place))
     ) as Board;
 }
 
 // bingo when any row or column is fully marked
 function isBingo(board: Board) {
-  const allMarked = (row: Board[0]) => row.every((x) => x.mark);
+  const allMarked = (row: Board[0]) => row.every((x) => x.marked);
   return board.some(allMarked) || transpose(board).some(allMarked);
 }
 
@@ -110,7 +111,7 @@ function scoreGame(state: GameState) {
   if (!state.bingo) return -1;
   const unmarkedPlaces = state.bingo.board
     .flatMap((x) => x)
-    .reduce((sum, place) => sum + (place.mark ? 0 : place.n), 0);
+    .reduce((sum, place) => sum + (place.marked ? 0 : place.n), 0);
   return unmarkedPlaces * state.bingo.n;
 }
 
