@@ -15,10 +15,12 @@ export async function* getLines(inputFilePath: string) {
 /**
  * Yields elements mapped through a transformation function
  */
-export function map<T, U>(fn: (x: T) => U) {
+export function map<T, U>(fn: (x: T, i: number) => U) {
   return async function* map(elements$: AsyncIterableIterator<T>) {
+    let index = 0;
     for await (const element of elements$) {
-      yield fn(element);
+      yield fn(element, index);
+      index++;
     }
   };
 }
@@ -44,13 +46,15 @@ export function slidingWindow<T>(windowSize: number) {
  * Reduce over a stream of values to a single output value
  */
 export function reduce<T, U>(
-  reducer: (a: U, x: T) => U,
+  reducer: (a: U, x: T, i: number) => U,
   initialValue: U,
 ) {
   return async function (elements$: AsyncIterableIterator<T>) {
     let accumulator = initialValue;
+    let index = 0;
     for await (const element of elements$) {
-      accumulator = reducer(accumulator, element);
+      accumulator = reducer(accumulator, element, index);
+      index++;
     }
     return accumulator;
   };

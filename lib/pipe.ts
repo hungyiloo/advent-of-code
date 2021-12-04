@@ -1,3 +1,6 @@
+export function pipe<T>(
+  input: T,
+): T;
 export function pipe<T, A>(
   input: T,
   op1: (x: T) => A,
@@ -38,5 +41,5 @@ export function pipe<T, A, B, C, D, E, F>(
   op6: (x: E) => F,
 ): F;
 export function pipe<T>(input: T, ...ops: ((x: any) => any)[]) {
-  return ops.reduce((result, op) => op(result), input);
+  return ops?.reduce((result, op) => op(result), input) ?? input;
 }
