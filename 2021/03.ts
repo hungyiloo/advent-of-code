@@ -20,7 +20,7 @@ async function majorityBits(numbers: ReturnType<typeof data>, invert?: boolean) 
 }
 
 const gamma = parseInt(await majorityBits(data()), 2);
-const epsilon = ~gamma & parseInt("1".repeat(bits), 2);
+const epsilon = ~gamma & parseInt("1".repeat(bits), 2); // bitwise inverse with mask
 console.log("Part 1:", gamma * epsilon);
 
 async function search(invert?: boolean) {
