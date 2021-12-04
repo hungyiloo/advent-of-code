@@ -1,11 +1,7 @@
 import { pipe } from "../lib/pipe.ts";
 import { getLines, map, reduce } from "../lib/streams.ts";
 
-enum Direction {
-  Forward = "forward",
-  Down = "down",
-  Up = "up",
-}
+type Direction = "forward" | "up" | "down";
 
 const vectors = () =>
   pipe(
@@ -16,16 +12,16 @@ const vectors = () =>
     }),
   );
 
-const finalState = await pipe(
+const part1 = await pipe(
   vectors(),
   reduce(
     (state, [direction, x]) => {
       switch (direction) {
-        case Direction.Forward:
+        case "forward":
           return { ...state, position: state.position + x };
-        case Direction.Down:
+        case "down":
           return { ...state, depth: state.depth + x };
-        case Direction.Up:
+        case "up":
           return { ...state, depth: state.depth - x };
         default:
           return state;
@@ -37,22 +33,22 @@ const finalState = await pipe(
     },
   ),
 );
-console.log("Part 1:", finalState.position * finalState.depth);
+console.log("Part 1:", part1.position * part1.depth);
 
-const finalStateWithAim = await pipe(
+const part2 = await pipe(
   vectors(),
   reduce(
     (state, [direction, x]) => {
       switch (direction) {
-        case Direction.Forward:
+        case "forward":
           return {
             ...state,
             position: state.position + x,
             depth: state.depth + state.aim * x,
           };
-        case Direction.Down:
+        case "down":
           return { ...state, aim: state.aim + x };
-        case Direction.Up:
+        case "up":
           return { ...state, aim: state.aim - x };
         default:
           return state;
@@ -65,7 +61,4 @@ const finalStateWithAim = await pipe(
     },
   ),
 );
-console.log(
-  "Part 2:",
-  finalStateWithAim.position * finalStateWithAim.depth,
-);
+console.log("Part 2:", part2.position * part2.depth);
