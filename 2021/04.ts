@@ -16,10 +16,10 @@ const initialState = await pipe(
     (acc, line, i) => {
       // split the first line into draw numbers
       if (i === 0) acc.draws = line.split(",").map(Number);
-      // on every non blank line, add it to the last board
-      else if (line.trim() !== "") acc.boards[0].push(makeBoardLine(line));
       // on every blank line, start a new board
-      else acc.boards = [[], ...acc.boards];
+      else if (line.trim() === "") acc.boards = [[], ...acc.boards];
+      // on every non blank line, add it to the last board
+      else acc.boards[0].push(makeBoardLine(line));
       return acc;
     },
     {
@@ -59,8 +59,7 @@ function isBingo(board: Board) {
 // score the game state according to AoC answer requirements
 function scoreGame(state: GameState) {
   if (!state.bingo) return -1;
-  const unmarkedPlaces = state.bingo.board
-    .flatMap((x) => x)
+  const unmarkedPlaces = state.bingo.board.flatMap((x) => x)
     .reduce((sum, place) => sum + (place.marked ? 0 : place.n), 0);
   return unmarkedPlaces * state.bingo.n;
 }
