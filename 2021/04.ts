@@ -6,7 +6,7 @@ type BoardPlace = {
   n: number;
   marked: boolean;
 };
-type BoardLine = BoardPlace[]
+type BoardLine = BoardPlace[];
 type Board = BoardLine[];
 
 const initialState = await pipe(
@@ -51,14 +51,13 @@ function makeBoardLine(line: string): BoardLine {
 }
 
 // create a marker that marks a board for value N
-function marker(n: number) {
-  return (board: Board) =>
-    board.map((row) =>
-      row.map((col) => ({
-        n: col.n,
-        marked: col.marked || col.n === n,
-      } as BoardPlace))
-    ) as Board;
+function markBoard(board: Board, n: number) {
+  return board.map((row) =>
+    row.map((col) => ({
+      n: col.n,
+      marked: col.marked || col.n === n,
+    } as BoardPlace))
+  ) as Board;
 }
 
 // bingo when any board line is fully marked
@@ -75,12 +74,11 @@ function play(state: GameState, long?: boolean) {
       if (!long && acc.bingo) return acc;
 
       let bingo = acc.bingo;
-      const mark = marker(n);
       const boards = acc.boards.map((board) => {
         // ignore a board if already bingo'd
         if (isBingo(board)) return board;
 
-        board = mark(board);
+        board = markBoard(board, n);
         // if a board bingoes on this round, capture state
         if (isBingo(board)) {
           bingo = { board, n };
