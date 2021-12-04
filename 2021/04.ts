@@ -77,12 +77,14 @@ function marker(n: number) {
     ) as Board;
 }
 
+// bingo when any row or column is fully marked
 function isBingo(board: Board) {
   const allMarked = (row: Board[0]) => row.every((x) => x.mark);
   return board.some(allMarked) || transpose(board).some(allMarked);
 }
 
-function playReducer(long?: boolean) {
+// reduce over the draw numbers on the game state to play bingo
+function play(long?: boolean) {
   return (acc: GameState, n: number) => {
     if (!long && acc.bingo) return acc;
 
@@ -103,21 +105,17 @@ function playReducer(long?: boolean) {
   };
 }
 
+// score the game state according to AoC answer requirements
 function scoreGame(state: GameState) {
   if (!state.bingo) return -1;
-  let unmarkedPlaces = 0;
-  state.bingo.board.forEach((row) =>
-    row.forEach((place) => {
-      if (!place.mark) {
-        unmarkedPlaces += place.n;
-      }
-    })
-  );
+  const unmarkedPlaces = state.bingo.board
+    .flatMap((x) => x)
+    .reduce((sum, place) => sum + (place.mark ? 0 : place.n), 0);
   return unmarkedPlaces * state.bingo.n;
 }
 
-const part1EndState = startState.draws.reduce(playReducer(), startState);
+const part1EndState = startState.draws.reduce(play(), startState);
 console.log("Part 1:", scoreGame(part1EndState));
 
-const part2EndState = startState.draws.reduce(playReducer(true), startState);
+const part2EndState = startState.draws.reduce(play(true), startState);
 console.log("Part 2:", scoreGame(part2EndState));
