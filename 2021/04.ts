@@ -1,70 +1,53 @@
 import { transpose } from "../lib/array.ts";
 import { pipe } from "../lib/pipe.ts";
-import { getLines, reduce, then } from "../lib/streams.ts";
+import { getLines, reduce } from "../lib/streams.ts";
 
-type Place = {
+type BoardPlace = {
   n: number;
   marked: boolean;
 };
-type Board = Place[][];
+type BoardLine = BoardPlace[]
+type Board = BoardLine[];
 
 const initialState = await pipe(
   getLines("04.input.txt"),
   // build the game state by reducing over input lines
   reduce(
     (acc, line, i) => {
+      // split the first line into draw numbers
       if (i === 0) {
-        return {
-          ...acc,
-          draws: line.split(",").map((x) => parseInt(x, 10)),
-        };
+        return { ...acc, draws: line.split(",").map(Number) };
       }
-      if (acc.unprocessed.length > 0 && line.trim() === "") {
-        return {
-          ...acc,
-          boards: [...acc.boards, makeBoard(acc.unprocessed)],
-          unprocessed: [],
-        };
-      }
+      // on every non blank line, add it to the last board
       if (line.trim() !== "") {
-        return {
-          ...acc,
-          unprocessed: [...acc.unprocessed, line],
-        };
+        acc.boards[acc.boards.length - 1].push(makeBoardLine(line));
+        return acc;
+      }
+      // on every blank line, start a new board
+      if (line.trim() === "") {
+        return { ...acc, boards: [...acc.boards, []] };
       }
       return acc;
     },
     {
       draws: [] as number[],
       boards: [] as Board[],
-      unprocessed: [] as string[],
+      bingo: undefined as {
+        board: Board;
+        n: number;
+      } | undefined,
     },
   ),
-  // final cleanup pass, ready for playing
-  then(({ draws, boards, unprocessed }) => ({
-    draws,
-    boards: [...boards, makeBoard(unprocessed)],
-    bingo: undefined as {
-      board: Board;
-      n: number;
-    } | undefined,
-  })),
 );
 
 type GameState = typeof initialState;
 
-// make a board from the lines of text that represent it
-function makeBoard(lines: string[]): Board {
-  return lines.reduce(
-    (acc, curr) => [
-      ...acc,
-      curr.trim().split(/\s+/).map((x) => ({
-        n: parseInt(x, 10),
-        marked: false,
-      } as Place)),
-    ],
-    [] as Board,
-  );
+// make a board line from the line of text that represents it
+function makeBoardLine(line: string): BoardLine {
+  return line.trim().split(/\s+/).map((x) => ({
+    n: parseInt(x, 10),
+    marked: false,
+  } as BoardPlace));
 }
 
 // create a marker that marks a board for value N
@@ -74,13 +57,13 @@ function marker(n: number) {
       row.map((col) => ({
         n: col.n,
         marked: col.marked || col.n === n,
-      } as Place))
+      } as BoardPlace))
     ) as Board;
 }
 
-// bingo when any row or column is fully marked
+// bingo when any board line is fully marked
 function isBingo(board: Board) {
-  const allMarked = (row: Board[0]) => row.every((x) => x.marked);
+  const allMarked = (row: BoardLine) => row.every((x) => x.marked);
   return board.some(allMarked) || transpose(board).some(allMarked);
 }
 
