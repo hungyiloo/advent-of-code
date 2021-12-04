@@ -4,24 +4,27 @@ import { getLines, toArray } from "../lib/streams.ts";
 const data = await toArray(getLines("03.input.txt"));
 const bits = data[0]?.length ?? 0;
 
-const majority = (numbers: string[], invert?: boolean) =>
+const majority = (numbers: string[]) =>
   numbers
     .reduce(
       (acc, curr) => acc.map((s, i) => s + (curr[i] === "1" ? 1 : -1)),
       range(bits).map(() => 0),
     )
-    .map((s) => (invert ? s < 0 : s >= 0) ? "1" : "0")
+    .map((s) => s >= 0 ? "1" : "0")
     .join("");
 
+const minority = (numbers: string[]) =>
+  majority(numbers).split("").map((c) => c === "0" ? "1" : "0").join("");
+
 const gamma = parseInt(majority(data), 2);
-const epsilon = parseInt(majority(data, true), 2);
+const epsilon = parseInt(minority(data), 2);
 console.log("Part 1:", gamma * epsilon);
 
-function search(invert?: boolean) {
+function search(fn: (numbers: string[]) => string) {
   const match = range(bits).reduce(
     (acc, i) => {
       if (acc.length <= 1) return acc;
-      const m = majority(acc, invert);
+      const m = fn(acc);
       return acc.filter((num) => num[i] === m[i]);
     },
     data,
@@ -30,6 +33,6 @@ function search(invert?: boolean) {
   return parseInt(match, 2);
 }
 
-const o2GeneratorRating = search();
-const co2ScrubberRating = search(true);
+const o2GeneratorRating = search(majority);
+const co2ScrubberRating = search(minority);
 console.log("Part 2:", o2GeneratorRating * co2ScrubberRating);
