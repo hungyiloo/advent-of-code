@@ -5,10 +5,10 @@ import { getLines, reduce, then } from "../lib/streams.ts";
 type Place = {
   n: number;
   marked: boolean;
-}
+};
 type Board = Place[][];
 
-const startState = await pipe(
+const initialState = await pipe(
   getLines("04.input.txt"),
   // build the game state by reducing over input lines
   reduce(
@@ -51,7 +51,7 @@ const startState = await pipe(
   })),
 );
 
-type GameState = typeof startState;
+type GameState = typeof initialState;
 
 // make a board from the lines of text that represent it
 function makeBoard(lines: string[]): Board {
@@ -85,25 +85,31 @@ function isBingo(board: Board) {
 }
 
 // reduce over the draw numbers on the game state to play bingo
-function play(long?: boolean) {
-  return (acc: GameState, n: number) => {
-    if (!long && acc.bingo) return acc;
+function play(state: GameState, long?: boolean) {
+  return state.draws.reduce(
+    (acc: GameState, n: number) => {
+      // if not playing the long version, abort on the first bingo
+      if (!long && acc.bingo) return acc;
 
-    let bingo = acc.bingo;
-    const mark = marker(n);
-    const boards = acc.boards.map((board) => {
-      if (isBingo(board)) return board;
+      let bingo = acc.bingo;
+      const mark = marker(n);
+      const boards = acc.boards.map((board) => {
+        // ignore a board if already bingo'd
+        if (isBingo(board)) return board;
 
-      board = mark(board);
-      if (isBingo(board)) {
-        bingo = { board, n };
-      }
+        board = mark(board);
+        // if a board bingoes on this round, capture state
+        if (isBingo(board)) {
+          bingo = { board, n };
+        }
 
-      return board;
-    });
+        return board;
+      });
 
-    return { ...acc, boards, bingo };
-  };
+      return { ...acc, boards, bingo };
+    },
+    state,
+  );
 }
 
 // score the game state according to AoC answer requirements
@@ -115,8 +121,8 @@ function scoreGame(state: GameState) {
   return unmarkedPlaces * state.bingo.n;
 }
 
-const part1EndState = startState.draws.reduce(play(), startState);
+const part1EndState = play(initialState);
 console.log("Part 1:", scoreGame(part1EndState));
 
-const part2EndState = startState.draws.reduce(play(true), startState);
+const part2EndState = play(initialState, true);
 console.log("Part 2:", scoreGame(part2EndState));
