@@ -11,7 +11,7 @@ const timestamp = parseInt(timestampRaw);
 
 const schedule = scheduleRaw
   .split(",")
-  .map((x) => x === "x" ? null : parseInt(x));
+  .map((x) => x === "x" ? null : parseInt(x, 10));
 
 const busIds = schedule.filter((x) => x !== null) as number[];
 

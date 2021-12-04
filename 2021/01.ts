@@ -4,7 +4,7 @@ import { getLines, map, reduce, slidingWindow } from "../lib/streams.ts";
 const depths = () =>
   pipe(
     getLines("01.input.txt"),
-    map(parseInt),
+    map((x) => parseInt(x, 10)),
   );
 
 const upticks = (numbers$: ReturnType<typeof depths>) => pipe(
