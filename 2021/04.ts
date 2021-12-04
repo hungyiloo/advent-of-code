@@ -15,27 +15,17 @@ const initialState = await pipe(
   reduce(
     (acc, line, i) => {
       // split the first line into draw numbers
-      if (i === 0) {
-        return { ...acc, draws: line.split(",").map(Number) };
-      }
+      if (i === 0) acc.draws = line.split(",").map(Number);
       // on every non blank line, add it to the last board
-      if (line.trim() !== "") {
-        acc.boards[acc.boards.length - 1].push(makeBoardLine(line));
-        return acc;
-      }
+      else if (line.trim() !== "") acc.boards[0].push(makeBoardLine(line));
       // on every blank line, start a new board
-      if (line.trim() === "") {
-        return { ...acc, boards: [...acc.boards, []] };
-      }
+      else acc.boards = [[], ...acc.boards];
       return acc;
     },
     {
       draws: [] as number[],
       boards: [] as Board[],
-      bingo: undefined as {
-        board: Board;
-        n: number;
-      } | undefined,
+      bingo: undefined as { board: Board; n: number } | undefined,
     },
   ),
 );
@@ -66,33 +56,6 @@ function isBingo(board: Board) {
   return board.some(allMarked) || transpose(board).some(allMarked);
 }
 
-// reduce over the draw numbers on the game state to play bingo
-function play(state: GameState, long?: boolean) {
-  return state.draws.reduce(
-    (acc: GameState, n: number) => {
-      // if not playing the long version, abort on the first bingo
-      if (!long && acc.bingo) return acc;
-
-      let bingo = acc.bingo;
-      const boards = acc.boards.map((board) => {
-        // ignore a board if already bingo'd
-        if (isBingo(board)) return board;
-
-        board = markBoard(board, n);
-        // if a board bingoes on this round, capture state
-        if (isBingo(board)) {
-          bingo = { board, n };
-        }
-
-        return board;
-      });
-
-      return { ...acc, boards, bingo };
-    },
-    state,
-  );
-}
-
 // score the game state according to AoC answer requirements
 function scoreGame(state: GameState) {
   if (!state.bingo) return -1;
@@ -102,8 +65,30 @@ function scoreGame(state: GameState) {
   return unmarkedPlaces * state.bingo.n;
 }
 
-const part1EndState = play(initialState);
-console.log("Part 1:", scoreGame(part1EndState));
+// reduce over the draw numbers on the game state to play bingo, then score
+function play(state: GameState, stopOnBingo?: boolean) {
+  const endState = state.draws.reduce(
+    (acc: GameState, n: number) => {
+      // abort on the first bingo if we're playing that way
+      if (stopOnBingo && acc.bingo) return acc;
 
-const part2EndState = play(initialState, true);
-console.log("Part 2:", scoreGame(part2EndState));
+      let bingo = acc.bingo;
+      const boards = acc.boards.map((board) => {
+        // ignore a board if already bingo'd
+        if (isBingo(board)) return board;
+        board = markBoard(board, n);
+        // if a board bingoes on this round, capture state
+        if (isBingo(board)) bingo = { board, n };
+        return board;
+      });
+
+      return { ...acc, boards, bingo };
+    },
+    state,
+  );
+
+  return scoreGame(endState);
+}
+
+console.log("Part 1:", play(initialState, true));
+console.log("Part 2:", play(initialState));
