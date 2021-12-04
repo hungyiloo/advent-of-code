@@ -13,9 +13,9 @@ const majority = (numbers: string[], invert?: boolean) =>
     .map((s) => (invert ? s < 0 : s >= 0) ? "1" : "0")
     .join("");
 
-const gamma = parseInt(majority(data), 2);
-const epsilon = ~gamma & parseInt("1".repeat(bits), 2); // bitwise inverse with mask
-console.log("Part 1:", gamma * epsilon);
+const gamma = majority(data);
+const epsilon = gamma.split("").map((c) => c === "0" ? "1" : "0").join("");
+console.log("Part 1:", parseInt(gamma, 2) * parseInt(epsilon, 2));
 
 function search(invert?: boolean) {
   const match = range(bits).reduce(
