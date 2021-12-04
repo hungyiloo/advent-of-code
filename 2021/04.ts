@@ -55,8 +55,9 @@ function scoreGame(state: GameState) {
     .reduce((sum, place) => sum + place, 0);
 }
 
-// reduce over the draw numbers on the game state to play bingo, then score
-function play(state: GameState, stopOnBingo?: boolean) {
+async function playBingo(stopOnBingo?: boolean) {
+  const state = await getInitialState();
+
   for (const n of state.draws) {
     // abort on the first bingo if we're playing that way
     if (stopOnBingo && state.bingo) continue;
@@ -74,5 +75,5 @@ function play(state: GameState, stopOnBingo?: boolean) {
   return scoreGame(state);
 }
 
-console.log("Part 1:", play(await getInitialState(), true));
-console.log("Part 2:", play(await getInitialState()));
+console.log("Part 1:", await playBingo(true));
+console.log("Part 2:", await playBingo());
