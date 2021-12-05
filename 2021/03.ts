@@ -12,12 +12,13 @@ const majority = (numbers: string[]) =>
       // start at zero for each position
       range(bits).map(() => 0),
     )
-    // a positive or zero score means 1 was more frequent; zero otherwise
+    // a positive or zero score means 1 was more frequent
+    // a negative score means 0 was more frequent
     .map((s) => s >= 0 ? "1" : "0")
     .join("");
 
-// the minority is just the opposite of the majority!
 const minority = (numbers: string[]) =>
+  // the minority is simply the opposite of the majority! i.e. invert every bit
   majority(numbers).split("").map((c) => c === "0" ? "1" : "0").join("");
 
 const gamma = parseInt(majority(data), 2);
