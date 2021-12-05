@@ -5,8 +5,13 @@ import { getLines, reduce } from "../lib/streams.ts";
 type BoardPlace = number | null;
 type BoardLine = BoardPlace[];
 type Board = BoardLine[];
+interface GameState {
+  draws: number[];
+  boards: Board[];
+  bingo?: { board: Board; n: number };
+}
 
-const getInitialState = () =>
+const makeInitialGameState = () =>
   pipe(
     getLines("04.input.txt"),
     // build the game state by reducing over input lines
@@ -20,25 +25,20 @@ const getInitialState = () =>
         else acc.boards[0].push(line.trim().split(/\s+/).map(Number));
         return acc;
       },
-      {
-        draws: [] as number[],
-        boards: [] as Board[],
-        bingo: undefined as { board: Board; n: number } | undefined,
-      },
+      { draws: [], boards: [] } as GameState,
     ),
   );
 
-type Awaited<T> = T extends PromiseLike<infer U> ? Awaited<U> : T;
-type GameState = Awaited<ReturnType<typeof getInitialState>>;
-
 // bingo when any board line is fully marked
+// note: transposing the board lets us check columns too
 function isBingo(board: Board) {
   const lineMarked = (line: BoardLine) => line.every((x) => x === null);
   return board.some(lineMarked) || transpose(board).some(lineMarked);
 }
 
 // destructively mark a board for value N and check for bingo
-function markAndCheck(board: Board, n: number) {
+// note: marking a place will set it to null
+function markAndCheckBingo(board: Board, n: number) {
   for (let i = 0; i < board.length; i++) {
     for (let j = 0; j < board[i].length; j++) {
       if (board[i][j] === n) board[i][j] = null;
@@ -56,7 +56,7 @@ function scoreGame(state: GameState) {
 }
 
 async function playBingo(stopOnBingo?: boolean) {
-  const state = await getInitialState();
+  const state = await makeInitialGameState();
 
   for (const n of state.draws) {
     // abort on the first bingo if we're playing that way
@@ -65,8 +65,8 @@ async function playBingo(stopOnBingo?: boolean) {
     for (const board of state.boards) {
       // ignore a board if already bingo'd
       if (isBingo(board)) continue;
-      // if a board bingoes on this round, capture state
-      if (markAndCheck(board, n)) {
+      // if a board bingo's on this round, capture state
+      if (markAndCheckBingo(board, n)) {
         state.bingo = { board, n };
       }
     }
