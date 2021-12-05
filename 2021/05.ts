@@ -26,10 +26,10 @@ const [straightLines, diagonalLines] = await pipe(
   partition(isStraight), // partition into straight & diagonal lines
 );
 
-const hashPoint = ({x, y}: Point) => Symbol.for(`${x}:${y}`)
+const hashPoint = ({ x, y }: Point) => Symbol.for(`${x}:${y}`);
 
 function plotPoint(grid: Grid, point: Point) {
-  const hash = hashPoint(point)
+  const hash = hashPoint(point);
   grid.set(hash, (grid.get(hash) ?? 0) + 1);
 }
 
