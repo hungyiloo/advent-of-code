@@ -40,16 +40,17 @@ function plotLine(grid: Grid, line: Line) {
   const ys = range(line.y1, line.y2, true);
   // iterate through the longer sequence of x or y values
   // (the other sequence must either be the same size, or a single value)
-  for (const i of range(Math.max(xs.length, ys.length))) {
-    plotPoint(grid, {
-      x: xs.length === 1 ? xs[0] : xs[i],
-      y: ys.length === 1 ? ys[0] : ys[i],
-    });
-  }
+  range(Math.max(xs.length, ys.length))
+    .forEach((i) =>
+      plotPoint(grid, {
+        x: xs.length === 1 ? xs[0] : xs[i],
+        y: ys.length === 1 ? ys[0] : ys[i],
+      })
+    );
 }
 
 function plotLines(grid: Grid, lines: Line[]) {
-  for (const line of lines) plotLine(grid, line);
+  lines.forEach((line) => plotLine(grid, line));
 }
 
 function scoreGrid(grid: Grid) {
