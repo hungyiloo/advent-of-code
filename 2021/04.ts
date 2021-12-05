@@ -20,7 +20,7 @@ const makeInitialGameState = () =>
         // split the first line into draw numbers
         if (i === 0) acc.draws = line.split(",").map(Number);
         // on every blank line, start a new board
-        else if (line.trim() === "") acc.boards = [[], ...acc.boards];
+        else if (line.trim() === "") acc.boards.unshift([]);
         // on every non blank line, add it to the last board
         else acc.boards[0].push(line.trim().split(/\s+/).map(Number));
         return acc;
