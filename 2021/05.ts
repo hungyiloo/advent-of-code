@@ -14,7 +14,7 @@ interface Line {
 }
 // a Map-based grid allows lazy grid simulation without needing a fixed size
 // and lets totally ignore position in the grid that are never touched
-type Grid = Map<number, Map<number, number>>;
+type Grid = Map<symbol, number>;
 
 const isStraight = (l: Line) => l.x1 === l.x2 || l.y1 === l.y2;
 
@@ -26,13 +26,11 @@ const [straightLines, diagonalLines] = await pipe(
   partition(isStraight), // partition into straight & diagonal lines
 );
 
+const hashPoint = ({x, y}: Point) => Symbol.for(`${x}:${y}`)
+
 function plotPoint(grid: Grid, point: Point) {
-  const { x, y } = point;
-  // if the grid hasn't seen this X value yet, make a Map for it
-  if (!grid.has(x)) grid.set(x, new Map<number, number>());
-  const col = grid.get(x)!;
-  // add one to the value at point X,Y (assume 0 if it didn't exist)
-  col.set(y, (col.get(y) ?? 0) + 1);
+  const hash = hashPoint(point)
+  grid.set(hash, (grid.get(hash) ?? 0) + 1);
 }
 
 function plotLine(grid: Grid, line: Line) {
@@ -55,11 +53,10 @@ function plotLines(grid: Grid, lines: Line[]) {
 
 function scoreGrid(grid: Grid) {
   return Array.from(grid.values())
-    .flatMap((col) => Array.from(col.values()))
     .reduce((acc, curr) => acc + (curr > 1 ? 1 : 0), 0);
 }
 
-const grid = new Map<number, Map<number, number>>();
+const grid = new Map<symbol, number>();
 plotLines(grid, straightLines);
 console.log("Part 1:", scoreGrid(grid));
 
