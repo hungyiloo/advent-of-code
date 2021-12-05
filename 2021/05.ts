@@ -13,7 +13,7 @@ interface Line {
   y2: number;
 }
 // a Map-based grid allows lazy grid simulation without needing a fixed size
-// and lets totally ignore position in the grid that are never touched
+// and lets us totally ignore position in the grid that are never touched
 type Grid = Map<symbol, number>;
 
 const isStraight = (l: Line) => l.x1 === l.x2 || l.y1 === l.y2;
@@ -26,6 +26,7 @@ const [straightLines, diagonalLines] = await pipe(
   partition(isStraight), // partition into straight & diagonal lines
 );
 
+// creates a unique hash for a given point on the grid
 const hashPoint = ({ x, y }: Point) => Symbol.for(`${x}:${y}`);
 
 function plotPoint(grid: Grid, point: Point) {
