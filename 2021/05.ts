@@ -39,7 +39,7 @@ function plotLine(grid: Grid, line: Line) {
   const xs = range(line.x1, line.x2, true);
   const ys = range(line.y1, line.y2, true);
   // iterate through the longer sequence of x or y values
-  // (the other one MUST be a single value, as part of AoC conditions)
+  // (the other sequence must either be the same size, or a single value)
   range(Math.max(xs.length, ys.length))
     .forEach((i) =>
       plotPoint(grid, {
