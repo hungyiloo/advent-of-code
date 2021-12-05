@@ -48,12 +48,10 @@ function markAndCheckBingo(board: Board, n: number) {
 }
 
 // score the game state according to AoC answer requirements
-function scoreGame(state: GameState) {
-  if (!state.bingo) return -1;
-  return state.bingo.n * state.bingo.board
+const score = (bingo: { board: Board, n: number}) =>
+  bingo.n * bingo.board
     .flatMap((line) => line.map((place) => place ?? 0))
     .reduce((sum, place) => sum + place, 0);
-}
 
 async function playBingo(stopOnBingo?: boolean) {
   const state = await makeInitialGameState();
@@ -72,7 +70,7 @@ async function playBingo(stopOnBingo?: boolean) {
     }
   }
 
-  return scoreGame(state);
+  return score(state.bingo!);
 }
 
 console.log("Part 1:", await playBingo(true));
