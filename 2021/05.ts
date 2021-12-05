@@ -17,10 +17,10 @@ const lines = await pipe(
   toArray,
 );
 
-const makeGrid = (): Grid => new Map<number, Map<number, number>>();
-
 const isHorizontal = (line: Line) => line.start[1] === line.end[1];
 const isVertical = (line: Line) => line.start[0] === line.end[0];
+
+const makeGrid = (): Grid => new Map<number, Map<number, number>>();
 
 function plotPoint(grid: Grid, point: Point) {
   const [x, y] = point;
