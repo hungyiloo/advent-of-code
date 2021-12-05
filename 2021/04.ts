@@ -60,7 +60,7 @@ async function playBingo(stopOnBingo?: boolean) {
 
   for (const n of state.draws) {
     // abort on the first bingo if we're playing that way
-    if (stopOnBingo && state.bingo) continue;
+    if (stopOnBingo && state.bingo) break;
 
     for (const board of state.boards) {
       // ignore a board if already bingo'd
