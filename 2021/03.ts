@@ -9,12 +9,14 @@ const majority = (numbers: string[]) =>
     .reduce(
       // add or subtract 1 from score if bit is 1 or 0 respectively
       (acc, curr) => acc.map((s, i) => s + (curr[i] === "1" ? 1 : -1)),
+      // start at zero for each position
       range(bits).map(() => 0),
     )
     // a positive or zero score means 1 was more frequent; zero otherwise
     .map((s) => s >= 0 ? "1" : "0")
     .join("");
 
+// the minority is just the opposite of the majority!
 const minority = (numbers: string[]) =>
   majority(numbers).split("").map((c) => c === "0" ? "1" : "0").join("");
 
@@ -23,16 +25,13 @@ const epsilon = parseInt(minority(data), 2);
 console.log("Part 1:", gamma * epsilon);
 
 function search(combinator: (numbers: string[]) => string) {
-  const match = range(bits).reduce(
-    (remaining, i) => {
-      if (remaining.length <= 1) return remaining;
-      const pattern = combinator(remaining);
-      return remaining.filter((num) => num[i] === pattern[i]);
-    },
-    data,
-  )[0];
-
-  return parseInt(match, 2);
+  let remaining = data;
+  for (const i of range(bits)) {
+    if (remaining.length <= 1) break;
+    const pattern = combinator(remaining);
+    remaining = remaining.filter((num) => num[i] === pattern[i]);
+  }
+  return parseInt(remaining[0], 2);
 }
 
 const o2GeneratorRating = search(majority);
