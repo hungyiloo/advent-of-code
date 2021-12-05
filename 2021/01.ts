@@ -13,7 +13,7 @@ const sinkCountPart2 = await pipe(
   getLines("01.input.txt"),
   map(Number),
   slidingWindow(3), // triplewise
-  map((arr) => arr.reduce((a, x) => a + x)), // sum each triple
+  map((triple) => triple.reduce((a, x) => a + x)), // sum each triple
   slidingWindow(2), // pairwise
   count(([x, y]) => x < y), // count pairs that increase
 );
