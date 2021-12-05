@@ -12,6 +12,8 @@ interface Line {
   y1: number;
   y2: number;
 }
+// a Map-based grid allows lazy grid simulation without needing a fixed size
+// and lets totally ignore position in the grid that are never touched
 type Grid = Map<number, Map<number, number>>;
 
 const isStraight = (l: Line) => l.x1 === l.x2 || l.y1 === l.y2;
@@ -30,8 +32,10 @@ const { straightLines, diagonalLines } = await pipe(
 
 function plotPoint(grid: Grid, point: Point) {
   const { x, y } = point;
+  // if the grid hasn't seen this X value yet, make a Map for it
   if (!grid.has(x)) grid.set(x, new Map<number, number>());
   const col = grid.get(x)!;
+  // add one to the value at point X,Y (assume 0 if it didn't exist)
   col.set(y, (col.get(y) ?? 0) + 1);
 }
 
