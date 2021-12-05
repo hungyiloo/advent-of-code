@@ -1,5 +1,5 @@
 import { pipe } from "../lib/pipe.ts";
-import { getLines, map, reduce, slidingWindow } from "../lib/streams.ts";
+import { count, getLines, map, slidingWindow } from "../lib/streams.ts";
 
 const depths = () =>
   pipe(
@@ -7,14 +7,12 @@ const depths = () =>
     map(Number),
   );
 
-const upticks = (numbers$: ReturnType<typeof depths>) => pipe(
-  numbers$,
-  slidingWindow(2),
-  reduce(
-    (uptickCount, [x, y]) => uptickCount + (y > x ? 1 : 0),
-    0,
-  )
-)
+const upticks = (numbers$: ReturnType<typeof depths>) =>
+  pipe(
+    numbers$,
+    slidingWindow(2),
+    count(([x, y]) => x < y)
+  );
 
 const sinkCountPart1 = await upticks(depths());
 console.log("Part 1:", sinkCountPart1);

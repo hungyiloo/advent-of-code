@@ -61,6 +61,29 @@ export function reduce<T, U>(
 }
 
 /**
+ * Count the number of values in a stream matching an optional condition
+ */
+export function count<T>(condition?: (x: T) => boolean) {
+  return reduce<T, number>(
+    (acc, curr) => acc + ((condition?.(curr) ?? true) ? 1 : 0),
+    0
+  )
+}
+
+/**
+ * Count the number of values in a stream based on a condition
+ */
+export function partition<T>(condition: (x: T) => boolean) {
+  return reduce<T, [T[], T[]]>(
+    (acc, curr) => {
+      condition(curr) ? acc[0].push(curr) : acc[1].push(curr)
+      return acc
+    },
+    [[], []]
+  )
+}
+
+/**
  * Converts any regular iterable into an async iterable iterator
  */
 export async function* from<T>(elements: Iterable<T> | Promise<Iterable<T>>) {
