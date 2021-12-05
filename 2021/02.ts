@@ -6,10 +6,8 @@ type Direction = "forward" | "up" | "down";
 const vectors = () =>
   pipe(
     getLines("02.input.txt"),
-    map((line) => {
-      const [p1, p2] = line.split(" ");
-      return [p1, parseInt(p2)] as [Direction, number];
-    }),
+    map((line) => line.split(" ")),
+    map(([p1, p2]) => [p1, parseInt(p2)] as [Direction, number]),
   );
 
 const part1 = await pipe(
@@ -18,10 +16,13 @@ const part1 = await pipe(
     (state, [direction, x]) => {
       switch (direction) {
         case "forward":
+          // add X to position
           return { ...state, position: state.position + x };
         case "down":
+          // add X to depth
           return { ...state, depth: state.depth + x };
         case "up":
+          // subtract X from depth
           return { ...state, depth: state.depth - x };
         default:
           return state;
@@ -41,14 +42,17 @@ const part2 = await pipe(
     (state, [direction, x]) => {
       switch (direction) {
         case "forward":
+          // add X to position and recalc depth based on aim
           return {
             ...state,
             position: state.position + x,
             depth: state.depth + state.aim * x,
           };
         case "down":
+          // add X to aim
           return { ...state, aim: state.aim + x };
         case "up":
+          // subtract X from aim
           return { ...state, aim: state.aim - x };
         default:
           return state;
