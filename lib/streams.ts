@@ -71,6 +71,14 @@ export async function* from<T>(elements: Iterable<T> | Promise<Iterable<T>>) {
 }
 
 /**
+ * Converts any regular value into an async iterable iterator
+ */
+export async function* of<T>(element: T | Promise<T>) {
+  element = await Promise.resolve(element);
+  yield element
+}
+
+/**
  * Yields elements filtered through a query function
  */
 export function filter<T>(fn: (x: T) => boolean) {
