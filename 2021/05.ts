@@ -35,8 +35,8 @@ function plotPoint(grid: Grid, point: Point) {
 }
 
 function plotLine(grid: Grid, line: Line) {
-  const xs = range(line.x1, line.x2, true);
-  const ys = range(line.y1, line.y2, true);
+  const xs = range(line.x1, line.x2);
+  const ys = range(line.y1, line.y2);
   // iterate through the longer sequence of x or y values
   // (the other sequence must either be the same size, or a single value)
   range(Math.max(xs.length, ys.length))
