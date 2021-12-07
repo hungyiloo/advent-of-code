@@ -5,7 +5,9 @@ import { getLines, toArray$ } from "../lib/streams.ts";
 const data = await toArray$(getLines("03.input.txt"));
 const bits = data[0]?.length ?? 0;
 
-const majority = (numbers: string[]) =>
+type Combinator = (numbers: string[]) => string;
+
+const majority: Combinator = (numbers) =>
   pipe(
     numbers,
     reduce(
@@ -17,23 +19,23 @@ const majority = (numbers: string[]) =>
     // zero or positive score means "1" was the majority;
     // negative score means "0" was the majority
     map((s) => s >= 0 ? "1" : "0"),
-    join("")
+    join(""),
   );
 
 // the minority is simply the opposite of the majority!
-const minority = (numbers: string[]) =>
+const minority: Combinator = (numbers) =>
   pipe(
     majority(numbers),
     split(""),
     map((c) => c === "0" ? "1" : "0"), // invert every bit
-    join("")
-  )
+    join(""),
+  );
 
 const gamma = parseInt(majority(data), 2);
 const epsilon = parseInt(minority(data), 2);
 console.log("Part 1:", gamma * epsilon);
 
-function search(combinator: (numbers: string[]) => string) {
+function search(combinator: Combinator) {
   let remaining = data;
   for (const i of range(bits)) {
     if (remaining.length <= 1) break;
