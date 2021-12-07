@@ -24,7 +24,7 @@ function fuelUsage(targetPos: number, distanceTo: DistanceMeasure) {
   );
 }
 
-function solve(distance: DistanceMeasure) {
+function leastFuel(distance: DistanceMeasure) {
   return pipe(
     range(min(crabs), max(crabs)),
     map((targetPos) => fuelUsage(targetPos, distance)),
@@ -32,5 +32,5 @@ function solve(distance: DistanceMeasure) {
   );
 }
 
-console.log("Part 1:", solve(linearDistance));
-console.log("Part 2:", solve(triangularDistance));
+console.log("Part 1:", leastFuel(linearDistance));
+console.log("Part 2:", leastFuel(triangularDistance));
