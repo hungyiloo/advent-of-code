@@ -16,18 +16,18 @@ const triangularDistance: DistanceMeasure = (a) => (b) => {
   return n * (n + 1) / 2;
 };
 
-function fuelUsage(targetPos: number, distanceTo: DistanceMeasure) {
+function fuelUsage(targetPos: number, measureDistance: DistanceMeasure) {
   return pipe(
     crabs,
-    map(distanceTo(targetPos)),
+    map(measureDistance(targetPos)),
     sum,
   );
 }
 
-function leastFuel(distance: DistanceMeasure) {
+function leastFuel(measureDistance: DistanceMeasure) {
   return pipe(
     range(min(crabs), max(crabs)),
-    map((targetPos) => fuelUsage(targetPos, distance)),
+    map((targetPos) => fuelUsage(targetPos, measureDistance)),
     min,
   );
 }
