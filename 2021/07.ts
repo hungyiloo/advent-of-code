@@ -11,29 +11,28 @@ const crabs = await pipe(
 const positionRange = [pipe(crabs, min), pipe(crabs, max)] as const;
 
 type DistanceMeasure = (a: number, b: number) => number;
+
 const linearDistance: DistanceMeasure = (a, b) => Math.abs(a - b);
 const triangularDistance: DistanceMeasure = (a, b) => {
   const n = linearDistance(a, b);
   return n * (n + 1) / 2;
 };
 
-const fuelUsage = (
-  crabs: number[],
-  targetPos: number,
-  distance: DistanceMeasure,
-) =>
-  pipe(
+function fuelUsage(targetPos: number, distance: DistanceMeasure) {
+  return pipe(
     crabs,
     map((c) => distance(c, targetPos)),
     sum,
   );
+}
 
-const solve = (distance: DistanceMeasure) =>
-  pipe(
+function solve(distance: DistanceMeasure) {
+  return pipe(
     range(...positionRange),
-    map((p) => fuelUsage(crabs, p, distance)),
+    map((p) => fuelUsage(p, distance)),
     min,
   );
+}
 
 console.log("Part 1:", solve(linearDistance));
 console.log("Part 2:", solve(triangularDistance));
