@@ -1,4 +1,4 @@
-import { range } from "../lib/array.ts";
+import { count, from, range } from "../lib/array.ts";
 import { pipe } from "../lib/pipe.ts";
 import { getLines, map$, partition$ } from "../lib/streams.ts";
 
@@ -53,8 +53,10 @@ function plotLines(grid: Grid, lines: Line[]) {
 }
 
 function scoreGrid(grid: Grid) {
-  return Array.from(grid.values())
-    .reduce((acc, curr) => acc + (curr > 1 ? 1 : 0), 0);
+  return pipe(
+    from(grid.values()),
+    count((x) => x >= 2), // count the overlaps
+  );
 }
 
 const grid = new Map<symbol, number>();

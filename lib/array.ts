@@ -78,3 +78,7 @@ export function min(nums: number[]) {
 export function max(nums: number[]) {
   return Math.max(...nums)
 }
+
+export function from<T>(elements: Iterable<T>) {
+  return Array.from(elements)
+}

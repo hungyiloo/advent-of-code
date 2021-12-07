@@ -86,7 +86,7 @@ export function partition$<T>(condition: (x: T) => boolean) {
 /**
  * Converts any regular iterable into an async iterable iterator
  */
-export async function* from<T>(elements: Iterable<T> | Promise<Iterable<T>>) {
+export async function* from$<T>(elements: Iterable<T> | Promise<Iterable<T>>) {
   elements = await Promise.resolve(elements);
   for (const element of elements) {
     yield element;
