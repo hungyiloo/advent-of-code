@@ -1,7 +1,7 @@
 import { range } from "../lib/array.ts";
-import { getLines, toArray } from "../lib/streams.ts";
+import { getLines, toArray$ } from "../lib/streams.ts";
 
-const data = await toArray(getLines("03.input.txt"));
+const data = await toArray$(getLines("03.input.txt"));
 const bits = data[0]?.length ?? 0;
 
 const majority = (numbers: string[]) =>

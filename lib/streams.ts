@@ -15,8 +15,8 @@ export async function* getLines(inputFilePath: string) {
 /**
  * Yields elements mapped through a transformation function
  */
-export function map<T, U>(fn: (x: T, i: number) => U) {
-  return async function* map(elements$: AsyncIterableIterator<T>) {
+export function map$<T, U>(fn: (x: T, i: number) => U) {
+  return async function* (elements$: AsyncIterableIterator<T>) {
     let index = 0;
     for await (const element of elements$) {
       yield fn(element, index);
@@ -28,7 +28,7 @@ export function map<T, U>(fn: (x: T, i: number) => U) {
 /**
  * Yields a sliding window of elements of a given window size
  */
-export function slidingWindow<T>(windowSize: number) {
+export function slidingWindow$<T>(windowSize: number) {
   return async function* (elements$: AsyncIterableIterator<T>) {
     const win: T[] = [];
 
@@ -45,7 +45,7 @@ export function slidingWindow<T>(windowSize: number) {
 /**
  * Reduce over a stream of values to a single output value
  */
-export function reduce<T, U>(
+export function reduce$<T, U>(
   reducer: (a: U, x: T, i: number) => U,
   initialValue: U,
 ) {
@@ -63,8 +63,8 @@ export function reduce<T, U>(
 /**
  * Count the number of values in a stream matching an optional condition
  */
-export function count<T>(condition?: (x: T) => boolean) {
-  return reduce<T, number>(
+export function count$<T>(condition?: (x: T) => boolean) {
+  return reduce$<T, number>(
     (acc, curr) => acc + ((condition?.(curr) ?? true) ? 1 : 0),
     0
   )
@@ -73,8 +73,8 @@ export function count<T>(condition?: (x: T) => boolean) {
 /**
  * Count the number of values in a stream based on a condition
  */
-export function partition<T>(condition: (x: T) => boolean) {
-  return reduce<T, [T[], T[]]>(
+export function partition$<T>(condition: (x: T) => boolean) {
+  return reduce$<T, [T[], T[]]>(
     (acc, curr) => {
       condition(curr) ? acc[0].push(curr) : acc[1].push(curr)
       return acc
@@ -104,7 +104,7 @@ export async function* of<T>(element: T | Promise<T>) {
 /**
  * Yields elements filtered through a query function
  */
-export function filter<T>(fn: (x: T) => boolean) {
+export function filter$<T>(fn: (x: T) => boolean) {
   return async function* (elements$: AsyncIterableIterator<T>) {
     for await (const element of elements$) {
       if (fn(element)) {
@@ -117,7 +117,7 @@ export function filter<T>(fn: (x: T) => boolean) {
 /**
  * Convert a stream of elements to an in-memory array
  */
-export async function toArray<T>(
+export async function toArray$<T>(
   elements$: AsyncIterableIterator<T>,
 ) {
   const arr: T[] = [];
@@ -130,7 +130,7 @@ export async function toArray<T>(
 /**
  * Take N elements from the stream
  */
-export function take<T>(n: number) {
+export function take$<T>(n: number) {
   return async function* (elements$: AsyncIterableIterator<T>) {
     let count = 0;
     for await (const element of elements$) {
@@ -144,7 +144,7 @@ export function take<T>(n: number) {
 /**
  * Gets the first value off a stream, or undefined if unable
  */
-export async function pop<T>(
+export async function pop$<T>(
   elements$: AsyncIterableIterator<T>,
 ) {
   return (await elements$.next())?.value as T | undefined;

@@ -33,3 +33,29 @@ export function transpose<T>(matrix: T[][]) {
     .map((i) => matrix.map((row) => row[i]));
 }
 
+export function map<T, U>(fn: (x: T, i: number) => U) {
+  return (elements: T[]) => elements.map(fn);
+}
+
+export function flatMap<T, U>(fn: (x: T, i: number) => U[]) {
+  return (elements: T[]) => elements.flatMap(fn);
+}
+
+export function filter<T, U>(condition: (x: T, i: number) => U) {
+  return (elements: T[]) => elements.filter(condition);
+}
+
+export function reduce<T, U>(reducer: (acc: U, x: T, i: number) => U, seed: U) {
+  return (elements: T[]) => elements.reduce(reducer, seed);
+}
+
+export function count<T>(condition?: (x: T) => boolean) {
+  if (!condition) return (elements: T[]) => elements.length
+  return (elements: T[]) =>
+    elements.reduce((acc, curr) => acc + (condition(curr) ? 1 : 0), 0);
+}
+
+export function sum(condition?: (x: number) => boolean) {
+  return (elements: number[]) =>
+    elements.reduce((acc, curr) => acc + (condition?.(curr) ?? true ? curr : 0))
+}

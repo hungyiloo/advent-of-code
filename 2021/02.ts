@@ -1,18 +1,18 @@
 import { pipe } from "../lib/pipe.ts";
-import { getLines, map, reduce } from "../lib/streams.ts";
+import { getLines, map$, reduce$ } from "../lib/streams.ts";
 
 type Direction = "forward" | "up" | "down";
 
 const vectors = () =>
   pipe(
     getLines("02.input.txt"),
-    map((line) => line.split(" ")),
-    map(([p1, p2]) => [p1, parseInt(p2)] as [Direction, number]),
+    map$((line) => line.split(" ")),
+    map$(([p1, p2]) => [p1, parseInt(p2)] as [Direction, number]),
   );
 
 const part1 = await pipe(
   vectors(),
-  reduce(
+  reduce$(
     (state, [direction, x]) => {
       switch (direction) {
         case "forward":
@@ -38,7 +38,7 @@ console.log("Part 1:", part1.position * part1.depth);
 
 const part2 = await pipe(
   vectors(),
-  reduce(
+  reduce$(
     (state, [direction, x]) => {
       switch (direction) {
         case "forward":

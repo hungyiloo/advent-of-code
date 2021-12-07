@@ -1,10 +1,10 @@
 import { memoize } from "../lib/functional.ts";
 import { pipe } from "../lib/pipe.ts";
-import { getLines, pop, then } from "../lib/streams.ts";
+import { getLines, pop$, then } from "../lib/streams.ts";
 
 const fish = await pipe(
   getLines("06.input.txt"),
-  pop,
+  pop$,
   then((x) => x!.split(",").map(Number)),
 );
 
@@ -24,8 +24,6 @@ console.log("Part 2:", evolve(fish, 256));
 
 // What follows below is the iterative naive approach, full data structures,
 // which totally bombs for Part 2 (would probably require >2TB memory)!
-//
-// I left it in here to illustrate what doesn't work...
 //
 // function naiveEvolve(fish: number[], days: number) {
 //   for (const _day of range(days)) {

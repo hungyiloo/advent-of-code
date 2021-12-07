@@ -1,6 +1,6 @@
 import { range } from "../lib/array.ts";
 import { pipe } from "../lib/pipe.ts";
-import { getLines, map, partition } from "../lib/streams.ts";
+import { getLines, map$, partition$ } from "../lib/streams.ts";
 
 type Point = {
   x: number;
@@ -20,10 +20,10 @@ const isStraight = (l: Line) => l.x1 === l.x2 || l.y1 === l.y2;
 
 const [straightLines, diagonalLines] = await pipe(
   getLines("05.input.txt"),
-  map((line) => line.split(" -> ")),
-  map((points) => points.map((p) => p.split(",").map(Number))),
-  map(([[x1, y1], [x2, y2]]) => ({ x1, x2, y1, y2 } as Line)),
-  partition(isStraight), // partition into straight & diagonal lines
+  map$((line) => line.split(" -> ")),
+  map$((points) => points.map((p) => p.split(",").map(Number))),
+  map$(([[x1, y1], [x2, y2]]) => ({ x1, x2, y1, y2 } as Line)),
+  partition$(isStraight), // partition into straight & diagonal lines
 );
 
 // creates a unique hash for a given point on the grid

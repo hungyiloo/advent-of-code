@@ -1,6 +1,6 @@
-import { transpose } from "../lib/array.ts";
+import { flatMap, reduce, transpose } from "../lib/array.ts";
 import { pipe } from "../lib/pipe.ts";
-import { getLines, reduce } from "../lib/streams.ts";
+import { getLines, reduce$ } from "../lib/streams.ts";
 
 type BoardPlace = number | null;
 type BoardLine = BoardPlace[];
@@ -15,7 +15,7 @@ const makeInitialGameState = () =>
   pipe(
     getLines("04.input.txt"),
     // build the game state by reducing over input lines
-    reduce(
+    reduce$(
       (acc, line, i) => {
         // split the first line into draw numbers
         if (i === 0) acc.draws = line.split(",").map(Number);
@@ -49,9 +49,11 @@ function markAndCheckBingo(board: Board, n: number) {
 
 // score the game state according to AoC answer requirements
 const score = (bingo: { board: Board, n: number}) =>
-  bingo.n * bingo.board
-    .flatMap((line) => line.map((place) => place ?? 0))
-    .reduce((sum, place) => sum + place, 0);
+  bingo.n * pipe(
+    bingo.board,
+    flatMap((line) => line.map((place) => place ?? 0)),
+    reduce((sum, place) => sum + place, 0)
+  );
 
 async function playBingo(stopOnBingo?: boolean) {
   const state = await makeInitialGameState();
