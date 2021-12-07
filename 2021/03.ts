@@ -9,11 +9,13 @@ const majority = (numbers: string[]) =>
   pipe(
     numbers,
     reduce(
-      // add or subtract 1 from score if bit is 1 or 0 respectively
+      // add or subtract 1 from score if bit is "1" or "0" respectively
       (acc, curr) => acc.map((s, i) => s + (curr[i] === "1" ? 1 : -1)),
-      // start at zero for each position
-      range(bits).map(() => 0),
+      // scores start at zero for each position
+      range(bits).fill(0),
     ),
+    // zero or positive score means "1" was the majority;
+    // negative score means "0" was the majority
     map((s) => s >= 0 ? "1" : "0"),
     join("")
   );
