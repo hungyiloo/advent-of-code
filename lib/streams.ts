@@ -147,9 +147,17 @@ export function take$<T>(n: number) {
 export async function pop$<T>(
   elements$: AsyncIterableIterator<T>,
 ) {
-  return (await elements$.next())?.value as T | undefined;
+  return (await elements$.next())!.value as T;
 }
 
 export function then<T, U>(fn: (x: T) => U) {
   return async (p: T | Promise<T>) => fn(await Promise.resolve(p));
+}
+
+export function min(numbers$: AsyncIterableIterator<number>) {
+  return reduce$((acc, curr: number) => curr < acc ? curr : acc, Infinity)(numbers$)
+}
+
+export function max(numbers$: AsyncIterableIterator<number>) {
+  return reduce$((acc, curr: number) => curr > acc ? curr : acc, -Infinity)(numbers$)
 }

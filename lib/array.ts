@@ -55,9 +55,12 @@ export function count<T>(condition?: (x: T) => boolean) {
     elements.reduce((acc, curr) => acc + (condition(curr) ? 1 : 0), 0);
 }
 
-export function sum(condition?: (x: number) => boolean) {
-  return (elements: number[]) =>
-    elements.reduce((acc, curr) => acc + (condition?.(curr) ?? true ? curr : 0))
+export function sum(elements: number[]) {
+  return elements.reduce((acc, curr) => acc + curr, 0)
+}
+
+export function average(elements: number[]) {
+  return sum(elements) / elements.length
 }
 
 export function join<T>(separator: string) {
@@ -66,4 +69,12 @@ export function join<T>(separator: string) {
 
 export function split(separator: string | RegExp, limit?: number | undefined) {
   return (str: string) => str.split(separator, limit)
+}
+
+export function min(nums: number[]) {
+  return Math.min(...nums)
+}
+
+export function max(nums: number[]) {
+  return Math.max(...nums)
 }
