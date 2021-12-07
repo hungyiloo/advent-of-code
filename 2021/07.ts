@@ -8,11 +8,11 @@ const crabs = await pipe(
   then((s) => s.split(",").map(Number)),
 );
 
-const minPosition = pipe(crabs, min);
-const maxPosition = pipe(crabs, max);
+const positionRange = [pipe(crabs, min), pipe(crabs, max)] as const;
 
-const linearDistance = (a: number, b: number) => Math.abs(a - b);
-const triangularDistance = (a: number, b: number) => {
+type DistanceMeasure = (a: number, b: number) => number;
+const linearDistance: DistanceMeasure = (a, b) => Math.abs(a - b);
+const triangularDistance: DistanceMeasure = (a, b) => {
   const n = linearDistance(a, b);
   return n * (n + 1) / 2;
 };
@@ -20,7 +20,7 @@ const triangularDistance = (a: number, b: number) => {
 const fuelUsage = (
   crabs: number[],
   targetPos: number,
-  distance: (a: number, b: number) => number,
+  distance: DistanceMeasure,
 ) =>
   pipe(
     crabs,
@@ -28,18 +28,12 @@ const fuelUsage = (
     sum,
   );
 
-const part1Fuel = pipe(
-  range(minPosition, maxPosition),
-  map((p) => fuelUsage(crabs, p, linearDistance)),
-  min,
-);
+const solve = (distance: DistanceMeasure) =>
+  pipe(
+    range(...positionRange),
+    map((p) => fuelUsage(crabs, p, distance)),
+    min,
+  );
 
-console.log("Part 1:", part1Fuel);
-
-const part2Fuel = pipe(
-  range(minPosition, maxPosition),
-  map((p) => fuelUsage(crabs, p, triangularDistance)),
-  min,
-);
-
-console.log("Part 2:", part2Fuel);
+console.log("Part 1:", solve(linearDistance));
+console.log("Part 2:", solve(triangularDistance));
