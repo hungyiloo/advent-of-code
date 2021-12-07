@@ -8,8 +8,6 @@ const crabs = await pipe(
   then((s) => s.split(",").map(Number)),
 );
 
-const positionRange = [min(crabs), max(crabs)] as const;
-
 type DistanceMeasure = (a: number) => (b: number) => number;
 
 const linearDistance: DistanceMeasure = (a) => (b) => Math.abs(a - b);
@@ -28,7 +26,7 @@ function fuelUsage(targetPos: number, distanceTo: DistanceMeasure) {
 
 function solve(distance: DistanceMeasure) {
   return pipe(
-    range(...positionRange),
+    range(min(crabs), max(crabs)),
     map((targetPos) => fuelUsage(targetPos, distance)),
     min,
   );
