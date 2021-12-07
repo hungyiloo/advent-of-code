@@ -1,25 +1,31 @@
-import { range } from "../lib/array.ts";
+import { join, map, range, reduce, split } from "../lib/array.ts";
+import { pipe } from "../lib/pipe.ts";
 import { getLines, toArray$ } from "../lib/streams.ts";
 
 const data = await toArray$(getLines("03.input.txt"));
 const bits = data[0]?.length ?? 0;
 
 const majority = (numbers: string[]) =>
-  numbers
-    .reduce(
+  pipe(
+    numbers,
+    reduce(
       // add or subtract 1 from score if bit is 1 or 0 respectively
       (acc, curr) => acc.map((s, i) => s + (curr[i] === "1" ? 1 : -1)),
       // start at zero for each position
       range(bits).map(() => 0),
-    )
-    // a positive or zero score means 1 was more frequent
-    // a negative score means 0 was more frequent
-    .map((s) => s >= 0 ? "1" : "0")
-    .join("");
+    ),
+    map((s) => s >= 0 ? "1" : "0"),
+    join("")
+  );
 
+// the minority is simply the opposite of the majority!
 const minority = (numbers: string[]) =>
-  // the minority is simply the opposite of the majority! i.e. invert every bit
-  majority(numbers).split("").map((c) => c === "0" ? "1" : "0").join("");
+  pipe(
+    majority(numbers),
+    split(""),
+    map((c) => c === "0" ? "1" : "0"), // invert every bit
+    join("")
+  )
 
 const gamma = parseInt(majority(data), 2);
 const epsilon = parseInt(minority(data), 2);

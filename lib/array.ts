@@ -59,3 +59,11 @@ export function sum(condition?: (x: number) => boolean) {
   return (elements: number[]) =>
     elements.reduce((acc, curr) => acc + (condition?.(curr) ?? true ? curr : 0))
 }
+
+export function join<T>(separator: string) {
+  return (elements: T[]) => elements.join(separator)
+}
+
+export function split(separator: string | RegExp, limit?: number | undefined) {
+  return (str: string) => str.split(separator, limit)
+}
