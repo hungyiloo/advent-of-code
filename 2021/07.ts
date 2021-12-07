@@ -8,7 +8,7 @@ const crabs = await pipe(
   then((s) => s.split(",").map(Number)),
 );
 
-const positionRange = [pipe(crabs, min), pipe(crabs, max)] as const;
+const positionRange = [min(crabs), max(crabs)] as const;
 
 type DistanceMeasure = (a: number) => (b: number) => number;
 
