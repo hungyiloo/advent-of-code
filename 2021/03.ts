@@ -35,16 +35,20 @@ const gamma = parseInt(majority(data), 2);
 const epsilon = parseInt(minority(data), 2);
 console.log("Part 1:", gamma * epsilon);
 
-function search(combinator: Combinator) {
-  let remaining = data;
-  for (const i of range(bits)) {
-    if (remaining.length <= 1) break;
-    const pattern = combinator(remaining);
-    remaining = remaining.filter((num) => num[i] === pattern[i]);
-  }
-  return parseInt(remaining[0], 2);
+function search(data: string[], bit: number, combinator: Combinator): string[] {
+  if (data.length <= 1 || bit === bits) return data;
+
+  const sieve = combinator(data)[bit];
+  return search(
+    data.filter((num) => num[bit] === sieve),
+    bit + 1,
+    combinator,
+  );
 }
 
-const o2GeneratorRating = search(majority);
-const co2ScrubberRating = search(minority);
+const startSearch = (combinator: Combinator) =>
+  parseInt(search(data, 0, combinator)[0], 2);
+
+const o2GeneratorRating = startSearch(majority);
+const co2ScrubberRating = startSearch(minority);
 console.log("Part 2:", o2GeneratorRating * co2ScrubberRating);
