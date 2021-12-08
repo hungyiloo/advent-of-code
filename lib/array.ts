@@ -45,6 +45,10 @@ export function filter<T, U>(condition: (x: T, i: number) => U) {
   return (elements: T[]) => elements.filter(condition);
 }
 
+export function sort<T>(compareFn?: (a: T, b: T) => number) {
+  return (elements: T[]) => elements.sort(compareFn);
+}
+
 export function reduce<T, U>(reducer: (acc: U, x: T, i: number) => U, seed: U) {
   return (elements: T[]) => elements.reduce(reducer, seed);
 }
