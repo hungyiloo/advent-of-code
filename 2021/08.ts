@@ -101,6 +101,7 @@ const scoreToTrueSegment = pipe(
       map(([k, v]) => [v, k] as const),
       (reversedEntries) => new Map(reversedEntries),
     ),
+  (scoreMap) => (score: number) => scoreMap.get(score)!,
 );
 
 const segmentDecoder = (patterns: string) =>
@@ -110,14 +111,14 @@ const segmentDecoder = (patterns: string) =>
       pipe(
         from(scoreMap.entries()),
         map(([segment, score]) =>
-          [segment, scoreToTrueSegment.get(score)!] as const
+          [segment, scoreToTrueSegment(score)] as const
         ),
         (entries) => new Map(entries),
       ),
     (trueSegments) => (segment: string) => trueSegments.get(segment)!,
   );
 
-const outputDecoder = (
+const decodeOutput = (
   output: string,
   decodeSegment: ReturnType<typeof segmentDecoder>,
 ) =>
@@ -144,7 +145,7 @@ const part2 = await pipe(
       split(" | "),
       ([patterns, output]) =>
         pipe(
-          outputDecoder(output, segmentDecoder(patterns)),
+          decodeOutput(output, segmentDecoder(patterns)),
           join(""),
           (x) => parseInt(x, 10),
         ),
