@@ -27,10 +27,35 @@ const part1 = await pipe(
 );
 console.log("Part 1:", part1);
 
+///////////////////////////////////////////////////////////////////////////////
+//    Honestly Part 2 is a complete mess. Maybe I'll clean it up later...    //
+///////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////
-//        Honestly this is all a mess. Maybe I'll clean it up later...       //
-///////////////////////////////////////////////////////////////////////////////
+//                0      1  2     3     4    5     6      7   8       9
+const baseline = "abcefg cf acdeg acdfg bcdf abdfg abdefg acf abcdefg abcdfg";
+
+// Using the baseline configuration (i.e. before the wires were messed up)
+// we can calculate a unique score for each true segment a-to-g. These SCORES
+// do not change when the wires get messed up, even though the LETTERS change.
+// The invariant scores are calculated in code below, but they're actually
+// constant, so I can list them out here:
+//
+// Map {
+//   "a" => 241,
+//   "b" => 198,
+//   "c" => 200,
+//   "d" => 212,
+//   "e" => 146,
+//   "f" => 236,
+//   "g" => 232
+// }
+//
+// (see the getScores function below for how they're calculated)
+//
+// The numbers on the right act like identifiers for the true segment. So when
+// decoding the messed up displays, we just calculate the scores based on the 10
+// unique patterns given by each input, get the scores, them map them back to
+// the true segments. The rest is trivial.
 
 const getScores = (patterns: string) =>
   pipe(
@@ -47,8 +72,11 @@ const getScores = (patterns: string) =>
               segment,
               pipe(
                 sets,
+                // find all the patterns that have this segment
                 filter((s) => s.has(segment)),
+                // then square the sizes of each of those patterns
                 map((s) => Math.pow(s.size, 2)),
+                // and add them up to get the score
                 sum,
               ),
             ),
@@ -56,8 +84,6 @@ const getScores = (patterns: string) =>
         ),
       ),
   );
-
-const baseline = "abcefg cf acdeg acdfg bcdf abdfg abdefg acf abcdefg abcdfg";
 
 const trueSegmentsToDigit = pipe(
   baseline,
@@ -98,16 +124,15 @@ const outputDecoder = (
   pipe(
     output,
     split(" "),
-    (digits) =>
-      digits.map((digit) =>
-        pipe(
-          digit,
-          split(""),
-          map(decodeSegment),
-          sort(), // lexicographically
-          join(""),
-        )
-      ),
+    map((digit) =>
+      pipe(
+        digit,
+        split(""),
+        map(decodeSegment),
+        sort(), // lexicographically
+        join(""),
+      )
+    ),
     map(trueSegmentsToDigit),
   );
 
@@ -117,14 +142,12 @@ const part2 = await pipe(
     pipe(
       line,
       split(" | "),
-      ([patterns, output]) => {
-        const decodeSegment = segmentDecoder(patterns);
-        return pipe(
-          outputDecoder(output, decodeSegment),
+      ([patterns, output]) =>
+        pipe(
+          outputDecoder(output, segmentDecoder(patterns)),
           join(""),
           (x) => parseInt(x, 10),
-        );
-      },
+        ),
     )
   ),
   sum$,
