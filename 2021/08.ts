@@ -12,27 +12,29 @@ import {
 import { pipe } from "../lib/pipe.ts";
 import { getLines, map$, sum$ } from "../lib/streams.ts";
 
+// The puzzle input is in the format:
+//
+// |--------------------- INPUT PATTERN ---------------------| |----- OUTPUT -----|
+// bgcfda gecbda abdgf aedfbg eda efcbd ae agfe bdefagc fbeda | ae egdafb ea fcdeb
+//                                  |                                |
+// WORDS made of letter SEGMENTS ---+--------------------------------+
+
 const part1 = await pipe(
   getLines("08.input.txt"),
   map$((l) => l.split(" | ")[1]),
-  map$((outputs) =>
+  map$((output) =>
     pipe(
-      outputs.trim(),
+      output.trim(),
       split(" "),
-      map((digit) => digit.length),
-      count((digitLength) => [2, 4, 3, 7].includes(digitLength)),
+      map((word) => word.length),
+      // part 1 doesn't require decoding anything;
+      // we just count the number of OUTPUT WORDS that match these lengths
+      count((wordLength) => [2, 4, 3, 7].includes(wordLength)),
     )
   ),
   sum$,
 );
 console.log("Part 1:", part1);
-
-///////////////////////////////////////////////////////////////////////////////
-//    Honestly Part 2 is a complete mess. Maybe I'll clean it up later...    //
-///////////////////////////////////////////////////////////////////////////////
-
-//                0      1  2     3     4    5     6      7   8       9
-const baseline = "abcefg cf acdeg acdfg bcdf abdfg abdefg acf abcdefg abcdfg";
 
 // Using the baseline configuration (i.e. before the wires were messed up)
 // we can calculate a unique score for each true segment a-to-g. These SCORES
@@ -56,8 +58,16 @@ const baseline = "abcefg cf acdeg acdfg bcdf abdfg abdefg acf abcdefg abcdfg";
 // decoding the messed up displays, we just calculate the scores based on the 10
 // unique patterns given by each input, get the scores, them map them back to
 // the true segments. The rest is trivial.
+//
+//                0      1  2     3     4    5     6      7   8       9
+const baseline = "abcefg cf acdeg acdfg bcdf abdfg abdefg acf abcdefg abcdfg";
 
-const getScores = (patterns: string) =>
+/**
+ * Generates scores for each of the segments in a pattern.
+ * It doesn't matter if the input pattern is encoded or baseline, because the
+ * scores are invariant.
+ */
+const scorePatterns = (patterns: string) =>
   pipe(
     patterns,
     split(" "),
@@ -85,16 +95,24 @@ const getScores = (patterns: string) =>
       ),
   );
 
-const trueSegmentsToDigit = pipe(
+/**
+ * Gets the digit for a given baseline (i.e. decoded) word
+ * e.g. cf => 1
+ * e.g. acf => 7
+ */
+const findDigitByWord = pipe(
   baseline,
   split(" "),
   map((segments, digit) => [segments, digit] as const),
   (entries) => new Map(entries),
-  (m) => (segments: string) => m.get(segments)!,
+  (m) => (baselineWord: string) => m.get(baselineWord)!,
 );
 
-const scoreToTrueSegment = pipe(
-  getScores(baseline),
+/**
+ * Gets the baseline-equivalent (i.e. true) segment given a unique score
+ */
+const findTrueSegmentByScore = pipe(
+  scorePatterns(baseline),
   (m) =>
     pipe(
       from(m.entries()),
@@ -104,37 +122,49 @@ const scoreToTrueSegment = pipe(
   (scoreMap) => (score: number) => scoreMap.get(score)!,
 );
 
+/**
+ * Constructs a segment decoder from a given PATTERN, by using the baseline
+ * data above. The resulting decoder takes an ENCODED SEGMENT and returns the
+ * TRUE SEGMENT.
+ */
 const segmentDecoder = (patterns: string) =>
   pipe(
-    getScores(patterns),
+    scorePatterns(patterns),
     (scoreMap) =>
       pipe(
         from(scoreMap.entries()),
         map(([segment, score]) =>
-          [segment, scoreToTrueSegment(score)] as const
+          [segment, findTrueSegmentByScore(score)] as const
         ),
         (entries) => new Map(entries),
       ),
-    (trueSegments) => (segment: string) => trueSegments.get(segment)!,
+    (decodeMap) => (encodedSegment: string) => decodeMap.get(encodedSegment)!,
   );
 
+/**
+ * Decodes output words to a single number, given a segmentDecoder.
+ * Output words are in the format: "ae egdafb ea fcdeb", where each word
+ * corresponds to a digit, but it is encoded (see segmentDecoder)
+ */
 const decodeOutput = (
-  output: string,
+  words: string,
   decodeSegment: ReturnType<typeof segmentDecoder>,
 ) =>
   pipe(
-    output,
+    words,
     split(" "),
-    map((digit) =>
+    map((word) =>
       pipe(
-        digit,
+        word,
         split(""),
         map(decodeSegment),
         sort(), // lexicographically
         join(""),
       )
     ),
-    map(trueSegmentsToDigit),
+    map(findDigitByWord),
+    join(""),
+    Number,
   );
 
 const part2 = await pipe(
@@ -143,12 +173,7 @@ const part2 = await pipe(
     pipe(
       line,
       split(" | "),
-      ([patterns, output]) =>
-        pipe(
-          decodeOutput(output, segmentDecoder(patterns)),
-          join(""),
-          (x) => parseInt(x, 10),
-        ),
+      ([patterns, output]) => decodeOutput(output, segmentDecoder(patterns)),
     )
   ),
   sum$,
