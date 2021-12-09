@@ -49,6 +49,10 @@ export function sort<T>(compareFn?: (a: T, b: T) => number) {
   return (elements: T[]) => elements.sort(compareFn);
 }
 
+export function take<T>(count: number) {
+  return (elements: T[]) => elements.slice(0, count);
+}
+
 export function reduce<T, U>(reducer: (acc: U, x: T, i: number) => U, seed: U) {
   return (elements: T[]) => elements.reduce(reducer, seed);
 }
@@ -60,7 +64,11 @@ export function count<T>(condition?: (x: T) => boolean) {
 }
 
 export function sum(elements: number[]) {
-  return elements.reduce((acc, curr) => acc + curr, 0)
+  return elements.reduce((acc, curr) => acc + curr)
+}
+
+export function product(elements: number[]) {
+  return elements.reduce((acc, curr) => acc * curr)
 }
 
 export function average(elements: number[]) {
