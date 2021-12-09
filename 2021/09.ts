@@ -45,24 +45,16 @@ const findLowPoints = () => {
 
 const riskLevel = (point: Point) => point.height + 1;
 
-const part1 = pipe(
-  heightMap,
-  findLowPoints,
-  map(riskLevel),
-  sum,
-);
-console.log("Part 1:", part1);
-
-const hashPoint = ({ y, x }: Coordinate) => Symbol.for(`${y}:${x}`);
+const hashCoordinate = ({ y, x }: Coordinate) => Symbol.for(`${y}:${x}`);
 
 const findBasin = (
   coord: Coordinate,
   basin?: Set<symbol>,
 ) => {
   if (!basin) basin = new Set();
-  basin.add(hashPoint(coord));
+  basin.add(hashCoordinate(coord));
   for (const neighbor of getNeighbors(coord)) {
-    const p = hashPoint(neighbor);
+    const p = hashCoordinate(neighbor);
     if (neighbor.height < 9 && !basin.has(p)) {
       basin.add(p);
       findBasin(neighbor, basin);
@@ -70,6 +62,14 @@ const findBasin = (
   }
   return basin;
 };
+
+const part1 = pipe(
+  heightMap,
+  findLowPoints,
+  map(riskLevel),
+  sum,
+);
+console.log("Part 1:", part1);
 
 const part2 = pipe(
   heightMap,
