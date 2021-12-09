@@ -1,4 +1,4 @@
-import { flatMap, map, product, sort, sum, take } from "../lib/array.ts";
+import { map, product, sort, sum, take } from "../lib/array.ts";
 import { pipe } from "../lib/pipe.ts";
 import { getLines, map$, toArray$ } from "../lib/streams.ts";
 
