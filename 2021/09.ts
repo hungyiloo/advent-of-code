@@ -15,13 +15,16 @@ interface Point {
 }
 
 const getNeighbors = (y: number, x: number) =>
-  [[y - 1, x], [y + 1, x], [y, x - 1], [y, x + 1]].reduce((acc, [y, x]) => {
-    const height = heightMap[y]?.[x];
-    if (height !== undefined) {
-      acc.push({ y, x, height });
-    }
-    return acc;
-  }, [] as Point[]);
+  [[y - 1, x], [y + 1, x], [y, x - 1], [y, x + 1]].reduce(
+    (acc, [y, x]) => {
+      const height = heightMap[y]?.[x];
+      if (height !== undefined) {
+        acc.push({ y, x, height });
+      }
+      return acc;
+    },
+    [] as Point[],
+  );
 
 const findLowPoints = () => {
   const lowPoints: Point[] = [];
