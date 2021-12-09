@@ -8,13 +8,16 @@ const heightMap = await pipe(
   toArray$,
 );
 
-interface Point {
+interface Coordinate {
   y: number;
   x: number;
+}
+
+interface Point extends Coordinate {
   height: number;
 }
 
-const getNeighbors = (y: number, x: number) =>
+const getNeighbors = ({ y, x }: Coordinate) =>
   [[y - 1, x], [y + 1, x], [y, x - 1], [y, x + 1]].reduce(
     (acc, [y, x]) => {
       const height = heightMap[y]?.[x];
@@ -31,7 +34,7 @@ const findLowPoints = () => {
   for (let y = 0; y < heightMap.length; y++) {
     for (let x = 0; x < heightMap[y].length; x++) {
       const height = heightMap[y][x];
-      const neighbors = getNeighbors(y, x);
+      const neighbors = getNeighbors({ y, x });
       if (neighbors.every((neighbor) => neighbor.height > height)) {
         lowPoints.push({ y, x, height });
       }
@@ -50,29 +53,28 @@ const part1 = pipe(
 );
 console.log("Part 1:", part1);
 
-const hashPoint = (y: number, x: number) => Symbol.for(`${y}:${x}`);
+const hashPoint = ({ y, x }: Coordinate) => Symbol.for(`${y}:${x}`);
 
-const searchBasin = (
-  y: number,
-  x: number,
-  basin: Set<symbol>,
+const findBasin = (
+  coord: Coordinate,
+  basin?: Set<symbol>,
 ) => {
-  basin.add(hashPoint(y, x));
-  getNeighbors(y, x).forEach(({ y, x, height }) => {
-    const p = hashPoint(y, x);
-    if (height < 9 && !basin.has(p)) {
+  if (!basin) basin = new Set();
+  basin.add(hashPoint(coord));
+  for (const neighbor of getNeighbors(coord)) {
+    const p = hashPoint(neighbor);
+    if (neighbor.height < 9 && !basin.has(p)) {
       basin.add(p);
-      searchBasin(y, x, basin);
+      findBasin(neighbor, basin);
     }
-  });
+  }
   return basin;
 };
 
 const part2 = pipe(
   heightMap,
   findLowPoints,
-  map((lowPoint) => searchBasin(lowPoint.y, lowPoint.x, new Set())),
-  map((basin) => basin.size),
+  map((point) => findBasin(point).size),
   sort((a, b) => b - a),
   take(3),
   product,
