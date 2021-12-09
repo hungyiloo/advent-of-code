@@ -26,6 +26,19 @@ export function map$<T, U>(fn: (x: T, i: number) => U) {
 }
 
 /**
+ * Yields elements mapped through a transformation function
+ */
+export function flatMap$<T, U>(fn: (x: T) => U[]) {
+  return async function* (elements$: AsyncIterableIterator<T>) {
+    for await (const element of elements$) {
+      for await (const subElement of fn(element)) {
+        yield subElement
+      }
+    }
+  };
+}
+
+/**
  * Yields a sliding window of elements of a given window size
  */
 export function slidingWindow$<T>(windowSize: number) {
