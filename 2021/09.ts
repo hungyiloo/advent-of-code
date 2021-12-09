@@ -20,9 +20,8 @@ interface Point extends Coordinate {
 const getNeighbors = ({ y, x }: Coordinate) =>
   [[y - 1, x], [y + 1, x], [y, x - 1], [y, x + 1]].reduce(
     (acc, [y, x]) => {
-      const height = heightMap[y]?.[x];
-      if (height !== undefined) {
-        acc.push({ y, x, height });
+      if (y >= 0 && y < heightMap.length && x >= 0 && x < heightMap[y].length) {
+        acc.push({ y, x, height: heightMap[y][x] });
       }
       return acc;
     },
