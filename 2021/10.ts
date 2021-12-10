@@ -1,13 +1,6 @@
-import { from, map, reduce, reverse, sort, split } from "../lib/array.ts";
+import { map, median, reduce, reverse, split, sum } from "../lib/array.ts";
 import { pipe } from "../lib/pipe.ts";
-import {
-  filter$,
-  getLines,
-  map$,
-  sum$,
-  then,
-  toArray$,
-} from "../lib/streams.ts";
+import { getLines, map$, partition$ } from "../lib/streams.ts";
 
 // Types
 type OpeningToken = "(" | "[" | "{" | "<";
@@ -69,6 +62,11 @@ const parseCode = (code: string) =>
     ),
   );
 
+const scoreSyntaxError = (state: ParseState) =>
+  state.lastChar && !isOpeningToken(state.lastChar)
+    ? syntaxScores[state.lastChar]
+    : 0;
+
 const scoreAutocomplete = (state: ParseState) =>
   pipe(
     state.stack,
@@ -79,30 +77,18 @@ const scoreAutocomplete = (state: ParseState) =>
   );
 
 // Final answers
-const part1 = await pipe(
+const [valid, invalid] = await pipe(
   getLines("10.input.txt"),
   map$(parseCode),
-  map$((s) =>
-    !s.valid && s.lastChar && !isOpeningToken(s.lastChar)
-      ? syntaxScores[s.lastChar]
-      : 0
-  ),
-  sum$,
+  partition$((s) => s.valid),
 );
-console.log("Part 1:", part1);
 
-const part2 = await pipe(
-  getLines("10.input.txt"),
-  map$(parseCode),
-  filter$((s) => s.valid),
-  map$(scoreAutocomplete),
-  toArray$,
-  then((scores) =>
-    pipe(
-      scores,
-      sort((a, b) => a - b),
-      (sortedScores) => sortedScores[Math.floor(scores.length / 2)],
-    )
-  ),
+console.log(
+  "Part 1:",
+  pipe(invalid, map(scoreSyntaxError), sum),
 );
-console.log("Part 2:", part2);
+
+console.log(
+  "Part 2:",
+  pipe(valid, map(scoreAutocomplete), median),
+);

@@ -58,43 +58,53 @@ export function reduce<T, U>(reducer: (acc: U, x: T, i: number) => U, seed: U) {
 }
 
 export function count<T>(condition?: (x: T) => boolean) {
-  if (!condition) return (elements: T[]) => elements.length
+  if (!condition) return (elements: T[]) => elements.length;
   return (elements: T[]) =>
     elements.reduce((acc, curr) => acc + (condition(curr) ? 1 : 0), 0);
 }
 
 export function sum(elements: number[]) {
-  return elements.reduce((acc, curr) => acc + curr)
+  return elements.reduce((acc, curr) => acc + curr);
 }
 
 export function product(elements: number[]) {
-  return elements.reduce((acc, curr) => acc * curr)
+  return elements.reduce((acc, curr) => acc * curr);
 }
 
 export function average(elements: number[]) {
-  return sum(elements) / elements.length
+  return sum(elements) / elements.length;
+}
+
+export function median(elements: number[]) {
+  elements = elements.sort((a, b) => a - b);
+  const half = Math.floor(elements.length / 2);
+  if (elements.length % 2) {
+    return elements[half];
+  } else {
+    return (elements[half - 1] + elements[half]) / 2.0;
+  }
 }
 
 export function join<T>(separator: string) {
-  return (elements: T[]) => elements.join(separator)
+  return (elements: T[]) => elements.join(separator);
 }
 
 export function split(separator: string | RegExp, limit?: number | undefined) {
-  return (str: string) => str.split(separator, limit)
+  return (str: string) => str.split(separator, limit);
 }
 
 export function min(nums: number[]) {
-  return Math.min(...nums)
+  return Math.min(...nums);
 }
 
 export function max(nums: number[]) {
-  return Math.max(...nums)
+  return Math.max(...nums);
 }
 
 export function reverse<T>(elements: T[]) {
-  return elements.slice().reverse()
+  return elements.slice().reverse();
 }
 
 export function from<T>(elements: Iterable<T>) {
-  return Array.from(elements)
+  return Array.from(elements);
 }
