@@ -9,9 +9,20 @@ import {
   toArray$,
 } from "../lib/streams.ts";
 
+// Types
 type OpeningToken = "(" | "[" | "{" | "<";
 type ClosingToken = ")" | "]" | "}" | ">";
 type Token = OpeningToken | ClosingToken;
+interface ParseState {
+  stack: Token[];
+  valid: boolean;
+  lastChar: null | Token;
+}
+
+// Type guard
+const isOpeningToken = (x: Token): x is OpeningToken => x in pairs;
+
+// Lookups
 const pairs: Record<OpeningToken, ClosingToken> = {
   "(": ")",
   "[": "]",
@@ -35,14 +46,7 @@ const autocompleteScores: Record<ClosingToken, number> = {
   ">": 4,
 };
 
-interface ParseState {
-  stack: Token[];
-  valid: boolean;
-  lastChar: null | Token;
-}
-
-const isOpeningToken = (x: Token): x is OpeningToken => x in pairs;
-
+// Functions
 const parseCode = (code: string) =>
   pipe(
     code,
@@ -74,6 +78,7 @@ const scoreAutocomplete = (state: ParseState) =>
     reduce((score, c) => (score * 5) + c, 0),
   );
 
+// Final answers
 const part1 = await pipe(
   getLines("10.input.txt"),
   map$(parseCode),
