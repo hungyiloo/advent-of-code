@@ -63,5 +63,7 @@ export function pipe<T, A, B, C, D, E, F, G, H>(
 ): H;
 // deno-lint-ignore no-explicit-any
 export function pipe<T>(input: T, ...ops: ((x: any) => any)[]) {
-  return ops?.reduce((result, op) => op(result), input) ?? input;
+  return ops.length > 0
+    ? ops.reduce((result, op) => op(result), input)
+    : input;
 }

@@ -41,7 +41,7 @@ export function flatMap<T, U>(fn: (x: T, i: number) => U[]) {
   return (elements: T[]) => elements.flatMap(fn);
 }
 
-export function filter<T, U>(condition: (x: T, i: number) => U) {
+export function filter<T>(condition: (x: T) => boolean) {
   return (elements: T[]) => elements.filter(condition);
 }
 
@@ -89,6 +89,10 @@ export function min(nums: number[]) {
 
 export function max(nums: number[]) {
   return Math.max(...nums)
+}
+
+export function reverse<T>(elements: T[]) {
+  return elements.reverse()
 }
 
 export function from<T>(elements: Iterable<T>) {
