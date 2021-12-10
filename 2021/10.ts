@@ -42,18 +42,17 @@ const parseCode = (code: string) =>
     reduce(
       (acc, char: string) => {
         if (!acc.valid) return acc;
-        const stack = acc.stack;
+
         if (from(reversePairs.values()).includes(char)) {
-          stack.push(char);
+          acc.stack.push(char);
         } else {
-          if (reversePairs.get(char) !== stack.pop()) {
+          if (reversePairs.get(char) !== acc.stack.pop()) {
             acc.valid = false;
           }
         }
-        return {
-          ...acc,
-          lastChar: char,
-        };
+        acc.lastChar = char;
+
+        return acc;
       },
       { stack: [], valid: true, lastChar: null } as ParseState,
     ),
@@ -65,7 +64,7 @@ const scoreAutocomplete = (state: ParseState) =>
     reverse,
     map((c) => pairs.get(c) ?? ""),
     map((c) => autocompleteScores.get(c) ?? 0),
-    reduce((score, c) => score * 5 + c, 0),
+    reduce((score, c) => (score * 5) + c, 0),
   );
 
 const part1 = await pipe(
@@ -90,4 +89,4 @@ const part2 = await pipe(
     )
   ),
 );
-console.log("Part 2", part2);
+console.log("Part 2:", part2);
