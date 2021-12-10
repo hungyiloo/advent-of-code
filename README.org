@@ -36,7 +36,7 @@ course in F# I will mostly be forced to write it that way.
 
 ** How to run each puzzle
 *deno + TypeScript*\\
-~cd 2021~\\
+~cd 2021~ \\
 ~deno run --allow-read=. 01.ts~ (replace =01= with the day number)
 
 *.NET + F#*\\
