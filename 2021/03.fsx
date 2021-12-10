@@ -28,19 +28,18 @@ let binaryToInt = fun (s: string) -> Convert.ToInt32(s, 2)
 |> Seq.reduce (*)
 |> printfn "Part 1: %A"
 
-let rec search =
-    fun (remaining: string list) (bit: int) (combinator: Combinator) ->
-        if ((List.length remaining) <= 1 || bit = bits)
-        then remaining
-        else
-            let sieve = (combinator remaining)[bit]
-            search
-                (List.filter (fun num -> num[bit] = sieve) remaining)
-                (bit + 1)
-                combinator
+let rec search (remaining: string list) (bit: int) (combinator: Combinator) =
+    if ((List.length remaining) <= 1 || bit = bits)
+    then remaining
+    else
+        let sieve = (combinator remaining)[bit]
+        search
+            (List.filter (fun num -> num[bit] = sieve) remaining)
+            (bit + 1)
+            combinator
 
-let startSearch =
-    fun (combinator: Combinator) -> (search data 0 combinator)[0] |> binaryToInt
+let startSearch (combinator: Combinator) =
+    (search data 0 combinator)[0] |> binaryToInt
 
 [startSearch majority; startSearch minority]
 |> Seq.reduce (*)
