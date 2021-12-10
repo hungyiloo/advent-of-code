@@ -46,7 +46,7 @@ export function filter<T>(condition: (x: T) => boolean) {
 }
 
 export function sort<T>(compareFn?: (a: T, b: T) => number) {
-  return (elements: T[]) => elements.sort(compareFn);
+  return (elements: T[]) => elements.slice().sort(compareFn);
 }
 
 export function take<T>(count: number) {
@@ -92,7 +92,7 @@ export function max(nums: number[]) {
 }
 
 export function reverse<T>(elements: T[]) {
-  return elements.reverse()
+  return elements.slice().reverse()
 }
 
 export function from<T>(elements: Iterable<T>) {

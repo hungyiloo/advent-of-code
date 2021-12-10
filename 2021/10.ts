@@ -9,46 +9,53 @@ import {
   toArray$,
 } from "../lib/streams.ts";
 
-const pairs = new Map([
-  ["(", ")"],
-  ["[", "]"],
-  ["{", "}"],
-  ["<", ">"],
-]);
-const reversePairs = new Map(from(pairs.entries()).map(([a, b]) => [b, a]));
-const syntaxScores = new Map<string | null, number>([
-  [")", 3],
-  ["]", 57],
-  ["}", 1197],
-  [">", 25137],
-]);
-const autocompleteScores = new Map<string | null, number>([
-  [")", 1],
-  ["]", 2],
-  ["}", 3],
-  [">", 4],
-]);
+type OpeningToken = "(" | "[" | "{" | "<";
+type ClosingToken = ")" | "]" | "}" | ">";
+type Token = OpeningToken | ClosingToken;
+const pairs: Record<OpeningToken, ClosingToken> = {
+  "(": ")",
+  "[": "]",
+  "{": "}",
+  "<": ">",
+};
+const reversePairs = Object.entries(pairs).reduce(
+  (acc, [k, v]) => ({ ...acc, [v]: k }),
+  {} as Record<ClosingToken, OpeningToken>,
+);
+const syntaxScores: Record<ClosingToken, number> = {
+  ")": 3,
+  "]": 57,
+  "}": 1197,
+  ">": 25137,
+};
+const autocompleteScores: Record<ClosingToken, number> = {
+  ")": 1,
+  "]": 2,
+  "}": 3,
+  ">": 4,
+};
 
 interface ParseState {
-  stack: string[];
+  stack: Token[];
   valid: boolean;
-  lastChar: null | string;
+  lastChar: null | Token;
 }
+
+const isOpeningToken = (x: Token): x is OpeningToken => x in pairs;
 
 const parseCode = (code: string) =>
   pipe(
     code,
     split(""),
+    (s) => s as Token[],
     reduce(
-      (acc, char: string) => {
+      (acc, char) => {
         if (!acc.valid) return acc;
 
-        if (from(reversePairs.values()).includes(char)) {
+        if (isOpeningToken(char)) {
           acc.stack.push(char);
-        } else {
-          if (reversePairs.get(char) !== acc.stack.pop()) {
-            acc.valid = false;
-          }
+        } else if (reversePairs[char] !== acc.stack.pop()) {
+          acc.valid = false;
         }
         acc.lastChar = char;
 
@@ -60,17 +67,21 @@ const parseCode = (code: string) =>
 
 const scoreAutocomplete = (state: ParseState) =>
   pipe(
-    state.stack.slice(),
+    state.stack,
     reverse,
-    map((c) => pairs.get(c) ?? ""),
-    map((c) => autocompleteScores.get(c) ?? 0),
+    map((c) => isOpeningToken(c) ? pairs[c] : undefined),
+    map((c) => c ? autocompleteScores[c] : 0),
     reduce((score, c) => (score * 5) + c, 0),
   );
 
 const part1 = await pipe(
   getLines("10.input.txt"),
   map$(parseCode),
-  map$((s) => s.valid ? 0 : syntaxScores.get(s.lastChar) ?? 0),
+  map$((s) =>
+    !s.valid && s.lastChar && !isOpeningToken(s.lastChar)
+      ? syntaxScores[s.lastChar]
+      : 0
+  ),
   sum$,
 );
 console.log("Part 1:", part1);
