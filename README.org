@@ -1,9 +1,46 @@
-* Advent of Code with deno
-This year I felt like doing [[https://adventofcode.com/][Advent of Code]] using TypeScript and [[https://deno.land/][deno]]. Let's hope I have the motivation to do it all, for once.
+#+begin_example
+          *             ,
+                       _/^\_
+                      <     >
+     *                 /.-.\         *
+              *        `/&\`                   *
+                      ,@.*;@,
+                     /_o.I %_\    *
+        *           (`'--:o(_@;
+                   /`;--.,__ `')             *
+                  ;@`o % O,*`'`&\
+            *    (`'--)_@ ;o %'()\      *
+                 /`;--._`''--._O'@;
+                /&*,()~o`;-.,_ `""`)
+     *          /`,@ ;+& () o*`;-';\
+               (`""--.,_0 +% @' &()\
+               /-.,_    ``''--....-'`)  *
+          *    /@%;o`:;'--,.__   __.'\
+              ;*,&(); @ % &^;~`"`o;@();         *
+              /(); o^~; & ().o@*&`;&%O\
+        jgs   `"="==""==,,,.,="=="==="`
+           __.----.(\-''#####---...___...-----._
+         '`         \)_`"""""`
+                 .--' ')
+               o(  )_-\
+#+end_example
 
-** How to run
+* Hung-Yi's AoC fun with deno + F#
+This year (2021) I felt like doing [[https://adventofcode.com/][Advent of Code]] using TypeScript and [[https://deno.land/][deno]]. I'm
+also playing around with F#. Let's hope I have the motivation to do it all, for
+once.
+
+I'm trying to write most of it in a functional and declarative style where I am
+able, just to test the limits of what I can do from scratch in TypeScript. Of
+course in F#, I will mostly be forced to write it that way.
+
+** How to run each puzzle
+deno + TypeScript:
 - ~cd 2021~
 - ~deno run --allow-read=. 01.ts~ (replace =01= with the day number)
 
-** Don't have deno installed?
-Follow the [[https://deno.land/#installation][official instructions]].
+.NET + F#:
+- ~dotnet fsi 2021/01.fsx~ (replace =01= with the day number)
+
+** Don't have deno or F# installed?
+Follow the official instructions [[https://deno.land/#installation][for deno]] or [[https://dotnet.microsoft.com/en-us/download][for .NET]].
