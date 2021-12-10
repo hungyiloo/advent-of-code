@@ -35,11 +35,11 @@ able, just to test the limits of what I can do from scratch in TypeScript. Of
 course in F# I will mostly be forced to write it that way.
 
 ** How to run each puzzle
-*deno + TypeScript*
-~cd 2021~
+*deno + TypeScript*\\
+~cd 2021~\\
 ~deno run --allow-read=. 01.ts~ (replace =01= with the day number)
 
-*.NET + F#*
+*.NET + F#*\\
 ~dotnet fsi 2021/01.fsx~ (replace =01= with the day number)
 
 ** Don't have deno or F# installed?
