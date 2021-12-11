@@ -1,8 +1,8 @@
 open System.IO
 
 type OctopusState =
-    | Flashed of int
     | Dormant of int
+    | Flashed
 
 let octopuses =
     File.ReadAllLines "11.input.txt"
@@ -43,7 +43,7 @@ let flashAll (grid: OctopusState [,]) =
             grid
             |> Array2D.mapi (fun x' y' n ->
                 match n with
-                | Dormant n when x' = x && y' = y -> Flashed n
+                | Dormant n when x' = x && y' = y -> Flashed
                 | Dormant n when Seq.contains (x', y') neighbors -> Dormant(n + 1)
                 | _ -> n)
             |> (fun grid -> Seq.fold (fun acc curr -> flashPoint curr acc) grid neighbors)
@@ -58,14 +58,14 @@ let countFlashed (grid: OctopusState [,]) =
     |> flatMap2D (fun x y _ -> (x, y))
     |> Seq.map (fun (x, y) ->
                 match grid[x, y] with
-                | Flashed _ -> 1
+                | Flashed -> 1
                 | _ -> 0)
     |> Seq.sum
 
 let reconcile (grid: OctopusState [,]) =
     grid |> Array2D.map
         (function
-        | Flashed _ -> Dormant 0
+        | Flashed -> Dormant 0
         | n -> n)
 
 let step grid =
