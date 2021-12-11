@@ -9,14 +9,12 @@ let bits = data |> Seq.head |> Array.length
 type Combinator = char array seq -> char array
 
 let majority: Combinator =
-    Seq.map (fun s -> Array.map (function '1' -> 1 | _ -> -1) (Seq.toArray s))
+    Seq.map (fun s -> Array.map (function '1' -> 1 | _ -> -1) s)
     >> Seq.reduce (fun acc curr -> Array.map2 (+) acc curr)
     >> Array.map (fun s -> if s >= 0 then '1' else '0')
 
 let minority: Combinator =
-    majority
-    >> Seq.toArray
-    >> Array.map (function '0' -> '1' | _ -> '0')
+    majority >> Array.map (function '0' -> '1' | _ -> '0')
 
 let binCharsToInt (s: char array) = Convert.ToInt32(String s, 2)
 
