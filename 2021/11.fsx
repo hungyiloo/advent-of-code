@@ -29,12 +29,13 @@ let flatMap2D mapping a =
               for y in [0..(Array2D.length2 a) - 1] do
                   yield mapping x y a[x,y] }
 
-let increment (grid: OctopusState [,]) =
-    grid |> Array2D.map (function
+let incrementEnergy (grid: OctopusState [,]) =
+    grid |> Array2D.map
+        (function
         | Dormant n -> Dormant (n + 1)
         | n -> n)
 
-let flash (grid: OctopusState [,]) =
+let flashAll (grid: OctopusState [,]) =
     let rec flashPoint (x, y) (grid: OctopusState [,]) =
         match grid[x, y] with
         | Dormant n when n > 9 ->
@@ -62,31 +63,32 @@ let countFlashed (grid: OctopusState [,]) =
     |> Seq.sum
 
 let reconcile (grid: OctopusState [,]) =
-    grid |> Array2D.map (function
+    grid |> Array2D.map
+        (function
         | Flashed _ -> Dormant 0
         | n -> n)
 
 let step grid =
-    let afterFlash = grid |> increment |> flash
+    let afterFlash = grid |> incrementEnergy |> flashAll
     let flashCount = afterFlash |> countFlashed
     (afterFlash |> reconcile, flashCount)
 
 let simulate n =
     [0..n-1]
     |> Seq.fold
-        (fun (grid, total) _ ->
+        (fun (grid, totalFlashCount) _ ->
          let grid, stepFlashCount = step grid
-         (grid, total + stepFlashCount))
+         (grid, totalFlashCount + stepFlashCount))
         (octopuses, 0)
-    |> (fun (_, totalFlashCount) -> totalFlashCount)
+    |> snd
 
 let synchronize() =
     let rec stepUntilSync (grid, flashes) steps =
         if flashes = pown gridSize 2
         then (grid, flashes, steps)
         else stepUntilSync (step grid) (steps + 1)
-    stepUntilSync (octopuses, 0) 0
-    |> (fun (_, _, steps) -> steps)
+
+    stepUntilSync (octopuses, 0) 0 |> (fun (_, _, steps) -> steps)
 
 simulate 100 |> printfn "Part 1: %A"
 synchronize() |> printfn "Part 2: %A"
