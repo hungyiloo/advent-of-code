@@ -17,7 +17,7 @@ let majority: Combinator =
 let minority: Combinator =
     majority
     >> Seq.toArray
-    >> Array.map (fun c -> if c = '0' then '1' else '0')
+    >> Array.map (function '0' -> '1' | _ -> '0')
     >> String
 
 let binaryToInt (s: string) = Convert.ToInt32(s, 2)
