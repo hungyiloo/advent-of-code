@@ -29,11 +29,7 @@ let flatMap2D mapping a =
               for y in [0..(Array2D.length2 a) - 1] do
                   yield mapping x y a[x,y] }
 
-let incrementEnergy (grid: OctopusState [,]) =
-    grid |> Array2D.map
-        (function
-        | Dormant n -> Dormant (n + 1)
-        | n -> n)
+let incrementEnergy = Array2D.map (function | Dormant n -> Dormant (n + 1) | n -> n)
 
 let flashAll (grid: OctopusState [,]) =
     let rec flashPoint (x, y) (grid: OctopusState [,]) =
@@ -43,7 +39,7 @@ let flashAll (grid: OctopusState [,]) =
             grid
             |> Array2D.mapi (fun x' y' n ->
                 match n with
-                | Dormant n when x' = x && y' = y -> Flashed
+                | Dormant _ when x' = x && y' = y -> Flashed
                 | Dormant n when Seq.contains (x', y') neighbors -> Dormant(n + 1)
                 | _ -> n)
             |> (fun grid -> Seq.fold (fun acc curr -> flashPoint curr acc) grid neighbors)
@@ -53,20 +49,9 @@ let flashAll (grid: OctopusState [,]) =
     |> flatMap2D (fun x y _ -> (x, y))
     |> Seq.fold (fun acc curr -> flashPoint curr acc) grid
 
-let countFlashed (grid: OctopusState [,]) =
-    grid
-    |> flatMap2D (fun x y _ -> (x, y))
-    |> Seq.map (fun (x, y) ->
-                match grid[x, y] with
-                | Flashed -> 1
-                | _ -> 0)
-    |> Seq.sum
+let countFlashed = flatMap2D (fun _ _ n -> match n with | Flashed -> 1 | _ -> 0) >> Seq.sum
 
-let reconcile (grid: OctopusState [,]) =
-    grid |> Array2D.map
-        (function
-        | Flashed -> Dormant 0
-        | n -> n)
+let reconcile = Array2D.map (function | Flashed -> Dormant 0 | n -> n)
 
 let step grid =
     let afterFlash = grid |> incrementEnergy |> flashAll
