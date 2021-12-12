@@ -1,0 +1,15 @@
+# top-most EditorConfig file
+root = true
+
+[*]
+insert_final_newline = true
+
+[*.{js,ts,tsx,jsx,json}]
+charset = utf-8
+indent_style = space
+indent_size = 2
+
+[*.{fs,fsx}]
+charset = utf-8
+indent_style = space
+indent_size = 4
