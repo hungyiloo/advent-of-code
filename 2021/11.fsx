@@ -53,25 +53,20 @@ let countFlashed = flatMap2D (fun _ _ n -> match n with | Flashed -> 1 | _ -> 0)
 
 let reconcile = Array2D.map (function | Flashed -> Dormant 0 | n -> n)
 
-let step grid =
+let step (grid, flashes) =
     let afterFlash = grid |> incrementEnergy |> flashAll
-    let flashCount = afterFlash |> countFlashed
-    (afterFlash |> reconcile, flashCount)
+    let stepFlashes = afterFlash |> countFlashed
+    (afterFlash |> reconcile, flashes + stepFlashes)
 
 let simulate n =
-    [0..n-1]
-    |> Seq.fold
-        (fun (grid, totalFlashCount) _ ->
-         let grid, stepFlashCount = step grid
-         (grid, totalFlashCount + stepFlashCount))
-        (octopuses, 0)
-    |> snd
+    let nSteps = Seq.replicate n step |> Seq.reduce (>>)
+    nSteps (octopuses, 0) |> snd
 
 let synchronize() =
     let rec stepUntilSync (grid, flashes) steps =
         if flashes = pown gridSize 2
         then (grid, flashes, steps)
-        else stepUntilSync (step grid) (steps + 1)
+        else stepUntilSync (step (grid, 0)) (steps + 1)
 
     stepUntilSync (octopuses, 0) 0 |> (fun (_, _, steps) -> steps)
 
