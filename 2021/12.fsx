@@ -1,6 +1,8 @@
+#load "../lib/Memoization.fsx"
+
 open System.IO
 open System
-open System.Collections.Generic
+open Memoization
 
 type Cave =
     | Start
@@ -22,16 +24,6 @@ let parseLink (line: string) =
     | line -> failwith (sprintf "Invalid link line %A" line)
 
 let links = File.ReadAllLines "12.input.txt" |> Seq.map parseLink
-
-let memoize fn =
-    let cache = new Dictionary<_,_>()
-    (fun x ->
-        match cache.TryGetValue x with
-        | true, v -> v
-        | false, _ ->
-            let v = fn x
-            cache.Add(x, v)
-            v)
 
 let getAdjacentCaves =
     memoize (fun n ->
