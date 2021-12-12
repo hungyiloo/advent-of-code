@@ -56,8 +56,9 @@ let pathfinder1 walked n =
 
 let canVisitTwice walked =
     walked
-    |> Seq.countBy (function | Small n -> Some n | _ -> None)
-    |> Seq.exists (fun (id, count) -> match id with | Some _ -> count >= 2 | None -> false)
+    |> Seq.choose (function | Small n -> Some n | _ -> None)
+    |> Seq.countBy id
+    |> Seq.exists (fun (_, count) -> count >= 2)
     |> not
 
 let pathfinder2 walked n =
