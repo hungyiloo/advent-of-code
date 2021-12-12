@@ -30,12 +30,12 @@ let rec walk pathFinder walked  =
         let next =
             links
             |> Seq.fold
-                (fun acc l ->
+                (fun acc link ->
                     let maybeWalk n =
                         match pathFinder walked n with
                         | Some n -> n :: acc
                         | None -> acc
-                    match l with
+                    match link with
                     | a, b when a = cave -> maybeWalk b
                     | a, b when b = cave -> maybeWalk a
                     | _ -> acc)
