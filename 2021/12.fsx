@@ -44,18 +44,18 @@ let getAdjacentCaves =
                 | _ -> acc)
             [])
 
-let rec walk pathFinder walked  =
+let rec walk pathfinder walked  =
     match walked with
-    | [] -> walk pathFinder [Start]
+    | [] -> walk pathfinder [Start]
     | End::_ -> 1 // return [walked] for tracing
     | cave::_ ->
-        let next = getAdjacentCaves cave |> List.filter (pathFinder walked)
+        let next = getAdjacentCaves cave |> List.filter (pathfinder walked)
 
         if Seq.isEmpty next
         then 0 // return [] for tracing
         else
             next
-            |> List.map (fun n -> walk pathFinder (n :: walked))
+            |> List.map (fun n -> walk pathfinder (n :: walked))
             |> List.sum // return List.concat for tracing
 
 let pathfinder1 walked n =
