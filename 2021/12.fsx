@@ -60,7 +60,7 @@ let rec walk pathFinder walked  =
 
 let pathfinder1 walked n =
     match n with
-    | Small _ when not (Seq.contains n walked) -> true
+    | Small _ -> not (Seq.contains n walked)
     | Big _ | End -> true
     | _ -> false
 
@@ -72,7 +72,7 @@ let canStillVisitTwice  =
 
 let pathfinder2 walked n =
     match n with
-    | Small _ when (canStillVisitTwice walked) || not (Seq.contains n walked) -> true
+    | Small _ -> canStillVisitTwice walked || not (Seq.contains n walked)
     | Big _ | End -> true
     | _ -> false
 
