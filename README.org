@@ -30,10 +30,10 @@ This year (2021) I felt like doing [[https://adventofcode.com/][Advent of Code]]
 also playing around with (a.k.a learning) F#. Let's hope I have the motivation
 to do all 25 puzzles, for once.
 
-I'm trying to write most of it in a functional, declarative and (mostly) pure
-style where I am able, just to test the limits of what I can do from scratch in
-TypeScript. Of course in F# I will mostly be forced to write it that way, unless
-I want to commit grave sins.
+I'm trying to write most of it in a functional, declarative and pure style where
+I am able, just to test the limits of what I can do from scratch in TypeScript.
+Of course in F# I will mostly be forced to write it that way, unless I want to
+commit grave sins.
 
 ** How to run each puzzle
 deno + TypeScript
