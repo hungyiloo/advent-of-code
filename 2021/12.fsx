@@ -9,7 +9,8 @@ type Cave =
 
 type Link = Cave * Cave
 
-let parseCave = function
+let parseCave =
+    function
     | "start" -> Start
     | "end" -> End
     | id when Seq.forall Char.IsUpper id -> Big id
@@ -18,32 +19,54 @@ let parseCave = function
 
 let parseLink (line: string) =
     match line.Split("-") with
-    | [|a; b|] -> (parseCave a, parseCave b)
+    | [| a; b |] -> (parseCave a, parseCave b)
     | line -> failwith (sprintf "Invalid link line %A" line)
 
 let links = File.ReadAllLines "12.input.txt" |> Seq.map parseLink
 
-let rec walk (walked: Cave list) cave =
-    let next =
-        links
-        |> Seq.fold
-            (fun acc l ->
-            match l with
-            | a, b when a = cave ->
-                match b with
-                | Small _ when not (Seq.contains b walked) -> b::acc
-                | Big _ | End -> b::acc
-                | _ -> acc
-            | a, b when b = cave ->
-                match a with
-                | Small _ when not (Seq.contains a walked) -> a::acc
-                | Big _ | End -> a::acc
-                | _ -> acc
-            | _ -> acc)
-            []
-    match next, cave with
-    | _, End -> [cave::walked]
-    | [], _ -> []
-    | _ -> next |> List.map (fun n -> walk (cave::walked) n) |> List.concat
+let rec walk pathFinder walked cave =
+    match cave with
+    | End -> 1 // return [walked] for tracing
+    | _ ->
+        let next =
+            links
+            |> Seq.fold
+                (fun acc l ->
+                    let maybeWalk n =
+                        match pathFinder walked n with
+                        | Some n -> n :: acc
+                        | None -> acc
+                    match l with
+                    | a, b when a = cave -> maybeWalk b
+                    | a, b when b = cave -> maybeWalk a
+                    | _ -> acc)
+                []
+            |> List.distinct
 
-printfn "Part 1: %A" (walk [] Start |> Seq.length)
+        match next with
+        | [] -> 0 // return [] for tracing
+        | _ ->
+            next
+            |> List.map (fun n -> walk pathFinder (n :: walked) n)
+            |> List.sum // return List.concat for tracing
+
+let pathfinder1 walked n =
+    match n with
+    | Small _ when not (Seq.contains n walked) -> Some n
+    | Big _ | End -> Some n
+    | _ -> None
+
+let canVisitTwice walked =
+    walked
+    |> Seq.countBy (function | Small n -> Some n | _ -> None)
+    |> Seq.exists (fun (id, count) -> match id with | Some _ -> count >= 2 | None -> false)
+    |> not
+
+let pathfinder2 walked n =
+    match n with
+    | Small _ when (canVisitTwice walked) || not (Seq.contains n walked) -> Some n
+    | Big _ | End -> Some n
+    | _ -> None
+
+printfn "Part 1: %A" (walk pathfinder1 [] Start)
+printfn "Part 2: %A" (walk pathfinder2 [] Start)

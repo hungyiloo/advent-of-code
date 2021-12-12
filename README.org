@@ -40,7 +40,8 @@ deno + TypeScript
 2. ~deno run --allow-read=. 01.ts~ (replace =01= with the day number)
 
 .NET + F#*
-1. ~dotnet fsi 2021/01.fsx~ (replace =01= with the day number)
+1. ~cd 2021~
+2. ~dotnet fsi 01.fsx~ (replace =01= with the day number)
 
 ** Don't have deno or F# installed?
 Follow the official instructions [[https://deno.land/#installation][for deno]] or [[https://dotnet.microsoft.com/en-us/download][for .NET]].
