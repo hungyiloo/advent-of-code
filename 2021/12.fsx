@@ -7,8 +7,6 @@ type Cave =
     | Big of string
     | Small of string
 
-type Link = Cave * Cave
-
 let parseCave =
     function
     | "start" -> Start
@@ -24,10 +22,11 @@ let parseLink (line: string) =
 
 let links = File.ReadAllLines "12.input.txt" |> Seq.map parseLink
 
-let rec walk pathFinder walked cave =
-    match cave with
-    | End -> 1 // return [walked] for tracing
-    | _ ->
+let rec walk pathFinder walked  =
+    match walked with
+    | [] -> walk pathFinder [Start]
+    | End::_ -> 1 // return [walked] for tracing
+    | cave::_ ->
         let next =
             links
             |> Seq.fold
@@ -43,11 +42,11 @@ let rec walk pathFinder walked cave =
                 []
             |> List.distinct
 
-        match next with
-        | [] -> 0 // return [] for tracing
-        | _ ->
+        if Seq.isEmpty next
+        then 0 // return [] for tracing
+        else
             next
-            |> List.map (fun n -> walk pathFinder (n :: walked) n)
+            |> List.map (fun n -> walk pathFinder (n :: walked))
             |> List.sum // return List.concat for tracing
 
 let pathfinder1 walked n =
@@ -68,5 +67,5 @@ let pathfinder2 walked n =
     | Big _ | End -> Some n
     | _ -> None
 
-printfn "Part 1: %A" (walk pathfinder1 [] Start)
-printfn "Part 2: %A" (walk pathfinder2 [] Start)
+printfn "Part 1: %A" (walk pathfinder1 [])
+printfn "Part 2: %A" (walk pathfinder2 [])
