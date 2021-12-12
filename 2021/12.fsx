@@ -44,9 +44,10 @@ let getAdjacentCaves =
                 | _ -> acc)
             [])
 
-let rec walk pathfinder walked  =
+let rec walk pathfinder walked n  =
+    let walked = n :: walked
     match walked with
-    | [] -> walk pathfinder [Start]
+    | [] -> walk pathfinder [] Start
     | End::_ -> 1 // return [walked] for tracing
     | cave::_ ->
         let next = getAdjacentCaves cave |> List.filter (pathfinder walked)
@@ -55,7 +56,7 @@ let rec walk pathfinder walked  =
         then 0 // return [] for tracing
         else
             next
-            |> List.map (fun n -> walk pathfinder (n :: walked))
+            |> List.map (walk pathfinder walked)
             |> List.sum // return List.concat for tracing
 
 let pathfinder1 walked n =
@@ -76,5 +77,5 @@ let pathfinder2 walked n =
     | Big _ | End -> true
     | _ -> false
 
-printfn "Part 1: %A" (walk pathfinder1 [])
-printfn "Part 2: %A" (walk pathfinder2 [])
+printfn "Part 1: %A" (walk pathfinder1 [] Start)
+printfn "Part 2: %A" (walk pathfinder2 [] Start)
