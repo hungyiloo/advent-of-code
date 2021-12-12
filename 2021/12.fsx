@@ -40,7 +40,6 @@ let rec walk pathFinder walked  =
                     | a, b when b = cave -> maybeWalk a
                     | _ -> acc)
                 []
-            |> List.distinct
 
         if Seq.isEmpty next
         then 0 // return [] for tracing
