@@ -51,7 +51,6 @@ let rec walk pathfinder walked n  =
     | End::_ -> 1 // return [walked] for tracing
     | cave::_ ->
         let next = getAdjacentCaves cave |> List.filter (pathfinder walked)
-
         if Seq.isEmpty next
         then 0 // return [] for tracing
         else
