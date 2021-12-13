@@ -48,7 +48,7 @@ let plot dots =
             (maxY + 1)
             (fun x y -> if Set.contains (x, y) dotSet then '█' else ' ')
     [0..maxY]
-    |> List.map (fun y -> String.Join("", output[*, y]))
+    |> List.map (fun y -> String output[*, y])
     |> (fun rows -> String.Join("\n", rows))
 
 origami dots (Seq.take 1 folds)
