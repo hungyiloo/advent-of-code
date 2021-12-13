@@ -1,1 +1,3 @@
 /.ionide/
+**.fake
+**.fsx.lock

@@ -27,8 +27,8 @@ let rec search (remaining: char array seq) (bit: int) (combinator: Combinator) =
     if (Seq.length remaining) <= 1 || bit = bits
     then remaining
     else
-        let sieve = (combinator remaining)[bit]
-        search (Seq.filter (fun s -> s[bit] = sieve) remaining) (bit + 1) combinator
+        let sieve = (combinator remaining).[bit]
+        search (Seq.filter (fun s -> s.[bit] = sieve) remaining) (bit + 1) combinator
 
 let startSearch (combinator: Combinator) =
     (search data 0 combinator) |> Seq.head |> binCharsToInt

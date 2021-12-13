@@ -27,13 +27,13 @@ let getNeighbors (x, y) =
 let flatMap2D mapping a =
     seq { for x in [0..(Array2D.length1 a) - 1] do
               for y in [0..(Array2D.length2 a) - 1] do
-                  yield mapping x y a[x,y] }
+                  yield mapping x y a.[x,y] }
 
 let incrementEnergy = Array2D.map (function | Dormant n -> Dormant (n + 1) | n -> n)
 
 let flashAll (grid: OctopusState [,]) =
     let rec flashPoint (x, y) (grid: OctopusState [,]) =
-        match grid[x, y] with
+        match grid.[x, y] with
         | Dormant n when n > 9 ->
             let neighbors = getNeighbors (x, y)
             grid
