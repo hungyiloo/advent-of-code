@@ -41,8 +41,12 @@ let origami dots folds =
 let plot dots =
     let maxX = dots |> Seq.map fst |> Seq.max
     let maxY = dots |> Seq.map snd |> Seq.max
-    let output = Array2D.create (maxX + 1) (maxY + 1) ' '
-    dots |> Seq.iter (fun (x, y) -> Array2D.set output x y '█')
+    let dotSet = Set.ofSeq dots
+    let output =
+        Array2D.init
+            (maxX + 1)
+            (maxY + 1)
+            (fun x y -> if Set.contains (x, y) dotSet then '█' else ' ')
     [0..maxY]
     |> List.map (fun y -> String.Join("", output[*, y]))
     |> (fun rows -> String.Join("\n", rows))
