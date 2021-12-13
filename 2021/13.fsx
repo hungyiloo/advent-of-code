@@ -11,9 +11,9 @@ let dots, folds =
         (fun (dots, folds) line ->
             match line.Split([| ','; '=' |]) with
             | [| "fold along x"; position |] -> dots, Vertical (int position) :: folds
-            | [| "fold along y"; position |]-> dots, Horizontal (int position) :: folds
-            | [| x; y |] -> (int x, int y)::dots, folds
-            | _ -> dots, folds)
+            | [| "fold along y"; position |] -> dots, Horizontal (int position) :: folds
+            | [| x; y |]                     -> (int x, int y)::dots, folds
+            | _                              -> dots, folds)
         ([], [])
     |> (fun (dots, folds) -> dots, folds |> List.rev)
 
