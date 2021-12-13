@@ -1,31 +1,31 @@
 open System.IO
 open System
 
-let parseDot (line: string) =
-    match line.Split(',') with
-    | [| a; b |] -> Some(int a, int b)
-    | _ -> None
-
 type Line =
     | Vertical of int
     | Horizontal of int
 
-let parseLine (line: string) =
-    match line.Split('=') with
-    | [| "fold along x"; a |] -> a |> int |> Vertical |> Some
-    | [| "fold along y"; a |] -> a |> int |> Horizontal |> Some
-    | _ -> None
+let lines = File.ReadAllLines "13.input.txt"
 
 let dots =
-    File.ReadAllLines "13.input.txt"
-    |> Seq.choose parseDot
-
-let lines =
-    File.ReadAllLines "13.input.txt"
-    |> Seq.choose parseLine
-
-let origami dots lines =
     lines
+    |> Seq.choose
+        (fun line ->
+            match line.Split(',') with
+            | [| a; b |] -> Some(int a, int b)
+            | _ -> None)
+
+let folds =
+    lines
+    |> Seq.choose
+        (fun line ->
+            match line.Split('=') with
+            | [| "fold along x"; a |] -> a |> int |> Vertical |> Some
+            | [| "fold along y"; a |] -> a |> int |> Horizontal |> Some
+            | _ -> None)
+
+let origami dots folds =
+    folds
     |> Seq.fold
         (fun acc curr ->
             let foldOperation =
@@ -45,12 +45,12 @@ let plot dots =
     dots |> Seq.iter (fun (x, y) -> Array2D.set output x y '█')
     [0..maxY]
     |> List.map (fun y -> String.Join("", output[*, y]))
-    |> (fun lines -> String.Join("\n", lines))
+    |> (fun rows -> String.Join("\n", rows))
 
-origami dots (Seq.take 1 lines)
+origami dots (Seq.take 1 folds)
 |> Seq.length
 |> printfn "Part 1: %A"
 
-origami dots lines
+origami dots folds
 |> plot
 |> printfn "Part 2:\n%s"
