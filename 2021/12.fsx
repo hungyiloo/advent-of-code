@@ -19,7 +19,7 @@ let parseCave =
     | id -> failwith (sprintf "Invalid cave identifier %A" id)
 
 let parseLink (line: string) =
-    match line.Split("-") with
+    match line.Split('-') with
     | [| a; b |] -> (parseCave a, parseCave b)
     | line -> failwith (sprintf "Invalid link line %A" line)
 

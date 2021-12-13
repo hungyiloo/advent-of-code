@@ -1,7 +1,7 @@
 open System.IO
 
 let (|Forward|Up|Down|) (line: string) =
-    match line.Split(" ") with
+    match line.Split(' ') with
     | [| "forward"; x |] -> Forward (int x)
     | [| "up"; x |] -> Up (int x)
     | [| "down"; x |] -> Down (int x)
