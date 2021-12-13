@@ -28,11 +28,13 @@ let origami dots lines =
     lines
     |> Seq.fold
         (fun acc curr ->
-            Seq.map
-                (match curr with
-                 | Horizontal dividerY -> (fun (x, y) -> x, (if y > dividerY then 2*dividerY - y else y))
-                 | Vertical dividerX -> (fun (x, y) -> (if x > dividerX then 2*dividerX - x else x), y))
-                acc)
+            let foldOperation =
+                match curr with
+                 | Horizontal dividerY ->
+                    (fun (x, y) -> x, (if y > dividerY then 2*dividerY - y else y))
+                 | Vertical dividerX ->
+                    (fun (x, y) -> (if x > dividerX then 2*dividerX - x else x), y)
+            Seq.map foldOperation acc)
         dots
     |> Seq.distinct
 
