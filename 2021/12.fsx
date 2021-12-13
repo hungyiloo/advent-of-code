@@ -56,11 +56,12 @@ let pathfinder1 walked n =
     | Big _ | End -> true
     | _ -> false
 
-let canStillVisitTwice  =
-    Seq.choose (function | Small n -> Some n | _ -> None)
-    >> Seq.countBy id
-    >> Seq.exists (fun (_, count) -> count >= 2)
-    >> not
+let canStillVisitTwice walked =
+    walked
+    |> Seq.choose (function | Small n -> Some n | _ -> None)
+    |> Seq.countBy id
+    |> Seq.exists (fun (_, count) -> count >= 2)
+    |> not
 
 let pathfinder2 walked n =
     match n with
