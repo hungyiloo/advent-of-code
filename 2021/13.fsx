@@ -5,22 +5,14 @@ type Fold =
     | Vertical of int
     | Horizontal of int
 
-let (|SplitLine|_|) (separator: char) (line: string) =
-    match line.Split(separator) with
-    | [| left; right |] -> Some (left, right)
-    | _ -> None
-
 let dots, folds =
     File.ReadLines "13.input.txt"
     |> Seq.fold
         (fun (dots, folds) line ->
-            match line with
-            | SplitLine ',' (x, y) -> (int x, int y)::dots, folds
-            | SplitLine '=' (direction, position) ->
-                match direction with
-                | "fold along x" -> dots, Vertical (int position) :: folds
-                | "fold along y" -> dots, Horizontal (int position) :: folds
-                | _ -> dots,folds
+            match line.Split([| ','; '=' |]) with
+            | [| "fold along x"; position |] -> dots, Vertical (int position) :: folds
+            | [| "fold along y"; position |]-> dots, Horizontal (int position) :: folds
+            | [| x; y |] -> (int x, int y)::dots, folds
             | _ -> dots, folds)
         ([], [])
     |> (fun (dots, folds) -> dots, folds |> List.rev)
