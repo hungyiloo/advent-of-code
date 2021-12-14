@@ -22,7 +22,7 @@ let template, rules =
 let regroupCountBy (counts: seq<'a * int64>) =
   counts
   |> Seq.groupBy fst
-  |> Seq.map (fun (p, partialCounts) -> p, Seq.sumBy snd partialCounts)
+  |> Seq.map (fun (key, partialCounts) -> key, Seq.sumBy snd partialCounts)
 
 let step rules template =
   template
