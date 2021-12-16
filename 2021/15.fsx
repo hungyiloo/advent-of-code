@@ -36,15 +36,15 @@ let dijkstra grid multiplier =
     let y' = y % gridCols
     ((grid.[x', y'] + (x / gridRows) + (y / gridCols) - 1) % 9) + 1
 
-  let best (nodes: Node list) = nodes |> Seq.minBy (fun (Node(_, cost)) -> cost)
+  let bestOf (nodes: Node list) = nodes |> Seq.minBy (fun (Node(_, cost)) -> cost)
 
-  let expand nodes at =
+  let explore nodes at =
     ([], nodes)
     ||> Seq.fold
       (fun acc node ->
         match node with
-        | Node (n, cost) when n = at ->
-          match getNeighbors n with
+        | Node (coord, cost) when coord = at ->
+          match getNeighbors coord with
           | [] -> acc
           | neighbors ->
             (acc, neighbors)
@@ -55,15 +55,12 @@ let dijkstra grid multiplier =
         | _ -> node::acc)
 
   let rec search nodes =
-    let (Node(bestCoord, bestCost)) = best nodes
+    let (Node(bestCoord, bestCost)) = bestOf nodes
     if bestCoord = goal
     then bestCost
-    else
-      search (expand nodes bestCoord)
+    else search (explore nodes bestCoord)
 
   search [Node(start, 0)]
 
 dijkstra input 1 |> printfn "Part 1: %A"
-#time "on"
 dijkstra input 5 |> printfn "Part 2: %A"
-#time "off"
