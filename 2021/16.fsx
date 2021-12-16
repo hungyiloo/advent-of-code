@@ -3,14 +3,23 @@ open System.Linq
 open System.Collections
 open System.IO
 
+type Operation = int64 list -> int64
+
 type TypeId =
   | Literal
-  | Operator of int
+  | Operator of Operation
 
 let (|TypeId|) x =
   match x with
   | 4 -> Literal
-  | n -> Operator n
+  | 0 -> Operator Seq.sum
+  | 1 -> Operator (Seq.reduce (*))
+  | 2 -> Operator Seq.min
+  | 3 -> Operator Seq.max
+  | 5 -> Operator (fun xs -> if Seq.item 0 xs > Seq.item 1 xs then 1L else 0L)
+  | 6 -> Operator (fun xs -> if Seq.item 0 xs < Seq.item 1 xs then 1L else 0L)
+  | 7 -> Operator (fun xs -> if Seq.item 0 xs = Seq.item 1 xs then 1L else 0L)
+  | _ -> failwith (sprintf "Invalid type ID: %A" x)
 
 type Length =
   | Count of int
@@ -33,9 +42,10 @@ let (|Chunk|) x =
 type Packet = {
   version: int
   typeId: TypeId
-  value: Option<int>
+  value: Option<int64>
   length: Option<Length>
   subpackets: List<Packet>
+  operation: Option<Operation>
 }
 
 let asInt (fromBits: BitArray) =
@@ -76,19 +86,19 @@ let rec parse (bits: BitArray) =
   let value, bits =
     match typeId with
     | Literal ->
-      let rec parseChunks bits n =
+      let rec parseChunks bits (n: int64) =
         let (Chunk c), n', bits = read2 1 4 bits
-        let n = n <<< 4 ||| n'
+        let (n: int64) = n <<< 4 ||| (int64 n')
         match c with
         | Continue -> parseChunks bits n
         | Stop -> n, bits
-      let n, bits = parseChunks bits 0
+      let n, bits = parseChunks bits 0L
       Some n, bits
-    | Operator _ -> None, bits
+    | _ -> None, bits
   let length, bits =
     match typeId with
     | Literal -> None, bits
-    | Operator _ ->
+    | _ ->
       let (LengthTypeId (makeLength, lengthBits)), bits = read 1 bits
       let lengthNum, bits = read lengthBits bits
       Some(makeLength lengthNum), bits
@@ -112,13 +122,25 @@ let rec parse (bits: BitArray) =
         remainingBits <- bits
       subpackets, remainingBits
     | None -> [], bits
-  {version = version; typeId = typeId; value = value; length = length; subpackets = subpackets}, bits
+  let subpackets = subpackets |> List.rev
+  let operation =
+    match typeId with
+    | Literal -> None
+    | Operator op -> Some op
+
+  {version = version; typeId = typeId; value = value; length = length; subpackets = subpackets; operation = operation}, bits
 
 let rec versionSum (packet: Packet) =
   packet.version + (packet.subpackets |> Seq.sumBy versionSum)
 
+let rec calculate (packet: Packet) =
+  match packet.value, packet.operation with
+  | Some x, _ -> x
+  | _, Some op -> op (packet.subpackets |> List.map calculate)
+  | _ -> failwith "Value or operation must exist on a packet"
+
 let packet =
-  // "EE00D40C823060"
+  // "F600BC2D8F"
   File.ReadAllText "16.input.txt"
   |> hexToBits
   |> parse
@@ -127,3 +149,7 @@ let packet =
 packet
 |> versionSum
 |> printfn "Part 1: %A"
+
+packet
+|> calculate
+|> printfn "Part 2: %A"
