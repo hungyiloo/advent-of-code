@@ -22,7 +22,7 @@ let dijkstra grid multiplier =
     Array2D.init
       virtualGridRows
       virtualGridCols
-      (fun x y -> if (x,y) = start then true else false)
+      (fun x y -> (x,y) = start)
 
   let getNeighbors (x, y) =
     [ (x + 1, y)
@@ -36,10 +36,7 @@ let dijkstra grid multiplier =
     let y' = y % gridCols
     ((grid.[x', y'] + (x / gridRows) + (y / gridCols) - 1) % 9) + 1
 
-  let best (nodes: Node list) =
-    nodes
-    |> Seq.map (function | Node (n, cost) -> n, if n = goal then cost else cost)
-    |> Seq.minBy snd
+  let best (nodes: Node list) = nodes |> Seq.minBy (fun (Node(_, cost)) -> cost)
 
   let expand nodes at =
     ([], nodes)
@@ -49,8 +46,8 @@ let dijkstra grid multiplier =
         | Node (n, cost) when n = at ->
           match getNeighbors n with
           | [] -> acc
-          | children ->
-            (acc, children)
+          | neighbors ->
+            (acc, neighbors)
             ||> Seq.fold
               (fun acc (x, y) ->
                 Array2D.set visited x y true
@@ -58,11 +55,11 @@ let dijkstra grid multiplier =
         | _ -> node::acc)
 
   let rec search nodes =
-    let bestNode, bestCost = best nodes
-    if bestNode = goal
+    let (Node(bestCoord, bestCost)) = best nodes
+    if bestCoord = goal
     then bestCost
     else
-      search (expand nodes bestNode)
+      search (expand nodes bestCoord)
 
   search [Node(start, 0)]
 
