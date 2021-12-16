@@ -62,7 +62,13 @@ let read2 (length1: int) (length2: int) (fromBits: BitArray) =
   (result1, result2, bits)
 
 let hexToBits (hex: string) =
-  Convert.FromHexString(hex.Trim()) |> Array.rev |> BitArray
+  // Convert.FromHexString(hex.Trim()) |> Array.rev |> BitArray
+  hex.Trim()
+  |> Seq.chunkBySize 2
+  |> Seq.map (fun cs -> Convert.ToByte(String (Seq.toArray cs), 16))
+  |> Seq.rev
+  |> Seq.toArray
+  |> BitArray
 
 let rec parse (bits: BitArray) =
   let version, bits = read 3 bits
@@ -108,8 +114,16 @@ let rec parse (bits: BitArray) =
     | None -> [], bits
   {version = version; typeId = typeId; value = value; length = length; subpackets = subpackets}, bits
 
-// "EE00D40C823060"
-File.ReadAllText "16.input.txt"
-|> hexToBits
-|> parse
-|> printfn "%A"
+let rec versionSum (packet: Packet) =
+  packet.version + (packet.subpackets |> Seq.sumBy versionSum)
+
+let packet =
+  // "EE00D40C823060"
+  File.ReadAllText "16.input.txt"
+  |> hexToBits
+  |> parse
+  |> fst
+
+packet
+|> versionSum
+|> printfn "Part 1: %A"
