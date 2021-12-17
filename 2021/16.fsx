@@ -24,19 +24,18 @@ type Length =
   | Size of int
   | NoSubpackets
 
-type Packet = {
-  version: int64
-  typeId: TypeId
-  value: Option<int64>
-  length: Length
-  subpackets: List<Packet>
-  operation: Option<Operation>
-}
+type Packet =
+  { version: int64
+    typeId: TypeId
+    value: Option<int64>
+    length: Length
+    subpackets: List<Packet>
+    operation: Option<Operation> }
 
 let asInt bits = (0L, bits) ||> Seq.fold (fun n bit -> n <<< 1 ||| if bit then 1L else 0L)
 
 let read (length: int) (bits: bool array) =
-  let result = bits.[0..(length-1)]
+  let result = bits.[0..(length - 1)]
   let remaining = bits.[length..]
   (asInt result, remaining)
 
@@ -48,28 +47,38 @@ let read2 (length1: int) (length2: int) bits =
 let hexToBits (hex: string) =
   hex.Trim()
   |> Seq.toArray
-  |> Array.map
-    (function
-     | '0' -> [| false; false; false; false |]
-     | '1' -> [| false; false; false; true |]
-     | '2' -> [| false; false; true; false |]
-     | '3' -> [| false; false; true; true |]
-     | '4' -> [| false; true; false; false |]
-     | '5' -> [| false; true; false; true |]
-     | '6' -> [| false; true; true; false |]
-     | '7' -> [| false; true; true; true |]
-     | '8' -> [| true; false; false; false |]
-     | '9' -> [| true; false; false; true |]
-     | 'A' -> [| true; false; true; false |]
-     | 'B' -> [| true; false; true; true |]
-     | 'C' -> [| true; true; false; false |]
-     | 'D' -> [| true; true; false; true |]
-     | 'E' -> [| true; true; true; false |]
-     | 'F' -> [| true; true; true; true |]
-     | _ -> failwith "Invalid hex character")
+  |> Array.map (function
+    | '0' -> [| false; false; false; false |]
+    | '1' -> [| false; false; false; true |]
+    | '2' -> [| false; false; true; false |]
+    | '3' -> [| false; false; true; true |]
+    | '4' -> [| false; true; false; false |]
+    | '5' -> [| false; true; false; true |]
+    | '6' -> [| false; true; true; false |]
+    | '7' -> [| false; true; true; true |]
+    | '8' -> [| true; false; false; false |]
+    | '9' -> [| true; false; false; true |]
+    | 'A' -> [| true; false; true; false |]
+    | 'B' -> [| true; false; true; true |]
+    | 'C' -> [| true; true; false; false |]
+    | 'D' -> [| true; true; false; true |]
+    | 'E' -> [| true; true; true; false |]
+    | 'F' -> [| true; true; true; true |]
+    | _ -> failwith "Invalid hex character")
   |> Array.concat
 
-let printBits (bits: bool array) = bits |> Array.map (fun b -> if b then '1' else '0') |> String
+let printBits (bits: bool array) =
+  bits
+  |> Array.map (fun b -> if b then '1' else '0')
+  |> String
+
+let rec parseContinuingChunks bits (n: int64) =
+  let continueFlag, n', bits = read2 1 4 bits
+  let n = n <<< 4 ||| (int64 n')
+  match continueFlag with
+  | 1L -> parseContinuingChunks bits n
+  | 0L -> n, bits
+  | _ -> failwith (sprintf "Invalid chunk continuation flag: %A" continueFlag)
 
 let rec parse bits =
   let version, bits = read 3 bits
@@ -79,14 +88,7 @@ let rec parse bits =
   let value, bits =
     match typeId with
     | Literal ->
-      let rec parseChunks bits (n: int64) =
-        let continueFlag, n', bits = read2 1 4 bits
-        let n = n <<< 4 ||| (int64 n')
-        match continueFlag with
-        | 1L -> parseChunks bits n
-        | 0L -> n, bits
-        | _ -> failwith (sprintf "Invalid chunk continuation flag: %A" continueFlag)
-      let n, bits = parseChunks bits 0L
+      let n, bits = parseContinuingChunks bits 0L
       Some n, bits
     | _ -> None, bits
 
@@ -98,10 +100,10 @@ let rec parse bits =
       match lengthTypeId with
       | 1L ->
         let count, bits = read 11 bits
-        Count (int count), bits
+        Count(int count), bits
       | 0L ->
         let size, bits = read 15 bits
-        Size (int size), bits
+        Size(int size), bits
       | _ -> failwith (sprintf "Invalid length type ID: %A" lengthTypeId)
 
   let subpackets, bits =
@@ -112,7 +114,7 @@ let rec parse bits =
       let mutable remainingBits = bits
       while bitCount - (Array.length remainingBits) < size do
         let subpacket, bits = parse remainingBits
-        subpackets <- subpacket::subpackets
+        subpackets <- subpacket :: subpackets
         remainingBits <- bits
       subpackets, remainingBits
     | Count count ->
@@ -120,7 +122,7 @@ let rec parse bits =
       let mutable remainingBits = bits
       while List.length subpackets < count do
         let subpacket, bits = parse remainingBits
-        subpackets <- subpacket::subpackets
+        subpackets <- subpacket :: subpackets
         remainingBits <- bits
       subpackets, remainingBits
     | NoSubpackets -> [], bits
@@ -132,10 +134,17 @@ let rec parse bits =
     | Literal -> None
     | Operator op -> Some op
 
-  {version = version; typeId = typeId; value = value; length = length; subpackets = subpackets; operation = operation}, bits
+  { version = version
+    typeId = typeId
+    value = value
+    length = length
+    subpackets = subpackets
+    operation = operation },
+  bits
 
 let rec versionSum (packet: Packet) =
-  packet.version + (packet.subpackets |> Seq.sumBy versionSum)
+  packet.version
+  + (packet.subpackets |> Seq.sumBy versionSum)
 
 let rec calculate (packet: Packet) =
   match packet.value, packet.operation with
@@ -149,10 +158,5 @@ let packet =
   |> parse
   |> fst
 
-packet
-|> versionSum
-|> printfn "Part 1: %d"
-
-packet
-|> calculate
-|> printfn "Part 2: %d"
+packet |> versionSum |> printfn "Part 1: %d"
+packet |> calculate |> printfn "Part 2: %d"
