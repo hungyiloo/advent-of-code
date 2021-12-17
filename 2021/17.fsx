@@ -49,7 +49,7 @@ let simulate velocity target =
   let path,_  = search ([(0, 0)], velocity)
 
   match path with
-  | point::_ when checkTarget point -> Some(velocity, path)
+  | point::_ when checkTarget point -> Some path
   | _ -> None
 
 let inline (++) xs ys = xs |> List.collect (fun x -> ys |> List.map (fun y -> x, y))
@@ -69,10 +69,9 @@ let _, x2, y1, _ = target
 |> List.choose
   (fun (vx, vy) ->
     match simulate (vx, vy) target with
-    | Some(_, path) -> Some (path |> Seq.maxBy snd)
+    | Some path -> Some (path |> Seq.maxBy snd |> snd)
     | _ -> None)
-|> List.maxBy snd
-|> snd
+|> Seq.max
 |> printfn "Part 1: %A"
 
 [0..x2] ++ [y1..(abs y1)]
