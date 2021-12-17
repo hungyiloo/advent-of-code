@@ -26,9 +26,7 @@ type Length =
 
 type Packet =
   { version: int64
-    typeId: TypeId
     value: Option<int64>
-    length: Length
     subpackets: List<Packet>
     operation: Option<Operation> }
 
@@ -135,9 +133,7 @@ let rec parse bits =
     | Operator op -> Some op
 
   { version = version
-    typeId = typeId
     value = value
-    length = length
     subpackets = subpackets
     operation = operation },
   bits
@@ -160,3 +156,4 @@ let packet =
 
 packet |> versionSum |> printfn "Part 1: %d"
 packet |> calculate |> printfn "Part 2: %d"
+
