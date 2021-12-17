@@ -1,3 +1,5 @@
+#r "nuget: FSharpx.Collections"
+open FSharpx.Collections
 open System.IO
 
 let input =
@@ -5,7 +7,19 @@ let input =
   |> Seq.map (Seq.map (string >> int))
   |> array2D
 
-type Node = Node of (int * int) * int
+[<StructuralEquality>]
+[<CustomComparison>]
+type Node =
+  Node of (int * int) * int with
+
+  // CustomComparison is required for use with a PriorityQueue
+  interface System.IComparable with
+    member x.CompareTo y =
+      match y with
+      | :? Node as y ->
+        match x, y with
+        | Node(_, c1), Node(_, c2) -> c1.CompareTo(c2)
+      | _ -> failwith "Can't compare a Node with anything other than another Node"
 
 let dijkstra grid multiplier =
   let gridRows = Array2D.length1 grid
@@ -36,31 +50,28 @@ let dijkstra grid multiplier =
     let y' = y % gridCols
     ((grid.[x', y'] + (x / gridRows) + (y / gridCols) - 1) % 9) + 1
 
-  let bestOf (nodes: Node list) = nodes |> Seq.minBy (fun (Node(_, cost)) -> cost)
-
-  let explore nodes at =
-    ([], nodes)
+  let explore (pq: IPriorityQueue<Node>) =
+    let (Node(bestCoord, cost)), pq = pq.Pop()
+    (pq, getNeighbors bestCoord)
     ||> Seq.fold
-      (fun acc node ->
-        match node with
-        | Node (coord, cost) when coord = at ->
-          match getNeighbors coord with
-          | [] -> acc
-          | neighbors ->
-            (acc, neighbors)
-            ||> Seq.fold
-              (fun acc (x, y) ->
-                Array2D.set visited x y true
-                Node((x, y), cost + getCost(x,y))::acc)
-        | _ -> node::acc)
+      (fun pq (x, y) ->
+        Array2D.set visited x y true
+        pq.Insert(Node((x, y), cost + getCost(x,y))))
 
-  let rec search nodes =
-    let (Node(bestCoord, bestCost)) = bestOf nodes
+  let rec search (pq: IPriorityQueue<Node>) =
+    // This can be replaced with a naive Seq.minBy if not using a PQ.
+    // Not using a PriorityQueue results in poorer performance.
+    let (Node(bestCoord, bestCost)) = pq.Peek()
+
     if bestCoord = goal
     then bestCost
-    else search (explore nodes bestCoord)
+    else search (explore pq)
 
-  search [Node(start, 0)]
+  search (
+    PriorityQueue
+      .empty<Node>(false) // min heap
+      .Insert(Node(start, 0))
+  )
 
 dijkstra input 1 |> printfn "Part 1: %A"
 dijkstra input 5 |> printfn "Part 2: %A"
