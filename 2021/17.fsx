@@ -2,22 +2,25 @@ open System
 open System.IO
 
 let (|Split|) (separator: string) (s: string) =
-  match s.Split([| separator |], StringSplitOptions.RemoveEmptyEntries) with
+  match s.Trim().Split([| separator |], StringSplitOptions.RemoveEmptyEntries) with
   | arr -> arr |> Seq.toList
 
-let parseTarget (input: string) =
-  let input = input.Trim()
-  match input.Split([|": "|], StringSplitOptions.RemoveEmptyEntries) with
-  | [| "target area"; coords |] ->
-    match coords.Split([|", "|], StringSplitOptions.RemoveEmptyEntries) with
-    | [| xRange; yRange |] ->
+let (|SplitMulti|) (separators: string seq) (s: string) =
+  match s.Trim().Split(separators |> Seq.toArray, StringSplitOptions.RemoveEmptyEntries) with
+  | arr -> arr |> Seq.toList
+
+let parseTarget =
+  function
+  | Split ": " [ "target area"; coords ] ->
+    match coords with
+    | Split ", " [ xRange; yRange ] ->
       let x1, x2 =
-        match xRange.Split([| "x="; ".." |], StringSplitOptions.RemoveEmptyEntries) with
-        | [| x1; x2 |] -> int x1, int x2
+        match xRange with
+        | SplitMulti ["x="; ".."] [ x1; x2 ] -> int x1, int x2
         | _ -> failwith "invalid input"
       let y1, y2 =
-        match yRange.Split([| "y="; ".." |], StringSplitOptions.RemoveEmptyEntries) with
-        | [| y1; y2 |] -> int y1, int y2
+        match yRange with
+        | SplitMulti ["y="; ".."] [ y1; y2 ] -> int y1, int y2
         | _ -> failwith "invalid input"
       x1, x2, y1, y2
     | _ -> failwith "invalid input"
