@@ -24,26 +24,13 @@ let (|TypeId|) x =
 type Length =
   | Count of int
   | Size of int
-
-let (|LengthTypeId|) x =
-  match x with
-  | 1 -> Count, 11
-  | 0 -> Size, 15
-  | _ -> failwith (sprintf "Invalid length type ID: %A" x)
-
-type Chunk = Continue | Stop
-
-let (|Chunk|) x =
-  match x with
-  | 1 -> Continue
-  | 0 -> Stop
-  | _ -> failwith (sprintf "Invalid chunk type: %A" x)
+  | NoSubpackets
 
 type Packet = {
   version: int
   typeId: TypeId
   value: Option<int64>
-  length: Option<Length>
+  length: Length
   subpackets: List<Packet>
   operation: Option<Operation>
 }
@@ -55,7 +42,14 @@ let asInt (fromBits: BitArray) =
      let n = n <<< 1
      if bit then n ||| 1 else n)
 
-let read (length: int) (fromBits: BitArray) =
+let asInt64 (fromBits: BitArray) =
+  (0L, fromBits.Cast() |> Seq.rev)
+  ||> Seq.fold
+    (fun n bit ->
+     let n = n <<< 1
+     if bit then n ||| 1 else n)
+
+let read (length: int) (fromBits: BitArray) mapper =
   let result = BitArray(length)
   [(fromBits.Count-length)..(fromBits.Count-1)]
   |> List.iteri (fun i' i -> result.Set(i', fromBits.[i]))
@@ -64,11 +58,11 @@ let read (length: int) (fromBits: BitArray) =
   [0..(fromBits.Count-length-1)]
   |> List.iter (fun i -> remaining.Set(i, fromBits.[i]))
 
-  (asInt result, remaining)
+  (mapper result, remaining)
 
-let read2 (length1: int) (length2: int) (fromBits: BitArray) =
-  let result1, bits = read length1 fromBits
-  let result2, bits = read length2 bits
+let read2 (length1: int) (length2: int) fromBits mapper =
+  let result1, bits = read length1 fromBits mapper
+  let result2, bits = read length2 bits mapper
   (result1, result2, bits)
 
 let hexToBits (hex: string) =
@@ -81,30 +75,41 @@ let hexToBits (hex: string) =
   |> BitArray
 
 let rec parse (bits: BitArray) =
-  let version, bits = read 3 bits
-  let (TypeId typeId), bits = read 3 bits
+  let version, bits = read 3 bits asInt
+
+  let (TypeId typeId), bits = read 3 bits asInt
+
   let value, bits =
     match typeId with
     | Literal ->
       let rec parseChunks bits (n: int64) =
-        let (Chunk c), n', bits = read2 1 4 bits
-        let (n: int64) = n <<< 4 ||| (int64 n')
-        match c with
-        | Continue -> parseChunks bits n
-        | Stop -> n, bits
+        let continueFlag, n', bits = read2 1 4 bits asInt64
+        let n = n <<< 4 ||| (int64 n')
+        match continueFlag with
+        | 1L -> parseChunks bits n
+        | 0L -> n, bits
+        | _ -> failwith (sprintf "Invalid chunk continuation flag: %A" continueFlag)
       let n, bits = parseChunks bits 0L
       Some n, bits
     | _ -> None, bits
+
   let length, bits =
     match typeId with
-    | Literal -> None, bits
+    | Literal -> NoSubpackets, bits
     | _ ->
-      let (LengthTypeId (makeLength, lengthBits)), bits = read 1 bits
-      let lengthNum, bits = read lengthBits bits
-      Some(makeLength lengthNum), bits
+      let lengthTypeId, bits = read 1 bits asInt
+      match lengthTypeId with
+      | 1 ->
+        let count, bits = read 11 bits asInt
+        Count count, bits
+      | 0 ->
+        let size, bits = read 15 bits asInt
+        Size size, bits
+      | _ -> failwith (sprintf "Invalid length type ID: %A" lengthTypeId)
+
   let subpackets, bits =
     match length with
-    | Some(Size size) ->
+    | Size size ->
       let bitCount = bits.Count
       let mutable subpackets = []
       let mutable remainingBits = bits
@@ -113,7 +118,7 @@ let rec parse (bits: BitArray) =
         subpackets <- subpacket::subpackets
         remainingBits <- bits
       subpackets, remainingBits
-    | Some(Count count) ->
+    | Count count ->
       let mutable subpackets = []
       let mutable remainingBits = bits
       while List.length subpackets < count do
@@ -121,8 +126,10 @@ let rec parse (bits: BitArray) =
         subpackets <- subpacket::subpackets
         remainingBits <- bits
       subpackets, remainingBits
-    | None -> [], bits
+    | NoSubpackets -> [], bits
+
   let subpackets = subpackets |> List.rev
+
   let operation =
     match typeId with
     | Literal -> None
