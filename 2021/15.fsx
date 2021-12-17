@@ -51,27 +51,25 @@ let dijkstra grid multiplier =
     ((grid.[x', y'] + (x / gridRows) + (y / gridCols) - 1) % 9) + 1
 
   let explore (pq: IPriorityQueue<Node>) =
-    let (Node(bestCoord, cost)), pq = pq.Pop()
+    let (Node(bestCoord, cost)), pq = PriorityQueue.pop pq
     (pq, getNeighbors bestCoord)
     ||> Seq.fold
       (fun pq (x, y) ->
         Array2D.set visited x y true
-        pq.Insert(Node((x, y), cost + getCost(x,y))))
+        PriorityQueue.insert (Node((x, y), cost + getCost(x,y))) pq)
 
   let rec search (pq: IPriorityQueue<Node>) =
     // This can be replaced with a naive Seq.minBy if not using a PQ.
     // Not using a PriorityQueue results in poorer performance.
-    let (Node(bestCoord, bestCost)) = pq.Peek()
+    let (Node(bestCoord, bestCost)) = PriorityQueue.peek pq
 
     if bestCoord = goal
     then bestCost
     else search (explore pq)
 
-  search (
-    PriorityQueue
-      .empty<Node>(false) // min heap
-      .Insert(Node(start, 0))
-  )
+  PriorityQueue.empty(false) // min heap
+  |> PriorityQueue.insert (Node(start, 0))
+  |> search
 
 dijkstra input 1 |> printfn "Part 1: %A"
 dijkstra input 5 |> printfn "Part 2: %A"

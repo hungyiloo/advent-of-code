@@ -1,6 +1,10 @@
 open System
 open System.IO
 
+let (|Split|) (separator: string) (s: string) =
+  match s.Split([| separator |], StringSplitOptions.RemoveEmptyEntries) with
+  | arr -> arr |> Seq.toList
+
 let parseTarget (input: string) =
   let input = input.Trim()
   match input.Split([|": "|], StringSplitOptions.RemoveEmptyEntries) with
@@ -54,7 +58,8 @@ let simulate velocity target =
 
 let inline (++) xs ys = xs |> List.collect (fun x -> ys |> List.map (fun y -> x, y))
 
-let triangularRoot n = round (((sqrt (((float n) * 8.0) + 1.0)) - 1.0) / 2.0) |> int
+let triangularRoot n =
+  n |> float |> (*) 8.0 |> (+) 1.0 |> sqrt |> (+) -1.0 |> (*) 0.5 |> int
 
 let target =
   // "target area: x=20..30, y=-10..-5"
