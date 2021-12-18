@@ -78,7 +78,7 @@ let addToFirstLiteral = addToLiteral walk
 let addToLastLiteral = addToLiteral walkBack
 
 let explode n =
-  let mutable exploded = false
+  let mutable exploded = false // only explode ONCE
   let result =
     walk
       (fun _ x -> Literal x, 0, 0)
@@ -95,6 +95,7 @@ let explode n =
       0
       n
     |> (fun (x, _, _) -> x)
+    // reset all the Exploded numbers back to Literal 0
     |> walk
       (fun _ x -> Literal x)
       (fun _ -> Literal 0)
@@ -103,7 +104,7 @@ let explode n =
   (result, result <> n)
 
 let split n =
-  let mutable didSplit = false
+  let mutable didSplit = false // only do ONE split
   let result =
     walk
       (fun _ x ->
@@ -121,6 +122,9 @@ let reduce n =
   let mutable keepReducing = true
   let mutable result = n
   while keepReducing do
+    // this very specific order of operations is EXTREMELY important
+    // do NOT try to be greedy and do multiple explosions or splits in one step
+    // do NOT try to split after an explosion unless we're sure there are no other explosions possible
     let nextResult, didExplode = explode result
     let nextResult, didSplit = if didExplode then nextResult, false else split nextResult
     keepReducing <- didExplode || didSplit
