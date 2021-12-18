@@ -134,23 +134,16 @@ let rec magnitude n =
   | Pair (a, b) -> (3 * (magnitude a)) + (2 * (magnitude b))
   | Exploded -> 0
 
-File.ReadAllLines "18.input.txt"
-|> Seq.map read
+let inline (++) xs ys = xs |> List.collect (fun x -> ys |> List.map (fun y -> x, y))
+
+let numbers = File.ReadAllLines "18.input.txt" |> Seq.map read |> Seq.toList
+
+numbers
 |> Seq.reduce add
 |> magnitude
-|> printfn "Part1: %d"
+|> printfn "Part 1: %d"
 
-// printfn "%A" (read "[[[[8,7],[7,7]],[[8,6],[7,7]]],[[[0,7],[6,6]],[8,7]]]" |> magnitude)
-// printfn "%A" (read "[[1,2],[[3,4],5]]" |> magnitude)
-// printfn "%A" (read "[[[[0,[4,5]],[0,0]],[[[4,5],[2,6]],[9,5]]],[7,[[[3,7],[4,3]],[[6,3],[8,8]]]]]" |> reduce |> encode)
-// printfn "%A" (read "[[[[[1,1],[2,2]],[3,3]],[4,4]],[5,5]]" |> reduce |> encode)
-// printfn "%A" (read "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]" |> reduce |> encode)
-// printfn "%A" (read "[[[[[9,8],1],2],3],4]" |> explode |> encode)
-// printfn "%A" (read "[7,[6,[5,[4,[3,2]]]]]" |> explode |> encode)
-// printfn "%A" (read "[[6,[5,[4,[3,2]]]],1]" |> explode |> encode)
-// printfn "%A" (read "[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]" |> explode |> encode)
-// printfn "%A" (read "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]" |> explode |> encode)
-// printfn "%A" (read "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]" |> explode |> encode)
-// printfn "%A" (read "[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]" |> addToFirstLiteral 3 |> encode)
-// printfn "%A" (read "[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]" |> addToLastLiteral 3 |> encode)
-// printfn "%A" (read "[12,1]" |> split |> encode)
+numbers ++ numbers
+|> Seq.map (fun (a, b) -> add a b |> magnitude)
+|> Seq.max
+|> printfn "Part 2: %d"
