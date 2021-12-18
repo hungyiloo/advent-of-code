@@ -1,5 +1,3 @@
-#r "nuget: FSharpx.Collections"
-open FSharpx.Collections
 open System.IO
 
 let input =
@@ -7,19 +5,14 @@ let input =
   |> Seq.map (Seq.map (string >> int))
   |> array2D
 
-[<StructuralEquality>]
-[<CustomComparison>]
-type Node =
-  Node of (int * int) * int with
+type Node = Node of (int * int) * int
 
-  // CustomComparison is required for use with a PriorityQueue
-  interface System.IComparable with
-    member x.CompareTo y =
-      match y with
-      | :? Node as y ->
-        match x, y with
-        | Node(_, c1), Node(_, c2) -> c1.CompareTo(c2)
-      | _ -> failwith "Can't compare a Node with anything other than another Node"
+let insertByCost (pq: Node list) (newNode: Node) =
+  let (Node(_, newNodeCost)) = newNode
+  let index = List.tryFindIndex (fun (Node(_, cost)) -> cost > newNodeCost) pq
+  match index with
+  | Some i -> List.insertAt i newNode pq
+  | None -> List.insertAt (List.length pq) newNode pq
 
 let dijkstra grid multiplier =
   let gridRows = Array2D.length1 grid
@@ -50,26 +43,27 @@ let dijkstra grid multiplier =
     let y' = y % gridCols
     ((grid.[x', y'] + (x / gridRows) + (y / gridCols) - 1) % 9) + 1
 
-  let explore (pq: IPriorityQueue<Node>) =
-    let (Node(bestCoord, cost)), pq = PriorityQueue.pop pq
+  let explore (pq: Node list) =
+    let (Node(bestCoord, cost)), pq =
+      match pq with
+      | head::pq -> head, pq
+      | _ -> failwith "Can't explore an empty queue"
     (pq, getNeighbors bestCoord)
     ||> Seq.fold
       (fun pq (x, y) ->
         Array2D.set visited x y true
-        PriorityQueue.insert (Node((x, y), cost + getCost(x,y))) pq)
+        insertByCost pq (Node((x, y), cost + getCost(x,y))))
 
-  let rec search (pq: IPriorityQueue<Node>) =
-    // This can be replaced with a naive Seq.minBy if not using a PQ.
-    // Not using a PriorityQueue results in poorer performance.
-    let (Node(bestCoord, bestCost)) = PriorityQueue.peek pq
+  let rec search (pq: Node list) =
+    let (Node(bestCoord, bestCost)) = List.head pq
 
     if bestCoord = goal
     then bestCost
     else search (explore pq)
 
-  PriorityQueue.empty(false) // min heap
-  |> PriorityQueue.insert (Node(start, 0))
-  |> search
+  search [Node(start, 0)]
 
 dijkstra input 1 |> printfn "Part 1: %A"
+#time "on"
 dijkstra input 5 |> printfn "Part 2: %A"
+#time "off"
