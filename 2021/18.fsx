@@ -1,4 +1,5 @@
 open System.IO
+
 type SnailfishNumber =
   | Literal of int
   | Exploded
@@ -31,42 +32,46 @@ let read s =
   |> fst
   |> List.exactlyOne
 
-let rec walk fLiteral fExploded fPair ancestors n =
-  let recurse = walk fLiteral fExploded fPair (n::ancestors)
+let rec walk fLiteral fExploded fPair depth n =
+  let recurse = walk fLiteral fExploded fPair (depth + 1)
   match n with
-  | Literal x -> fLiteral ancestors x
-  | Exploded -> fExploded ancestors
-  | Pair(a, b) -> fPair ancestors (recurse a, recurse b)
+  | Literal x -> fLiteral depth x
+  | Exploded -> fExploded depth
+  | Pair(a, b) -> fPair depth (recurse a, recurse b)
 
-let rec walkBack fLiteral fExploded fPair ancestors n =
-  let recurse = walkBack fLiteral fExploded fPair (n::ancestors)
+// Having a dedicated "walkBack" function improves performance by a lot
+let rec walkBack fLiteral fExploded fPair depth n =
+  let recurse = walkBack fLiteral fExploded fPair (depth + 1)
   match n with
-  | Literal x -> fLiteral ancestors x
-  | Exploded -> fExploded ancestors
+  | Literal x -> fLiteral depth x
+  | Exploded -> fExploded depth
   | Pair(a, b) ->
     let b = recurse b
     let a = recurse a
-    fPair ancestors (a, b)
+    fPair depth (a, b)
 
 let rec encode n =
   walk
     (fun _ x -> string x)
     (fun _ -> "0*")
     (fun _ (a,b) -> sprintf "[%s,%s]" a b)
-    []
+    0
     n
 
 let addToLiteral walker delta n =
-  let mutable delta = delta
-  walker
-    (fun _ x ->
-     let result = Literal(x + delta)
-     delta <- 0
-     result)
-    (fun _ -> Exploded)
-    (fun _ (a,b) -> Pair(a, b))
-    []
-    n
+  if delta = 0
+  then n
+  else
+    let mutable delta = delta
+    walker
+      (fun _ x ->
+        let result = Literal(x + delta)
+        delta <- 0
+        result)
+      (fun _ -> Exploded)
+      (fun _ (a,b) -> Pair(a, b))
+      0
+      n
 
 let addToFirstLiteral = addToLiteral walk
 
@@ -78,27 +83,23 @@ let explode n =
     walk
       (fun _ x -> Literal x, 0, 0)
       (fun _ -> Exploded, 0, 0)
-      (fun ancestors ((a, aLeft, aRight), (b, bLeft, bRight)) ->
-        if (List.length ancestors) >= 4 && not exploded
+      (fun depth ((a, aLeft, aRight), (b, bLeft, bRight)) ->
+        if depth >= 4 && not exploded
         then
           exploded <- true
           match a, b with
           | Literal a, Literal b -> Exploded, a, b
           | _ -> failwith "Can't explode nested pairs"
         else
-          match a, b with
-          | Literal a, Literal b -> Pair(Literal(a + aLeft + bLeft), Literal(b + aRight + bRight)), 0, 0
-          | Literal a, _ -> Pair(Literal(a + aLeft + bLeft), b), 0, aRight + bRight
-          | _, Literal b -> Pair(a, Literal(b + aRight + bRight)), aLeft + bLeft, 0
-          | _ -> Pair(a |> addToLastLiteral bLeft, b |> addToFirstLiteral aRight), aLeft, bRight)
-      []
+          Pair(a |> addToLastLiteral bLeft, b |> addToFirstLiteral aRight), aLeft, bRight)
+      0
       n
     |> (fun (x, _, _) -> x)
     |> walk
       (fun _ x -> Literal x)
       (fun _ -> Literal 0)
       (fun _ p -> Pair p)
-      []
+      0
   (result, result <> n)
 
 let split n =
@@ -112,7 +113,7 @@ let split n =
         else Literal x)
       (fun _ -> Exploded)
       (fun _ (a,b) -> Pair(a,b))
-      []
+      0
       n
   (result, result <> n)
 
