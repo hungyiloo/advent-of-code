@@ -64,6 +64,4 @@ let dijkstra grid multiplier =
   search [Node(start, 0)]
 
 dijkstra input 1 |> printfn "Part 1: %A"
-#time "on"
 dijkstra input 5 |> printfn "Part 2: %A"
-#time "off"
