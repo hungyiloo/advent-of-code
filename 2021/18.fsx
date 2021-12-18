@@ -145,6 +145,7 @@ numbers
 |> printfn "Part 1: %d"
 
 numbers ++ numbers
+|> Seq.filter (fun (a, b) -> a <> b) // ignore pairs of the same number
 |> Seq.map (fun (a, b) -> add a b |> magnitude)
 |> Seq.max
 |> printfn "Part 2: %d"
