@@ -39,17 +39,6 @@ let rec walk fLiteral fExploded fPair depth n =
   | Exploded -> fExploded depth
   | Pair(a, b) -> fPair depth (recurse a, recurse b)
 
-// Having a dedicated "walkBack" function improves performance by a lot
-let rec walkBack fLiteral fExploded fPair depth n =
-  let recurse = walkBack fLiteral fExploded fPair (depth + 1)
-  match n with
-  | Literal x -> fLiteral depth x
-  | Exploded -> fExploded depth
-  | Pair(a, b) ->
-    let b = recurse b
-    let a = recurse a
-    fPair depth (a, b)
-
 let rec encode n =
   walk
     (fun _ x -> string x)
@@ -58,24 +47,17 @@ let rec encode n =
     0
     n
 
-let addToLiteral walker delta n =
-  if delta = 0
-  then n
-  else
-    let mutable delta = delta
-    walker
-      (fun _ x ->
-        let result = Literal(x + delta)
-        delta <- 0
-        result)
-      (fun _ -> Exploded)
-      (fun _ (a,b) -> Pair(a, b))
-      0
-      n
+let rec addToLeftmostLiteral delta n =
+  match n with
+  | Literal x -> Literal (x + delta)
+  | Pair(a, b) -> Pair(addToLeftmostLiteral delta a, b)
+  | q -> q
 
-let addToFirstLiteral = addToLiteral walk
-
-let addToLastLiteral = addToLiteral walkBack
+let rec addToRightmostLiteral delta n =
+  match n with
+  | Literal x -> Literal (x + delta)
+  | Pair(a, b) -> Pair(a, addToRightmostLiteral delta b)
+  | q -> q
 
 let explode n =
   let mutable exploded = false // only explode ONCE
@@ -91,7 +73,7 @@ let explode n =
           | Literal a, Literal b -> Exploded, a, b
           | _ -> failwith "Can't explode nested pairs"
         else
-          Pair(a |> addToLastLiteral bLeft, b |> addToFirstLiteral aRight), aLeft, bRight)
+          Pair(a |> addToRightmostLiteral bLeft, b |> addToLeftmostLiteral aRight), aLeft, bRight)
       0
       n
     |> (fun (x, _, _) -> x)
