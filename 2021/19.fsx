@@ -14,13 +14,16 @@ type Scanner =
     beacons: List<int * int * int> }
 
 let ROTATIONS =
-  // all physical 24 rotations around a cube.
+  // all 24 physical rotations around a cube.
   // each triplet represents X, Y and Z numbers of quarter turns respectively
   [ 0, 0, 0; 1, 0, 0; 2, 0, 0; 3, 0, 0; 0, 1, 0; 0, 3, 0;
     0, 0, 1; 1, 0, 1; 2, 0, 1; 3, 0, 1; 0, 1, 1; 0, 3, 1;
     0, 0, 2; 1, 0, 2; 2, 0, 2; 3, 0, 2; 0, 1, 2; 0, 3, 2;
     0, 0, 3; 1, 0, 3; 2, 0, 3; 3, 0, 3; 0, 1, 3; 0, 3, 3; ]
 
+// Instead of using trig functions, we are doing quarter turns
+// so we can optimize by using a pattern matching map.
+// (i.e. cosine or sine of 90°, 180° & 270° are all either 0, 1 or -1)
 let intcos turns =
   match (turns + 4) % 4 with
   | 0 -> 1
@@ -37,9 +40,11 @@ let intsin turns =
   | 3 -> -1
   | _ -> failwith "Modulo failed?!"
 
-let rotateX n (x, y, z) = x, (intcos n)*y - (intsin n)*z, (intsin n)*y + (intcos n)*z
-let rotateY n (x, y, z) = (intcos n)*x + (intsin n)*z, y, -(intsin n)*x + (intcos n)*z
-let rotateZ n (x, y, z) = (intcos n)*x - (intsin n)*y, (intsin n)*x + (intcos n)*y, z
+// Using matrix rotation rules, we can transform a point by rotating around X, Y or Z axes.
+// see: https://en.wikipedia.org/wiki/Rotation_matrix#Basic_rotations
+let rotateX turns (x, y, z) = x, (intcos turns)*y - (intsin turns)*z, (intsin turns)*y + (intcos turns)*z
+let rotateY turns (x, y, z) = (intcos turns)*x + (intsin turns)*z, y, -(intsin turns)*x + (intcos turns)*z
+let rotateZ turns (x, y, z) = (intcos turns)*x - (intsin turns)*y, (intsin turns)*x + (intcos turns)*y, z
 
 let rotate rotation point =
   let xr, yr, zr = rotation
@@ -50,13 +55,15 @@ let translate translation point =
   let x', y', z' = translation
   x + x', y + y', z + z'
 
-let intersect xs ys = xs |> List.fold (fun acc x -> acc + if List.contains x ys then 1 else 0) 0
+let countIntersection xs ys = xs |> List.fold (fun acc x -> acc + if List.contains x ys then 1 else 0) 0
 
 let manhattanDistance (a, b) =
   let x1, y1, z1 = a
   let x2, y2, z2 = b
   (abs (x1 - x2)) + (abs (y1 - y2)) + (abs (z1 - z2))
 
+// Tries to absolutely locate a SCANNER with relation to a REFERENCE.
+// Returns Some Scanner if location was successful or None if unsuccessful.
 let locate reference scanner =
   if scanner.found then
     Some scanner
@@ -66,6 +73,10 @@ let locate reference scanner =
       if Option.isNone result then
         let rotatedBeacons = scanner.beacons |> List.map (rotate rotation)
         let beaconPairs = rotatedBeacons ++ reference.beacons
+        // Estimate the overlap using manhattan distance.
+        // if there are 12 or more manhattan distances the same,
+        // then it is likely to be a translation
+        // (i.e. 12 or more beacons are slid across the plane in some direction)
         let estimatedOverlaps =
           beaconPairs
           |> List.groupBy manhattanDistance
@@ -76,7 +87,9 @@ let locate reference scanner =
             if Option.isNone result then
               let translation = x' - x, y' - y, z' - z
               let translatedBeacons = rotatedBeacons |> List.map (translate translation)
-              let exactOverlaps = intersect translatedBeacons reference.beacons
+              // We still need to do a strict intersection count to find the final
+              // true translation. Not sure if this can be optimized away or not.
+              let exactOverlaps = countIntersection translatedBeacons reference.beacons
               if exactOverlaps >= 12 then
                 result <- Some
                   { found = true
@@ -85,22 +98,26 @@ let locate reference scanner =
                     beacons = translatedBeacons }
     result
 
+// For a given list of scanners, at least one of which is already located
+// iteratively locate all the other scanners in the list.
 let solve scanners =
-  let mutable found, remaining = List.partition (fun s -> s.found) scanners
-  let mutable foundToScan = found
+  let mutable located, remaining = List.partition (fun s -> s.found) scanners
+  let mutable locatedToScan = located
   while not (List.isEmpty remaining) do
-    let mutable newlyFound = []
-    for reference in foundToScan do
+    let mutable newlyLocated = []
+    for reference in locatedToScan do
       let mutable stillRemaining = []
       for scanner in remaining do
         match locate reference scanner with
         | Some x ->
-          newlyFound <- x::newlyFound
+          newlyLocated <- x::newlyLocated
         | None -> stillRemaining <- scanner::stillRemaining
-      remaining <- stillRemaining
-    found <- found @ foundToScan
-    foundToScan <- newlyFound
-  found @ foundToScan
+      remaining <- stillRemaining // only check unresolved scanners the next found
+    located <- located @ locatedToScan // the found scanners that have just been checked can be archived
+    locatedToScan <- newlyLocated // newly found scanners need to be checked next to find more lost scanners
+    if List.isEmpty newlyLocated then
+      failwith "There were no scanners located in this iteration phase. Stopping because this might loop indefinitely."
+  located @ locatedToScan // return all the found scanners in a single list
 
 let lostScanners =
   Seq.append (File.ReadLines "19.input.txt") [""]
