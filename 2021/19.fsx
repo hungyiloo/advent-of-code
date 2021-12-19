@@ -1,12 +1,6 @@
 open System
 open System.IO
 
-let (|Split|) (separator: string) (s: string) =
-  match s.Trim().Split([| separator |], StringSplitOptions.RemoveEmptyEntries) with
-  | arr -> arr |> Seq.toList
-
-let inline (++) xs ys = xs |> List.collect (fun x -> ys |> List.map (fun y -> x, y))
-
 type Scanner =
   { found: bool
     translation: int * int * int
@@ -15,13 +9,14 @@ type Scanner =
 
 let ROTATIONS =
   // all 24 physical rotations around a cube.
-  // each triplet represents X, Y and Z numbers of quarter turns respectively
+  // each triplet represents X, Y and Z numbers of quarter turns respectively.
+  // (0 1 2 3 yaw + 1 3 pitch gives us 6 faces of the cube) * 0 1 2 3 roll for each face.
   [ 0, 0, 0; 1, 0, 0; 2, 0, 0; 3, 0, 0; 0, 1, 0; 0, 3, 0;
     0, 0, 1; 1, 0, 1; 2, 0, 1; 3, 0, 1; 0, 1, 1; 0, 3, 1;
     0, 0, 2; 1, 0, 2; 2, 0, 2; 3, 0, 2; 0, 1, 2; 0, 3, 2;
     0, 0, 3; 1, 0, 3; 2, 0, 3; 3, 0, 3; 0, 1, 3; 0, 3, 3; ]
 
-// Instead of using trig functions, we are doing quarter turns
+// Instead of using trig functions, note that we are doing quarter turns
 // so we can optimize by using a pattern matching map.
 // (i.e. cosine or sine of 90°, 180° & 270° are all either 0, 1 or -1)
 let intcos turns =
@@ -61,6 +56,8 @@ let manhattanDistance (a, b) =
   let x1, y1, z1 = a
   let x2, y2, z2 = b
   (abs (x1 - x2)) + (abs (y1 - y2)) + (abs (z1 - z2))
+
+let inline (++) xs ys = xs |> List.collect (fun x -> ys |> List.map (fun y -> x, y))
 
 // Tries to absolutely locate a SCANNER with relation to a REFERENCE.
 // Returns Some Scanner if location was successful or None if unsuccessful.
@@ -118,6 +115,10 @@ let solve scanners =
     if List.isEmpty newlyLocated then
       failwith "There were no scanners located in this iteration. Stopping because this might loop indefinitely."
   located @ locatedToScan // return all the found scanners in a single list
+
+let (|Split|) (separator: string) (s: string) =
+  match s.Trim().Split([| separator |], StringSplitOptions.RemoveEmptyEntries) with
+  | arr -> arr |> Seq.toList
 
 let scanners =
   Seq.append (File.ReadLines "19.input.txt") [""]
