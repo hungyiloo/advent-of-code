@@ -74,9 +74,10 @@ let locate reference scanner =
         let rotatedBeacons = scanner.beacons |> List.map (rotate rotation)
         let beaconPairs = rotatedBeacons ++ reference.beacons
         // Estimate the overlap using manhattan distance.
-        // if there are 12 or more manhattan distances the same,
-        // then it is likely to be a translation
-        // (i.e. 12 or more beacons are slid across the plane in some direction)
+        // If it is really a translation, then there WILL be
+        // at least 12 points on each scanner that are the same distance apart.
+        // (i.e. Imagine 12 or more points are slid across the plane in some direction.
+        //       Those sliding distances should be the same. )
         let estimatedOverlaps =
           beaconPairs
           |> List.groupBy manhattanDistance
@@ -109,17 +110,16 @@ let solve scanners =
       let mutable stillRemaining = []
       for scanner in remaining do
         match locate reference scanner with
-        | Some x ->
-          newlyLocated <- x::newlyLocated
+        | Some x -> newlyLocated <- x::newlyLocated
         | None -> stillRemaining <- scanner::stillRemaining
       remaining <- stillRemaining // only check unresolved scanners the next found
     located <- located @ locatedToScan // the found scanners that have just been checked can be archived
     locatedToScan <- newlyLocated // newly found scanners need to be checked next to find more lost scanners
     if List.isEmpty newlyLocated then
-      failwith "There were no scanners located in this iteration phase. Stopping because this might loop indefinitely."
+      failwith "There were no scanners located in this iteration. Stopping because this might loop indefinitely."
   located @ locatedToScan // return all the found scanners in a single list
 
-let lostScanners =
+let scanners =
   Seq.append (File.ReadLines "19.input.txt") [""]
   |> Seq.fold
     (fun (scanners, points) curr ->
@@ -134,8 +134,7 @@ let lostScanners =
     ([], [])
   |> fst
   |> List.rev
-
-let scanners = solve lostScanners
+  |> solve
 
 scanners
 |> List.collect (fun s -> s.beacons)
