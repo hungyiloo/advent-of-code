@@ -85,18 +85,15 @@ let split n =
     | _ -> n
   (recurse n, didSplit)
 
-let reduce n =
-  let mutable keepReducing = true
-  let mutable result = n
-  while keepReducing do
-    // this very specific order of operations is EXTREMELY important
-    // do NOT try to be greedy and do multiple explosions or splits in one step
-    // do NOT try to split after an explosion unless we're sure there are no other explosions possible
-    let nextResult, didExplode = explode result
-    let nextResult, didSplit = if didExplode then nextResult, false else split nextResult
-    keepReducing <- didExplode || didSplit
-    result <- nextResult
-  result
+let rec reduce n =
+  // this very specific order of operations is EXTREMELY important
+  // do NOT try to be greedy and do multiple explosions or splits in one step
+  // do NOT try to split after an explosion unless we're sure there are no other explosions possible
+  let result, didExplode = explode n
+  let result, didSplit = if didExplode then result, false else split result
+  if didExplode || didSplit
+  then reduce result
+  else result
 
 let add n1 n2 = Pair(n1, n2) |> reduce
 
