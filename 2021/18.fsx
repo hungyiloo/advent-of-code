@@ -38,31 +38,29 @@ let rec walk fLiteral fExploded fPair depth n =
   | Exploded -> fExploded depth
   | Pair(a, b) -> fPair depth (recurse a, recurse b)
 
-let rec encode n =
-  walk
-    (fun _ x -> string x)
-    (fun _ -> "0*")
-    (fun _ (a,b) -> sprintf "[%s,%s]" a b)
-    0
-    n
+let rec encode =
+  function
+  | Literal x -> string x
+  | Exploded -> "0*"
+  | Pair(a,b) -> sprintf "[%s, %s]" (encode a) (encode b)
 
-let rec addToLeftmostLiteral delta n =
-  match n with
+let rec addToLeftmostLiteral delta =
+  function
   | Literal x -> Literal (x + delta)
   | Pair(a, b) -> Pair(addToLeftmostLiteral delta a, b)
   | q -> q
 
-let rec addToRightmostLiteral delta n =
-  match n with
+let rec addToRightmostLiteral delta =
+  function
   | Literal x -> Literal (x + delta)
   | Pair(a, b) -> Pair(a, addToRightmostLiteral delta b)
   | q -> q
 
-let rec resetExploded n =
-  match n with
+let rec resetExploded =
+  function
   | Exploded -> Literal 0
   | Pair(a,b) -> Pair(resetExploded a, resetExploded b)
-  | _ -> n
+  | q -> q
 
 let explode n =
   let mutable exploded = false // only explode ONCE
@@ -111,8 +109,8 @@ let reduce n =
 
 let add n1 n2 = Pair(n1, n2) |> reduce
 
-let rec magnitude n =
-  match n with
+let rec magnitude =
+  function
   | Literal x -> x
   | Pair (a, b) -> (3 * (magnitude a)) + (2 * (magnitude b))
   | Exploded -> 0
