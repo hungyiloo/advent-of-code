@@ -50,7 +50,12 @@ let translate translation point =
   let x', y', z' = translation
   x + x', y + y', z + z'
 
-let intersect xs ys = xs |> List.filter (fun x -> List.contains x ys)
+let intersect xs ys = xs |> List.fold (fun acc x -> acc + if List.contains x ys then 1 else 0) 0
+
+let manhattanDistance (a, b) =
+  let x1, y1, z1 = a
+  let x2, y2, z2 = b
+  (abs (x1 - x2)) + (abs (y1 - y2)) + (abs (z1 - z2))
 
 let locate reference scanner =
   if scanner.found then
@@ -61,42 +66,41 @@ let locate reference scanner =
       if Option.isNone result then
         let rotatedBeacons = scanner.beacons |> List.map (rotate rotation)
         let beaconPairs = rotatedBeacons ++ reference.beacons
-        for ((x, y, z), (x', y', z')) in beaconPairs do
-          if Option.isNone result then
-            let translation = x' - x, y' - y, z' - z
-            let translatedBeacons = rotatedBeacons |> List.map (translate translation)
-            let matches = intersect translatedBeacons reference.beacons
-            if (List.length matches) >= 12 then
-              result <- Some
-                { found = true
-                  translation = translation
-                  rotation = rotation
-                  beacons = translatedBeacons }
+        let estimatedOverlaps =
+          beaconPairs
+          |> List.groupBy manhattanDistance
+          |> List.maxBy (snd >> List.length)
+          |> snd
+        if (List.length estimatedOverlaps) >= 12 then
+          for (x, y, z), (x', y', z') in estimatedOverlaps do
+            if Option.isNone result then
+              let translation = x' - x, y' - y, z' - z
+              let translatedBeacons = rotatedBeacons |> List.map (translate translation)
+              let exactOverlaps = intersect translatedBeacons reference.beacons
+              if exactOverlaps >= 12 then
+                result <- Some
+                  { found = true
+                    translation = translation
+                    rotation = rotation
+                    beacons = translatedBeacons }
     result
 
 let solve scanners =
-  let mutable allFound, remaining = List.partition (fun s -> s.found) scanners
-  let mutable found = allFound
+  let mutable found, remaining = List.partition (fun s -> s.found) scanners
+  let mutable foundToScan = found
   while not (List.isEmpty remaining) do
-    printfn "Found: %A; Still remaining: %A" (List.length allFound) (List.length remaining)
     let mutable newlyFound = []
-    for reference in found do
+    for reference in foundToScan do
       let mutable stillRemaining = []
       for scanner in remaining do
         match locate reference scanner with
         | Some x ->
-          // printfn "Located %A" x
           newlyFound <- x::newlyFound
         | None -> stillRemaining <- scanner::stillRemaining
       remaining <- stillRemaining
-    allFound <- allFound @ found
-    found <- newlyFound
-  allFound @ found
-
-let manhattanDistance (a, b) =
-  let x1, y1, z1 = a
-  let x2, y2, z2 = b
-  (abs (x1 - x2)) + (abs (y1 - y2)) + (abs (z1 - z2))
+    found <- found @ foundToScan
+    foundToScan <- newlyFound
+  found @ foundToScan
 
 let lostScanners =
   Seq.append (File.ReadLines "19.input.txt") [""]
