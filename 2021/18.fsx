@@ -31,13 +31,6 @@ let read =
   >> fst
   >> List.exactlyOne
 
-let rec walk fLiteral fExploded fPair depth n =
-  let recurse = walk fLiteral fExploded fPair (depth + 1)
-  match n with
-  | Literal x -> fLiteral depth x
-  | Exploded -> fExploded depth
-  | Pair(a, b) -> fPair depth (recurse a, recurse b)
-
 let rec encode =
   function
   | Literal x -> string x
@@ -64,24 +57,22 @@ let rec resetExploded =
 
 let explode n =
   let mutable exploded = false // only explode ONCE
-  let result =
-    walk
-      (fun _ x -> Literal x, 0, 0)
-      (fun _ -> Exploded, 0, 0)
-      (fun depth ((a, aLeft, aRight), (b, bLeft, bRight)) ->
-        if depth >= 4 && not exploded
-        then
-          exploded <- true
-          match a, b with
-          | Literal a, Literal b -> Exploded, a, b
-          | _ -> failwith "Can't explode nested pairs"
-        else
-          Pair(a |> addToRightmostLiteral bLeft, b |> addToLeftmostLiteral aRight), aLeft, bRight)
-      0
-      n
-    |> (fun (x, _, _) -> x)
-    |> resetExploded
-  (result, exploded)
+  let rec recurse depth (n, left, right) =
+    match n with
+    | Literal _ -> n, 0, 0
+    | Exploded -> n, 0, 0
+    | Pair(a, b) when depth >= 4 && not exploded ->
+      exploded <- true
+      match a, b with
+      | Literal a, Literal b -> Exploded, a, b
+      | _ -> failwith "Can't explode nested pairs"
+    | Pair(a, b) ->
+      let a, aLeft, aRight = recurse (depth + 1) (a, left, right)
+      let b, bLeft, bRight = recurse (depth + 1) (b, left, right)
+      Pair(a |> addToRightmostLiteral bLeft, b |> addToLeftmostLiteral aRight), aLeft, bRight
+
+  recurse 0 (n, 0, 0) |> (fun (x, _, _) -> x) |> resetExploded,
+  exploded
 
 let split n =
   let mutable didSplit = false // only do ONE split
