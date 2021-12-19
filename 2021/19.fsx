@@ -126,10 +126,13 @@ let scanners =
     match curr with
     | Split "," [ x; y; z ] -> scanners, (int x, int y, int z)::points
     | "" ->
-     { found = List.isEmpty scanners
-       translation = 0,0,0
-       rotation = 0,0,0
-       beacons = points }::scanners, []
+      match points with
+      | [] -> scanners, []
+      | _ ->
+        { found = List.isEmpty scanners
+          translation = 0,0,0
+          rotation = 0,0,0
+          beacons = points }::scanners, []
     | _ -> scanners, points)
     ([], [])
   |> fst
