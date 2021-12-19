@@ -5,10 +5,9 @@ type SnailfishNumber =
   | Exploded
   | Pair of SnailfishNumber * SnailfishNumber
 
-let read s =
-  s
-  |> Seq.toArray
-  |> Array.fold
+let read =
+  Seq.toArray
+  >> Array.fold
     (fun acc c ->
       let stack, cache = acc
       match c with
@@ -29,8 +28,8 @@ let read s =
         | _ -> failwith "Not enough items in stack to close a pair!"
       | n -> stack, cache + (string n))
     ([], "")
-  |> fst
-  |> List.exactlyOne
+  >> fst
+  >> List.exactlyOne
 
 let rec walk fLiteral fExploded fPair depth n =
   let recurse = walk fLiteral fExploded fPair (depth + 1)
@@ -59,6 +58,12 @@ let rec addToRightmostLiteral delta n =
   | Pair(a, b) -> Pair(a, addToRightmostLiteral delta b)
   | q -> q
 
+let rec resetExploded n =
+  match n with
+  | Exploded -> Literal 0
+  | Pair(a,b) -> Pair(resetExploded a, resetExploded b)
+  | _ -> n
+
 let explode n =
   let mutable exploded = false // only explode ONCE
   let result =
@@ -77,28 +82,19 @@ let explode n =
       0
       n
     |> (fun (x, _, _) -> x)
-    // reset all the Exploded numbers back to Literal 0
-    |> walk
-      (fun _ x -> Literal x)
-      (fun _ -> Literal 0)
-      (fun _ p -> Pair p)
-      0
-  (result, result <> n)
+    |> resetExploded
+  (result, exploded)
 
 let split n =
   let mutable didSplit = false // only do ONE split
-  let result =
-    walk
-      (fun _ x ->
-        if x >= 10 && not didSplit then
-          didSplit <- true
-          Pair(Literal(x/2), Literal((x+1)/2))
-        else Literal x)
-      (fun _ -> Exploded)
-      (fun _ (a,b) -> Pair(a,b))
-      0
-      n
-  (result, result <> n)
+  let rec recurse n =
+    match n with
+    | Literal x when x >= 10 && not didSplit ->
+      didSplit <- true
+      Pair(Literal(x/2), Literal((x+1)/2))
+    | Pair(a, b) -> Pair(recurse a, recurse b)
+    | _ -> n
+  (recurse n, didSplit)
 
 let reduce n =
   let mutable keepReducing = true
