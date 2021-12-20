@@ -1,15 +1,6 @@
 open System
 open System.IO
 
-let (|Split|) (separator: string) (s: string) =
-  match s.Trim().Split([| separator |], StringSplitOptions.RemoveEmptyEntries) with
-  | arr -> arr |> Seq.toList
-
-let parseLine line =
-  match line with
-  | Split "," [ p1; p2 ] -> p1, p2
-  | _ -> failwith "Invalid input line"
-
 let rawDecoder, rawImageLines =
   File.ReadAllLines "20.input.txt"
   |> Seq.toList
@@ -29,46 +20,86 @@ let image =
     Map.empty<int * int, bool>
 
 let getGrid (x, y) =
-  [ (x, y)
-    (x + 1, y)
-    (x - 1, y)
-    (x, y + 1)
-    (x, y - 1)
-    (x + 1, y + 1)
-    (x - 1, y - 1)
-    (x + 1, y - 1)
-    (x - 1, y + 1) ]
+  [ (x-1, y-1); (x-1, y); (x-1, y+1)
+    (x, y-1);   (x, y);   (x, y+1)
+    (x+1, y-1); (x+1, y); (x+1, y+1) ]
 
-let gridAsInt coords image =
-  coords
-  |> Seq.map (fun coord ->
-              match Map.tryFind coord image with
-              | Some v -> v
-              | None -> false)
-  |> Seq.fold (fun acc n -> acc <<< 1 ||| if n then 1 else 0) 0
+let getImagePixel (fallback, image) coord =
+  match Map.tryFind coord image with
+  | Some v -> v
+  // Untracked pixels are set with a fallback value.
+  // They can be on or off depending on the cycle, which is handled in the step function.
+  | None -> fallback
 
-let decodeImageAt coord image =
-  let grid = getGrid coord
-  let key = gridAsInt grid image
-  decoder.[key]
+let decodeBitArray arr =
+  arr
+  |> Seq.fold (fun acc n -> (acc <<< 1) ||| if n then 1 else 0) 0
+  |> (fun n -> decoder.[n])
 
 let inline (++) xs ys = xs |> List.collect (fun x -> ys |> List.map (fun y -> x, y))
 
-let step (image: Map<int * int, bool>) =
+let getImageSize image =
   let allCoords = Map.keys image
-  let x1 = (allCoords |> Seq.map fst |> Seq.min) - 1
-  let x2 = (allCoords |> Seq.map fst |> Seq.max) + 1
-  let y1 = (allCoords |> Seq.map snd |> Seq.min) - 1
-  let y2 = (allCoords |> Seq.map snd |> Seq.max) + 1
-  [x1..x2] ++ [y1..y2]
-  |> Seq.fold
-    (fun nextImage coord -> Map.add coord (decodeImageAt coord image) nextImage)
-    Map.empty<int * int, bool>
+  let allX = allCoords |> Seq.map fst
+  let allY = allCoords |> Seq.map snd
+  let x1 = (allX |> Seq.min) - 1
+  let x2 = (allX |> Seq.max) + 1
+  let y1 = (allY |> Seq.min) - 1
+  let y2 = (allY |> Seq.max) + 1
+  x1, x2, y1, y2
+
+// Recalculates the fallback pixel value, on or off, for tracking the infinite plane.
+// We do this by creating a virtual grid full of previous fallback values,
+// then using this array of all on or off whether the next fallback is on or off based on the decoder array.
+// "If a tree falls in the forest..." the result is decided entirely on the decoder array!
+// Hint: Usually this maps to the first and last characters of the decoder line. (i.e. all 0 or all 1)
+let recalculateFallback fallback = Array.create 9 fallback |> decodeBitArray
+
+let step (fallback, image) =
+  let x1, x2, y1, y2 = getImageSize image
+  let nextImage =
+    [x1..x2] ++ [y1..y2]
+    |> Seq.map
+      (fun coord ->
+        coord,
+        coord
+        |> getGrid
+        |> Seq.map (getImagePixel (fallback, image))
+        |> decodeBitArray)
+    |> Seq.fold
+      (fun nextImage (coord, pixel) -> Map.add coord pixel nextImage)
+      Map.empty<int * int, bool>
+
+  recalculateFallback fallback, // recalculate the next fallback
+  nextImage
 
 let repeat n fn = Seq.replicate n fn |> Seq.reduce (>>)
 
 let countLit image = Map.values image |> Seq.map (fun v -> if v then 1 else 0) |> Seq.sum
 
-repeat 2 step image
+let printImage (fallback, image) =
+  let x1, x2, y1, y2 = getImageSize image
+  [x1..x2]
+  |> List.map
+    (fun x ->
+     [y1..y2]
+     |> List.map (fun y -> x, y)
+     |> Seq.map (getImagePixel (fallback, image))
+     |> Seq.map (function | true -> '#' | false ->  '.')
+     |> Seq.toArray
+     |> String)
+  |> Seq.iter (printfn "%s")
+
+  fallback, image
+
+repeat 2 step (false, image) // first fallback for infinite plane is all off, as defined by the puzzle
+// |> printImage
+|> snd
 |> countLit
 |> printfn "Part 1: %A"
+
+repeat 50 step (false, image)
+// |> printImage
+|> snd
+|> countLit
+|> printfn "Part 2: %A"
