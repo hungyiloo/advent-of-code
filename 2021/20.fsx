@@ -49,8 +49,8 @@ let getImageSize image =
   x1, x2, y1, y2
 
 // Recalculates the fallback pixel value, on or off, for tracking the infinite plane.
-// We do this by creating a virtual grid full of previous fallback values,
-// then using this array of all on or off whether the next fallback is on or off based on the decoder array.
+// We do this by creating a virtual grid full of previous fallback values.
+// Using this array of all on or off, decide whether the next fallback is on or off based on the decoder array.
 // "If a tree falls in the forest..." the result is decided entirely on the decoder array!
 // Hint: Usually this maps to the first and last characters of the decoder line. (i.e. all 0 or all 1)
 let recalculateFallback fallback = Array.create 9 fallback |> decodeBitArray
