@@ -21,7 +21,7 @@ let p1Start, p2Start =
 
 let nextPosition currentPos steps = ((currentPos - 1) + steps) % 10 + 1
 
-let practiceGame p1Start p2Start winThreshold =
+let practiceGame p1Start p2Start =
   let dice = seq { while true do for i in 1..100 do yield i }
 
   let roll totalRolls =
@@ -34,10 +34,10 @@ let practiceGame p1Start p2Start winThreshold =
     score + position,
     position
 
-  let finished players threshold =
+  let finished players =
     match players with
     | [] -> false
-    | _ -> (players |> Seq.map fst |> Seq.max) >= threshold
+    | _ -> (players |> Seq.map fst |> Seq.max) >= 1000
 
   let scoreGame (totalRolls, players) =
     match players with
@@ -45,14 +45,14 @@ let practiceGame p1Start p2Start winThreshold =
     | _ -> (players |> Seq.map fst |> Seq.min) * totalRolls
 
   let rec play (totalRolls, players) =
-    if finished players winThreshold then
+    if finished players then
       totalRolls, players
     else
       let totalRolls, players =
         ((totalRolls, []), players)
         ||> Seq.fold
           (fun (totalRolls, players) player ->
-            if finished players winThreshold then
+            if finished players then
               totalRolls, player::players
             else
               let rolls, totalRolls = roll totalRolls
@@ -63,7 +63,7 @@ let practiceGame p1Start p2Start winThreshold =
   let players = [(0, p1Start); (0, p2Start)]
   play (0, players) |> scoreGame
 
-practiceGame p1Start p2Start 1000
+practiceGame p1Start p2Start
 |> printfn "Part 1: %A"
 
 let comb n source =
