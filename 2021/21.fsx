@@ -79,6 +79,7 @@ let diracOutcomes =
   |> Seq.map Seq.sum
   |> Seq.toList
 
+#nowarn "40"
 let rec wins =
   memoize
     (fun (score1, pos1, score2, pos2) ->
