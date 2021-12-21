@@ -19,42 +19,40 @@ let p1Start, p2Start =
       | [ p1; p2 ] -> int p1, int p2
       | _ -> failwith "Invalid input format")
 
-let dice = seq { while true do for i in 1..100 do yield i }
-
 let nextPosition currentPos steps = ((currentPos - 1) + steps) % 10 + 1
 
-let roll totalRolls =
-  let n = 3
-  dice |> Seq.skip (totalRolls % 100) |> Seq.take n,
-  totalRolls + n
+let practiceGame p1Start p2Start winThreshold =
+  let dice = seq { while true do for i in 1..100 do yield i }
 
-let move stepList (score, position) =
-  let position = nextPosition position (stepList |> Seq.sum)
-  score + position,
-  position
+  let roll totalRolls =
+    let n = 3
+    dice |> Seq.skip (totalRolls % 100) |> Seq.take n,
+    totalRolls + n
 
-let repeat n fn = Seq.replicate n fn |> Seq.reduce (>>)
+  let move stepList (score, position) =
+    let position = nextPosition position (stepList |> Seq.sum)
+    score + position,
+    position
 
-let finished players threshold =
-  match players with
-  | [] -> false
-  | _ -> (players |> Seq.map fst |> Seq.max) >= threshold
+  let finished players threshold =
+    match players with
+    | [] -> false
+    | _ -> (players |> Seq.map fst |> Seq.max) >= threshold
 
-let scoreGame (totalRolls, players) =
-  match players with
-  | [] -> failwith "Can't score a game without players"
-  | _ -> (players |> Seq.map fst |> Seq.min) * totalRolls
+  let scoreGame (totalRolls, players) =
+    match players with
+    | [] -> failwith "Can't score a game without players"
+    | _ -> (players |> Seq.map fst |> Seq.min) * totalRolls
 
-let game players threshold =
   let rec play (totalRolls, players) =
-    if finished players threshold then
+    if finished players winThreshold then
       totalRolls, players
     else
       let totalRolls, players =
         ((totalRolls, []), players)
         ||> Seq.fold
           (fun (totalRolls, players) player ->
-            if finished players threshold then
+            if finished players winThreshold then
               totalRolls, player::players
             else
               let rolls, totalRolls = roll totalRolls
@@ -62,9 +60,10 @@ let game players threshold =
               totalRolls, player::players)
       play (totalRolls, players |> List.rev)
 
+  let players = [(0, p1Start); (0, p2Start)]
   play (0, players) |> scoreGame
 
-game [(0, p1Start); (0, p2Start)] 1000
+practiceGame p1Start p2Start 1000
 |> printfn "Part 1: %A"
 
 let comb n source =
