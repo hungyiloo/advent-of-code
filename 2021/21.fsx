@@ -76,6 +76,8 @@ let comb n source =
 let diracOutcomes =
   comb 3 [1; 2; 3]
   |> Seq.map Seq.sum
+  |> Seq.countBy id
+  |> Seq.map (fun (p, count) -> p, int64 count)
   |> Seq.toList
 
 #nowarn "40"
@@ -84,20 +86,22 @@ let rec wins =
     (fun (score1, pos1, score2, pos2) ->
       diracOutcomes
       |> List.collect
-        (fun steps1 ->
+        (fun (steps1, universes1) ->
           let pos1 = nextPosition pos1 steps1
           let score1 = score1 + pos1
           if score1 >= 21
-          then [(1L, 0L)]
+          then [(universes1, 0L)]
           else
             diracOutcomes
             |> List.map
-              (fun steps2 ->
+              (fun (steps2, universes2) ->
                 let pos2 = nextPosition pos2 steps2
                 let score2 = score2 + pos2
                 if score2 >= 21
-                then (0L, 1L)
-                else wins (score1, pos1, score2, pos2)))
+                then (0L, universes2)
+                else
+                  let w1, w2 = wins (score1, pos1, score2, pos2)
+                  (universes1 * universes2 * w1, universes1 * universes2 * w2)))
       |> List.reduce (fun (a, b) (a', b') -> (a + a', b + b')))
 
 let win1, win2 = wins (0, p1Start, 0, p2Start)
