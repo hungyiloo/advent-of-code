@@ -1,19 +1,8 @@
 open System
 open System.IO
 
-let (|SplitMulti|) (separators: string seq) (s: string) =
-  match s.Trim().Split(separators |> Seq.toArray, StringSplitOptions.RemoveEmptyEntries) with
-  | arr -> arr |> Seq.toList
-
 type CubeState = | On | Off
 type Cube = | Cube of ((int64 * int64) * (int64 * int64) * (int64 * int64) * CubeState)
-
-let parseRange rangeString =
-  match rangeString with
-  | SplitMulti [ "="; ".." ] [ _; v1; v2 ] -> (int64 v1, int64 v2)
-  | e -> failwith (sprintf "Invalid range string %A" e)
-
-let inRange (min, max) x = x >= min && x <= max
 
 let overlap a b =
   match a, b with
@@ -39,8 +28,7 @@ let volume cube =
       | Off -> -1L
     ((abs (x1 - x2)) + 1L) * ((abs (y1 - y2)) + 1L) * ((abs (z1 - z2)) + 1L) * sign
 
-let reducer existingCubes cube =
-  // printfn "%A" (List.length existingCubes)
+let reduceCubes existingCubes cube =
   existingCubes
   |> Seq.fold
     (fun acc existingCube ->
@@ -52,12 +40,20 @@ let reducer existingCubes cube =
         | None, _, _ -> acc)
     existingCubes
   |> (fun newCubes ->
-      let result =
         match cube with
         | Cube(_, _, _, On) -> cube::newCubes
-        | Cube(_, _, _, Off) -> newCubes
-      // printfn "%A" result
-      result)
+        | Cube(_, _, _, Off) -> newCubes)
+
+let (|SplitMulti|) (separators: string seq) (s: string) =
+  match s.Trim().Split(separators |> Seq.toArray, StringSplitOptions.RemoveEmptyEntries) with
+  | arr -> arr |> Seq.toList
+
+let parseRange rangeString =
+  match rangeString with
+  | SplitMulti [ "="; ".." ] [ _; v1; v2 ] -> (int64 v1, int64 v2)
+  | e -> failwith (sprintf "Invalid range string %A" e)
+
+let inRange (min, max) x = min <= x && x <= max
 
 let ranges =
   File.ReadAllLines "22.input.txt"
@@ -77,15 +73,15 @@ ranges
     (fun cube ->
       let valid = inRange (-50L, 50L)
       match cube with
-      | Cube((x1, x2), (y1, y2), (z1, z2), _) when valid x1 || valid x2 || valid y1 || valid y2 || valid z1 || valid z2 -> true
+      | Cube((x1, x2), (y1, y2), (z1, z2), _) when valid x1 && valid x2 && valid y1 && valid y2 && valid z1 && valid z2 -> true
       | _ -> false)
-  |> Seq.fold reducer []
+  |> Seq.fold reduceCubes []
   |> Seq.map volume
   |> Seq.sum
   |> printfn "Part 1: %d"
 
 ranges
-  |> Seq.fold reducer []
+  |> Seq.fold reduceCubes []
   |> Seq.map volume
   |> Seq.sum
   |> printfn "Part 2: %d"
