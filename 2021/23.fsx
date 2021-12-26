@@ -119,7 +119,7 @@ let dijkstra start =
            costs.[state] <- nextCost
            let pq = pq |> List.filter (fun o -> o.state <> state)
            insertByCost pq { state = state; cost = nextCost }
-         // if this is thef irst time seeing this state, track its cost
+         // if this is the first time seeing this state, track its cost
          | false, _ ->
            costs.[state] <- nextCost
            insertByCost pq { state = state; cost = nextCost })
