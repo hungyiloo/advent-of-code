@@ -1,7 +1,5 @@
 #load "../lib/Memoization.fsx"
 open Memoization
-open System.IO
-open System
 open System.Collections.Generic
 
 type Letter = A | B | C | D
@@ -106,7 +104,6 @@ let nextStates =
                   | None -> None)
       Seq.concat [roomMoves; hallwayMoves])
 
-
 let dijkstra start =
   let insertByCost pq newOutcome =
     let index = List.tryFindIndex (fun outcome -> outcome.cost > newOutcome.cost) pq
@@ -137,13 +134,8 @@ let dijkstra start =
            costs.[state] <- nextCost
            insertByCost pq { state = state; cost = nextCost })
 
-  let mutable count = 0
   let rec search pq =
     let bestOutcome = List.head pq
-    count <- count + 1
-    if count % 1000 = 0 then
-      printfn "%A" count
-      printfn "%A" bestOutcome
     if win bestOutcome.state
     then bestOutcome.cost
     else search (explore pq)
@@ -152,37 +144,22 @@ let dijkstra start =
 
 let parseLetter = function | "A" -> A | "B" -> B | "C" -> C | "D" -> D | _ -> failwith "Invalid amphipod letter"
 
-let init =
-  File.ReadAllLines "23.input.txt"
-  |> Seq.fold
-    (fun state line ->
-      match line.Split([|"#"|], StringSplitOptions.RemoveEmptyEntries) with
-      | [| a; b; c; d |] ->
-        state.roomA.[0] <- Some(parseLetter a)
-        state.roomB.[0] <- Some(parseLetter b)
-        state.roomC.[0] <- Some(parseLetter c)
-        state.roomD.[0] <- Some(parseLetter d)
-        state
-      | [| "  "; a; b; c; d; "  " |]
-      | [| "  "; a; b; c; d; |] ->
-        state.roomA.[1] <- Some(parseLetter a)
-        state.roomB.[1] <- Some(parseLetter b)
-        state.roomC.[1] <- Some(parseLetter c)
-        state.roomD.[1] <- Some(parseLetter d)
-        state
-      | _ -> state)
-    { roomA = Array.create 2 None; roomB = Array.create 2 None; roomC = Array.create 2 None; roomD = Array.create 2 None; hallway = Array.create 11 None }
-  |> (fun state -> { state = state; cost = 0 })
+let part1 =
+  { state =
+      { roomA = [| Some B; Some C |]
+        roomB = [| Some B; Some A |]
+        roomC = [| Some D; Some D |]
+        roomD = [| Some A; Some C |]
+        hallway = Array.create 11 None }
+    cost = 0 }
+dijkstra part1 |> printfn "Part 1: %A"
 
-dijkstra init
-// nextStates init.state
-// |> Seq.item 15
-// |> fst
-// |> nextStates
-// |> Seq.length
-// |> (fun os -> List.head os |> nextOutcomes)
-// |> (fun os -> List.head os |> nextOutcomes)
-// |> (fun os -> List.head os |> nextOutcomes)
-// |> (fun os -> List.head os |> nextOutcomes)
-// |> (fun os -> List.head os |> nextOutcomes)
-|> printfn "%A"
+let part2 =
+  { state =
+      { roomA = [| Some B; Some D; Some D; Some C |]
+        roomB = [| Some B; Some C; Some B; Some A |]
+        roomC = [| Some D; Some B; Some A; Some D |]
+        roomD = [| Some A; Some A; Some C; Some C |]
+        hallway = Array.create 11 None }
+    cost = 0 }
+dijkstra part2 |> printfn "Part 2: %A"
