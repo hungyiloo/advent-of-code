@@ -22,8 +22,6 @@ let (|Op|) (x: string) =
 
 let getZ state = match Map.tryFind "z" state.registers with | Some v -> v | None -> 0
 
-let isValid state = getZ state = 0
-
 let reduce state instruction =
   match instruction, state.stack with
   | Input reg, pop::tail -> { registers = Map.add reg pop state.registers; stack = tail }
@@ -35,7 +33,6 @@ let reduce state instruction =
       | Register r -> match Map.tryFind r state.registers with | Some v -> v | None -> 0
     let result = operator left right
     let nextState = { registers = Map.add reg result state.registers; stack = stack }
-    // printfn "%A" nextState
     nextState
   | _ -> failwith "illegal instruction"
 
@@ -51,51 +48,84 @@ let instructions =
 
 let compute input = instructions |> Seq.fold reduce { registers = Map.empty; stack = input } |> getZ
 
-let score (input: int list) =
+let scoreForMax (input: int list) =
   let s1 = input |> Seq.map string |> String.concat "" |> int64
   let s2 = compute input
-  if s2 = 0 then
-    printfn "%A" input
-  s1 - (abs ((int64 s2) * 10000000000L))
+  if s2 = 0 then s1 else -99999999999999L
+
+let scoreForMin (input: int list) =
+  let s1 = input |> Seq.map string |> String.concat "" |> int64
+  let s2 = compute input
+  if s2 = 0 then s1 else 99999999999999L
 
 let r = System.Random()
 let mutate input =
   input
   |> List.map
     (fun digit ->
-     let doMutate = r.Next(0, 8) = 1
+     let doMutate = r.Next(0, 5) = 1
      if doMutate
      then
-       let mutation = r.Next(1, 7)
+       let mutation = r.Next(1, 9)
        (((digit - 1) + mutation) % 9) + 1
      else digit)
 
-// for i in [1111..2222] do
-// let s = "999999999" + string i + "1"
-// let s = "99993999999999"
-// instructions
-// |> Seq.fold reduce { registers = Map.empty; stack = s |> Seq.toList |> List.map (string >> int) }
-// |> getZ
-// |> printfn "%A %A" s
-
-let evolve (inputs: int list list) =
+let evolveForValidity (inputs: int list list) =
   List.replicate 10 inputs
   |> List.concat
   |> List.map mutate
-  |> List.sortByDescending score
-  |> List.take 2
+  |> List.append inputs
+  |> List.sortBy (fun input -> compute input |> abs)
+  |> List.take 3
+
+let evolveForMax (inputs: int list list) =
+  List.replicate 10 inputs
+  |> List.concat
+  |> List.map mutate
+  |> List.append inputs
+  |> List.sortByDescending scoreForMax
+  |> List.take 3
+
+let evolveForMin (inputs: int list list) =
+  List.replicate 10 inputs
+  |> List.concat
+  |> List.map mutate
+  |> List.append inputs
+  |> List.sortBy scoreForMin
+  |> List.take 3
 
 let repeat n fn = Seq.replicate n fn |> Seq.reduce (>>)
 
-// "99999999999999"
-// |> Seq.toList |> List.map (string >> int)
-// |> (fun x -> [x])
-// |> repeat 1000 evolve
-// |> List.map (fun x -> x, compute x)
-// |> printfn "%A"
+let simulate seed generations evolver =
+  seed
+  |> Seq.toList |> List.map (string >> int)
+  |> (fun x -> [x])
+  |> repeat generations evolver
+  |> List.head
+  |> (fun x -> x |> List.map string |> String.concat "")
 
-// success example
-"99393911291467"
-|> Seq.toList |> List.map (string >> int)
-|> compute
-|> printfn "%A"
+let isValid s =
+  s
+  |> Seq.toList
+  |> List.map (string >> int)
+  |> compute
+  |> printfn "Is it valid? %A"
+
+// Discover a solution
+// Use this to sample for valid solutions
+// Starting value does not need to be valid
+simulate "99999999999999" 8000 evolveForValidity
+|> (fun s -> printfn "Some close-to valid solution: %s" s; s)
+|> isValid
+
+// From the sampling above, pick a high (valid) value as a seed
+// This will likely find the max
+simulate "78271999291355" 2000 evolveForMax
+|> (fun s -> printfn "Part 1: %s" s; s)
+|> isValid
+
+// From the sampling above, pick a low (valid) value as a seed
+// This will likely find the min
+simulate "46482988181532" 10000 evolveForMin // pick a low value sampled from above
+|> (fun s -> printfn "Part 2: %s" s; s)
+|> isValid
