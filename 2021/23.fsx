@@ -25,7 +25,6 @@ let getRoom (state: GameState) (room: Letter) =
   | D -> state.roomD
 
 let roomWin letter room = room |> Array.forall ((=) (Some letter))
-let roomOccupants room = room |> Array.choose id
 let roomHasForeigners letter room = room |> Array.choose id |> Array.exists ((<>) letter)
 let roomFirstOccupant room = room |> Array.mapi (fun i x -> match x with | Some l -> Some(i, l) | None -> None) |> Array.tryPick id
 let roomFirstVacancy room = room |> Array.mapi (fun i x -> match x with | None -> Some(i) | Some _ -> None) |> Array.rev |> Array.tryPick id
@@ -61,11 +60,6 @@ let nextStates =
               |> List.map
                 (fun place ->
                   let nextState = clone state
-                    // match roomLetter with
-                    // | A -> { roomA = state.roomA.[*]; roomB = state.roomB; roomC = state.roomC; roomD = state.roomD; hallway = state.hallway.[*] }
-                    // | B -> { roomA = state.roomA; roomB = state.roomB.[*]; roomC = state.roomC; roomD = state.roomD; hallway = state.hallway.[*] }
-                    // | C -> { roomA = state.roomA; roomB = state.roomB; roomC = state.roomC.[*]; roomD = state.roomD; hallway = state.hallway.[*] }
-                    // | D -> { roomA = state.roomA; roomB = state.roomB; roomC = state.roomC; roomD = state.roomD.[*]; hallway = state.hallway.[*] }
                   let room = getRoom nextState roomLetter
                   room.[position] <- None
                   nextState.hallway.[place] <- Some letter
@@ -89,11 +83,6 @@ let nextStates =
                 then None
                 else
                   let nextState = clone state
-                    // match letter with
-                    // | A -> { roomA = state.roomA.[*]; roomB = state.roomB; roomC = state.roomC; roomD = state.roomD; hallway = state.hallway.[*] }
-                    // | B -> { roomA = state.roomA; roomB = state.roomB.[*]; roomC = state.roomC; roomD = state.roomD; hallway = state.hallway.[*] }
-                    // | C -> { roomA = state.roomA; roomB = state.roomB; roomC = state.roomC.[*]; roomD = state.roomD; hallway = state.hallway.[*] }
-                    // | D -> { roomA = state.roomA; roomB = state.roomB; roomC = state.roomC; roomD = state.roomD.[*]; hallway = state.hallway.[*] }
                   nextState.hallway.[place] <- None
                   let targetRoom = getRoom nextState letter
                   match roomFirstVacancy targetRoom with
@@ -112,9 +101,7 @@ let dijkstra start =
     | None -> List.insertAt (List.length pq) newOutcome pq
 
   let costs = new Dictionary<GameState, int>()
-
   let explore pq =
-    // printfn "PQ: %A" (List.length pq)
     let bestOutcome, pq =
       match pq with
       | head::pq -> head, pq
@@ -125,11 +112,14 @@ let dijkstra start =
       (fun pq (state, additionalCost) ->
          let nextCost = bestOutcome.cost + additionalCost
          match costs.TryGetValue state with
+         // if this state has been seen before cheaper, abandon this line of search
          | true, lastCost when lastCost <= nextCost -> pq
+         // if this state has been seen before but the new path is cheaper, abandon old lines of search
          | true, _ ->
            costs.[state] <- nextCost
            let pq = pq |> List.filter (fun o -> o.state <> state)
            insertByCost pq { state = state; cost = nextCost }
+         // if this is thef irst time seeing this state, track its cost
          | false, _ ->
            costs.[state] <- nextCost
            insertByCost pq { state = state; cost = nextCost })
@@ -141,8 +131,6 @@ let dijkstra start =
     else search (explore pq)
 
   search [start]
-
-let parseLetter = function | "A" -> A | "B" -> B | "C" -> C | "D" -> D | _ -> failwith "Invalid amphipod letter"
 
 let part1 =
   { state =
