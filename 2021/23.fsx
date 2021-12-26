@@ -5,34 +5,34 @@ open System.Collections.Generic
 type Letter = A | B | C | D
 type GameState = { roomA: Option<Letter> array; roomB: Option<Letter> array; roomC: Option<Letter> array; roomD: Option<Letter> array; hallway: Option<Letter> array }
 type Outcome = { state: GameState; cost: int }
-let validHallwayPlaces = [ 0; 1; 3; 5; 7; 9; 10 ]
-let letters = [ A; B; C; D ]
 
-let isHallwayBlocked (state: GameState) fromPlace toPlace =
-  validHallwayPlaces
-  |> List.filter (fun p -> (fromPlace < p && p <= toPlace) || (toPlace <= p && p < fromPlace))
-  |> List.exists (fun p -> match state.hallway.[p] with | Some _ -> true | None -> false)
-
-let getRoom (state: GameState) (room: Letter) =
+let getRoom state room =
   match room with
   | A -> state.roomA
   | B -> state.roomB
   | C -> state.roomC
   | D -> state.roomD
 
+let validHallwayPlaces = [ 0; 1; 3; 5; 7; 9; 10 ]
+let letters = [ A; B; C; D ]
+let getRoomHallwayPlace = function | A -> 2 | B -> 4 | C -> 6 | D -> 8
+let energy = function | A -> 1 | B -> 10 | C -> 100 | D -> 1000
 let roomWin letter room = room |> Array.forall ((=) (Some letter))
 let roomHasForeigners letter room = room |> Array.choose id |> Array.exists ((<>) letter)
 let roomFirstOccupant room = room |> Array.mapi (fun i x -> match x with | Some l -> Some(i, l) | None -> None) |> Array.tryPick id
-let roomFirstVacancy room = room |> Array.mapi (fun i x -> match x with | None -> Some(i) | Some _ -> None) |> Array.rev |> Array.tryPick id
-let win (state: GameState) = [ A; B; C; D ] |> List.forall (fun letter -> getRoom state letter |> roomWin letter)
-let getRoomHallwayPlace = function | A -> 2 | B -> 4 | C -> 6 | D -> 8
-let energy = function | A -> 1 | B -> 10 | C -> 100 | D -> 1000
+let roomDeepestVacancy room = room |> Array.mapi (fun i x -> match x with | None -> Some(i) | Some _ -> None) |> Array.rev |> Array.tryPick id
+let win state = [ A; B; C; D ] |> List.forall (fun letter -> getRoom state letter |> roomWin letter)
 let clone state = { roomA = state.roomA.[*]; roomB = state.roomB.[*]; roomC = state.roomC.[*]; roomD = state.roomD.[*]; hallway = state.hallway.[*] }
-let getCost letter roomLetter depth hallwayPlace  = energy letter * ((abs (hallwayPlace - getRoomHallwayPlace roomLetter)) + depth + 1)
+let getMoveCost letter roomLetter depth hallwayPlace  = energy letter * ((abs (hallwayPlace - getRoomHallwayPlace roomLetter)) + depth + 1)
+
+let isHallwayBlocked state fromPlace toPlace =
+  validHallwayPlaces
+  |> List.filter (fun p -> (fromPlace < p && p <= toPlace) || (toPlace <= p && p < fromPlace))
+  |> List.exists (fun p -> match state.hallway.[p] with | Some _ -> true | None -> false)
 
 let nextStates =
   memoize
-    (fun (state: GameState) ->
+    (fun state ->
       let roomMoves =
         letters
         |> Seq.collect
@@ -52,7 +52,7 @@ let nextStates =
                   let room = getRoom nextState roomLetter
                   room.[depth] <- None
                   nextState.hallway.[place] <- Some letter
-                  let additionalCost = getCost letter roomLetter depth place
+                  let additionalCost = getMoveCost letter roomLetter depth place
                   nextState, additionalCost))
       let hallwayMoves =
         validHallwayPlaces
@@ -74,10 +74,10 @@ let nextStates =
                   let nextState = clone state
                   nextState.hallway.[place] <- None
                   let targetRoom = getRoom nextState letter
-                  match roomFirstVacancy targetRoom with
+                  match roomDeepestVacancy targetRoom with
                   | Some vacantDepth ->
                     targetRoom.[vacantDepth] <- Some letter
-                    let additionalCost = getCost letter letter vacantDepth place
+                    let additionalCost = getMoveCost letter letter vacantDepth place
                     Some(nextState, additionalCost)
                   | None -> None)
       Seq.concat [roomMoves; hallwayMoves])
