@@ -49,50 +49,39 @@ let instructions =
 let compute input = instructions |> Seq.fold reduce { registers = Map.empty; stack = input } |> getZ
 
 let scoreForMax (input: int list) =
-  let s1 = input |> Seq.map string |> String.concat "" |> int64
-  let s2 = compute input
-  if s2 = 0 then s1 else -99999999999999L
+  if compute input = 0
+  then input |> Seq.map string |> String.concat "" |> int64
+  else -99999999999999L
 
 let scoreForMin (input: int list) =
-  let s1 = input |> Seq.map string |> String.concat "" |> int64
-  let s2 = compute input
-  if s2 = 0 then s1 else 99999999999999L
+  if compute input = 0
+  then input |> Seq.map string |> String.concat "" |> int64
+  else 99999999999999L
 
-let r = System.Random()
-let mutate input =
-  input
-  |> List.map
-    (fun digit ->
-     let doMutate = r.Next(0, 5) = 1
-     if doMutate
-     then
-       let mutation = r.Next(1, 9)
-       (((digit - 1) + mutation) % 9) + 1
-     else digit)
+let mutate =
+  let r = System.Random()
+  (fun input ->
+    input
+    |> List.map
+      (fun digit ->
+      let doMutate = r.Next(0, 5) = 1
+      if doMutate
+      then
+        let mutation = r.Next(1, 9)
+        (((digit - 1) + mutation) % 9) + 1
+      else digit))
 
-let evolveForValidity (inputs: int list list) =
+let evolve sorter (inputs: int list list) =
   List.replicate 10 inputs
   |> List.concat
   |> List.map mutate
   |> List.append inputs
-  |> List.sortBy (fun input -> compute input |> abs)
+  |> sorter
   |> List.take 3
 
-let evolveForMax (inputs: int list list) =
-  List.replicate 10 inputs
-  |> List.concat
-  |> List.map mutate
-  |> List.append inputs
-  |> List.sortByDescending scoreForMax
-  |> List.take 3
-
-let evolveForMin (inputs: int list list) =
-  List.replicate 10 inputs
-  |> List.concat
-  |> List.map mutate
-  |> List.append inputs
-  |> List.sortBy scoreForMin
-  |> List.take 3
+let evolveForValidity = evolve (List.sortBy (fun input -> compute input |> abs))
+let evolveForMax = evolve (List.sortByDescending scoreForMax)
+let evolveForMin = evolve (List.sortBy scoreForMin)
 
 let repeat n fn = Seq.replicate n fn |> Seq.reduce (>>)
 
@@ -109,18 +98,19 @@ let isValid s =
   |> Seq.toList
   |> List.map (string >> int)
   |> compute
-  |> printfn "Is it valid? %A"
+  |> (fun z -> if z = 0 then "Yes" else "No")
+  |> printfn "Is it valid? %s"
 
 // Discover a solution
 // Use this to sample for valid solutions
 // Starting value does not need to be valid
-simulate "99999999999999" 8000 evolveForValidity
+simulate "55555555555555" 9000 evolveForValidity
 |> (fun s -> printfn "Some close-to valid solution: %s" s; s)
 |> isValid
 
 // From the sampling above, pick a high (valid) value as a seed
 // This will likely find the max
-simulate "78271999291355" 2000 evolveForMax
+simulate "85593966291626" 2000 evolveForMax
 |> (fun s -> printfn "Part 1: %s" s; s)
 |> isValid
 
