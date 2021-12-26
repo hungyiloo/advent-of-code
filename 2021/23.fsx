@@ -28,7 +28,7 @@ let win (state: GameState) = [ A; B; C; D ] |> List.forall (fun letter -> getRoo
 let getRoomHallwayPlace = function | A -> 2 | B -> 4 | C -> 6 | D -> 8
 let energy = function | A -> 1 | B -> 10 | C -> 100 | D -> 1000
 let clone state = { roomA = state.roomA.[*]; roomB = state.roomB.[*]; roomC = state.roomC.[*]; roomD = state.roomD.[*]; hallway = state.hallway.[*] }
-let getCost letter room depth hallwayPlace  = energy letter * ((abs (hallwayPlace - getRoomHallwayPlace room)) + depth + 1)
+let getCost letter roomLetter depth hallwayPlace  = energy letter * ((abs (hallwayPlace - getRoomHallwayPlace roomLetter)) + depth + 1)
 
 let nextStates =
   memoize
@@ -43,16 +43,16 @@ let nextStates =
           else
             match roomFirstOccupant room with
             | None -> []
-            | Some(position, letter) ->
+            | Some(depth, letter) ->
               validHallwayPlaces
               |> List.filter (isHallwayBlocked state (getRoomHallwayPlace roomLetter) >> not)
               |> List.map
                 (fun place ->
                   let nextState = clone state
                   let room = getRoom nextState roomLetter
-                  room.[position] <- None
+                  room.[depth] <- None
                   nextState.hallway.[place] <- Some letter
-                  let additionalCost = getCost letter roomLetter position place
+                  let additionalCost = getCost letter roomLetter depth place
                   nextState, additionalCost))
       let hallwayMoves =
         validHallwayPlaces
@@ -75,9 +75,9 @@ let nextStates =
                   nextState.hallway.[place] <- None
                   let targetRoom = getRoom nextState letter
                   match roomFirstVacancy targetRoom with
-                  | Some vacantPosition ->
-                    targetRoom.[vacantPosition] <- Some letter
-                    let additionalCost = getCost letter letter vacantPosition place
+                  | Some vacantDepth ->
+                    targetRoom.[vacantDepth] <- Some letter
+                    let additionalCost = getCost letter letter vacantDepth place
                     Some(nextState, additionalCost)
                   | None -> None)
       Seq.concat [roomMoves; hallwayMoves])
