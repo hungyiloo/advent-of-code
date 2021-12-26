@@ -50,8 +50,8 @@ let compute input = instructions |> Seq.fold reduce { registers = Map.empty; sta
 
 let scoreForMax (input: int list) =
   if compute input = 0
-  then input |> Seq.map string |> String.concat "" |> int64
-  else -99999999999999L
+  then 99999999999999L - (input |> Seq.map string |> String.concat "" |> int64)
+  else 99999999999999L
 
 let scoreForMin (input: int list) =
   if compute input = 0
@@ -80,7 +80,7 @@ let evolve sorter (inputs: int list list) =
   |> List.take 3
 
 let evolveForValidity = evolve (List.sortBy (fun input -> compute input |> abs))
-let evolveForMax = evolve (List.sortByDescending scoreForMax)
+let evolveForMax = evolve (List.sortBy scoreForMax)
 let evolveForMin = evolve (List.sortBy scoreForMin)
 
 let repeat n fn = Seq.replicate n fn |> Seq.reduce (>>)
@@ -110,7 +110,7 @@ simulate "77777777777777" 10000 evolveForValidity
 
 // From the sampling above, pick a high (valid) value as a seed
 // This will likely find the max
-simulate "85593966291626" 2000 evolveForMax
+simulate "85593966291626" 5000 evolveForMax
 |> (fun s -> printfn "Part 1: %s" s; s)
 |> isValid
 
