@@ -3,9 +3,6 @@ open Memoization
 open System.Collections.Generic
 
 type Letter = A | B | C | D
-type Position =
-  | Hallway of int
-  | Room of Letter * int
 type GameState = { roomA: Option<Letter> array; roomB: Option<Letter> array; roomC: Option<Letter> array; roomD: Option<Letter> array; hallway: Option<Letter> array }
 type Outcome = { state: GameState; cost: int }
 let validHallwayPlaces = [ 0; 1; 3; 5; 7; 9; 10 ]
@@ -15,7 +12,6 @@ let isHallwayBlocked (state: GameState) fromPlace toPlace =
   validHallwayPlaces
   |> List.filter (fun p -> (fromPlace < p && p <= toPlace) || (toPlace <= p && p < fromPlace))
   |> List.exists (fun p -> match state.hallway.[p] with | Some _ -> true | None -> false)
-
 
 let getRoom (state: GameState) (room: Letter) =
   match room with
@@ -29,17 +25,10 @@ let roomHasForeigners letter room = room |> Array.choose id |> Array.exists ((<>
 let roomFirstOccupant room = room |> Array.mapi (fun i x -> match x with | Some l -> Some(i, l) | None -> None) |> Array.tryPick id
 let roomFirstVacancy room = room |> Array.mapi (fun i x -> match x with | None -> Some(i) | Some _ -> None) |> Array.rev |> Array.tryPick id
 let win (state: GameState) = [ A; B; C; D ] |> List.forall (fun letter -> getRoom state letter |> roomWin letter)
-let hallwayPlace = function | A -> 2 | B -> 4 | C -> 6 | D -> 8
+let getRoomHallwayPlace = function | A -> 2 | B -> 4 | C -> 6 | D -> 8
 let energy = function | A -> 1 | B -> 10 | C -> 100 | D -> 1000
 let clone state = { roomA = state.roomA.[*]; roomB = state.roomB.[*]; roomC = state.roomC.[*]; roomD = state.roomD.[*]; hallway = state.hallway.[*] }
-
-let getCost letter currentPosition targetPosition =
-  energy letter *
-  match currentPosition, targetPosition with
-  | Hallway place1, Hallway place2 -> (abs (place1 - place2))
-  | Room(room, depth), Hallway place
-  | Hallway place, Room(room, depth) -> (abs (place - hallwayPlace room)) + depth + 1
-  | Room(room1, depth1), Room(room2, depth2) -> (abs (hallwayPlace room1 - hallwayPlace room2)) + depth1 + depth2 + 2
+let getCost letter room depth hallwayPlace  = energy letter * ((abs (hallwayPlace - getRoomHallwayPlace room)) + depth + 1)
 
 let nextStates =
   memoize
@@ -56,14 +45,14 @@ let nextStates =
             | None -> []
             | Some(position, letter) ->
               validHallwayPlaces
-              |> List.filter (isHallwayBlocked state (hallwayPlace roomLetter) >> not)
+              |> List.filter (isHallwayBlocked state (getRoomHallwayPlace roomLetter) >> not)
               |> List.map
                 (fun place ->
                   let nextState = clone state
                   let room = getRoom nextState roomLetter
                   room.[position] <- None
                   nextState.hallway.[place] <- Some letter
-                  let additionalCost = getCost letter (Room(roomLetter, position)) (Hallway place)
+                  let additionalCost = getCost letter roomLetter position place
                   nextState, additionalCost))
       let hallwayMoves =
         validHallwayPlaces
@@ -72,7 +61,7 @@ let nextStates =
             match state.hallway.[place] with
             | None -> None
             | Some letter ->
-              let targetPlace = hallwayPlace letter
+              let targetPlace = getRoomHallwayPlace letter
               let hallwayBlocked = isHallwayBlocked state place targetPlace
               if hallwayBlocked
               then None
@@ -88,7 +77,7 @@ let nextStates =
                   match roomFirstVacancy targetRoom with
                   | Some vacantPosition ->
                     targetRoom.[vacantPosition] <- Some letter
-                    let additionalCost = getCost letter (Hallway place) (Room(letter, vacantPosition))
+                    let additionalCost = getCost letter letter vacantPosition place
                     Some(nextState, additionalCost)
                   | None -> None)
       Seq.concat [roomMoves; hallwayMoves])
