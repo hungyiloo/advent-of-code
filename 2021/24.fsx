@@ -104,8 +104,8 @@ let isValid s =
 // Discover a solution
 // Use this to sample for valid solutions
 // Starting value does not need to be valid
-simulate "55555555555555" 9000 evolveForValidity
-|> (fun s -> printfn "Some close-to valid solution: %s" s; s)
+simulate "77777777777777" 10000 evolveForValidity
+|> (fun s -> printfn "Some close-to-valid solution: %s" s; s)
 |> isValid
 
 // From the sampling above, pick a high (valid) value as a seed
