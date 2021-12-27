@@ -1,3 +1,5 @@
+#load "../lib/Memoization.fsx"
+open Memoization
 open System.IO
 open System
 
@@ -20,7 +22,15 @@ let (|Op|) (x: string) =
   | "eql" -> (fun a b -> if a = b then 1 else 0)
   | _ -> failwith "invalid op"
 
-let getZ state = match Map.tryFind "z" state.registers with | Some v -> v | None -> 0
+let instructions =
+  File.ReadAllLines "24.input.txt"
+  |> Seq.map
+    (fun (line: string) ->
+      match line.Split([| ' ' |]) with
+      | [| Op op; reg; Int i |] -> Operation(op, reg, Literal i)
+      | [| Op op; reg1; reg2 |] -> Operation(op, reg1, Register reg2)
+      | [| "inp"; reg1 |] -> Input reg1
+      | _ -> failwith "invalid line")
 
 let reduce state instruction =
   match instruction, state.stack with
@@ -36,17 +46,15 @@ let reduce state instruction =
     nextState
   | _ -> failwith "illegal instruction"
 
-let instructions =
-  File.ReadAllLines "24.input.txt"
-  |> Seq.map
-    (fun (line: string) ->
-      match line.Split([| ' ' |]) with
-      | [| Op op; reg; Int i |] -> Operation(op, reg, Literal i)
-      | [| Op op; reg1; reg2 |] -> Operation(op, reg1, Register reg2)
-      | [| "inp"; reg1 |] -> Input reg1
-      | _ -> failwith "invalid line")
+let compute' input =
+  let state =
+    instructions
+    |> Seq.fold reduce { registers = Map.empty; stack = input }
+  match Map.tryFind "z" state.registers with
+  | Some v -> v
+  | None -> 0
 
-let compute input = instructions |> Seq.fold reduce { registers = Map.empty; stack = input } |> getZ
+let compute = memoize compute'
 
 let scoreForMax (input: int list) =
   if compute input = 0
@@ -64,7 +72,7 @@ let mutate =
     input
     |> List.map
       (fun digit ->
-      let doMutate = r.Next(0, 5) = 1
+      let doMutate = r.Next(0, 4) = 1
       if doMutate
       then
         let mutation = r.Next(1, 9)
@@ -77,13 +85,23 @@ let evolve sorter (inputs: int list list) =
   |> List.map mutate
   |> List.append inputs
   |> sorter
+  |> List.distinct
   |> List.take 3
 
-let evolveForValidity = evolve (List.sortBy (fun input -> compute input |> abs))
-let evolveForMax = evolve (List.sortBy scoreForMax)
-let evolveForMin = evolve (List.sortBy scoreForMin)
+let selectForValidity = evolve (List.sortBy (fun input -> compute input |> abs))
+let selectForMaxValue = evolve (List.sortBy scoreForMax)
+let selectForMinValue = evolve (List.sortBy scoreForMin)
 
 let repeat n fn = Seq.replicate n fn |> Seq.reduce (>>)
+
+let simulateUntilValid seed =
+  let initialPopulation = [seed |> Seq.toList |> List.map (string >> int)]
+  let mutable best = initialPopulation
+  while (best |> List.head |> (fun x -> compute x <> 0)) do
+    // Reset every 200 generations back to seed/initial population
+    // to prevent getting stuck in local minimums
+    best <- initialPopulation |> repeat 200 selectForValidity
+  best |> List.head |> List.map string |> String.concat ""
 
 let simulate seed generations evolver =
   seed
@@ -93,29 +111,15 @@ let simulate seed generations evolver =
   |> List.head
   |> (fun x -> x |> List.map string |> String.concat "")
 
-let isValid s =
-  s
-  |> Seq.toList
-  |> List.map (string >> int)
-  |> compute
-  |> (fun z -> if z = 0 then "Yes" else "No")
-  |> printfn "Is it valid? %s"
+// Discover ANY valid solution.
+// Starting (seed) value does not need to be valid.
+let aValidSolution = simulateUntilValid "77777777777777"
+printfn "Some valid solution: %s" aValidSolution
 
-// Discover a solution
-// Use this to sample for valid solutions
-// Starting value does not need to be valid
-simulate "77777777777777" 12000 evolveForValidity
-|> (fun s -> printfn "Some close-to-valid solution: %s" s; s)
-|> isValid
-
-// From the sampling above, pick a high (valid) value as a seed
-// This will likely find the max
-simulate "85593966291626" 5000 evolveForMax
-|> (fun s -> printfn "Part 1: %s" s; s)
-|> isValid
-
-// From the sampling above, pick a low (valid) value as a seed
-// This will likely find the min
-simulate "46482988181532" 10000 evolveForMin // pick a low value sampled from above
-|> (fun s -> printfn "Part 2: %s" s; s)
-|> isValid
+// Then we use the discovered valid value as a seed for the next two populations
+// Part 1: Evolve while selecting for max value
+simulate aValidSolution 5000 selectForMaxValue
+|> printfn "Part 1: %s"
+// Part 2: Evolve while selecting for min value
+simulate aValidSolution 5000 selectForMinValue
+|> printfn "Part 2: %s"
