@@ -1,6 +1,7 @@
 #load "../lib/Memoization.fsx"
 open Memoization
 open System.Collections.Generic
+open System.IO
 
 type Letter = A | B | C | D
 type GameState = { roomA: Option<Letter> array; roomB: Option<Letter> array; roomC: Option<Letter> array; roomD: Option<Letter> array; hallway: Option<Letter> array }
@@ -121,22 +122,29 @@ let dijkstra start =
 
   search [start]
 
-let part1 =
-  { state =
-      { roomA = [| Some B; Some C |]
-        roomB = [| Some B; Some A |]
-        roomC = [| Some D; Some D |]
-        roomD = [| Some A; Some C |]
-        hallway = Array.create 11 None }
-    cost = 0 }
-dijkstra part1 |> printfn "Part 1: %A"
+let parseLetter = function
+  | 'A' -> Some A
+  | 'B' -> Some B
+  | 'C' -> Some C
+  | 'D' -> Some D
+  | _ -> None
 
-let part2 =
-  { state =
-      { roomA = [| Some B; Some D; Some D; Some C |]
-        roomB = [| Some B; Some C; Some B; Some A |]
-        roomC = [| Some D; Some B; Some A; Some D |]
-        roomD = [| Some A; Some A; Some C; Some C |]
-        hallway = Array.create 11 None }
-    cost = 0 }
-dijkstra part2 |> printfn "Part 2: %A"
+let initializeState (lines: string seq) =
+  lines
+  |> Seq.map (fun line -> line.Trim() |> Seq.filter (fun c -> c <> '#' && c <> '.') |> Seq.map parseLetter |> Seq.toList)
+  |> Seq.filter (fun chars -> List.isEmpty chars |> not)
+  |> Seq.toList
+  |> List.transpose
+  |> List.map Seq.toArray
+  |> (function
+      | [ a; b; c; d ] -> { roomA = a; roomB = b; roomC = c; roomD = d; hallway = Array.create 11 None }
+      | _ -> failwith "couldn't find all the rooms in the input")
+
+let part1 = File.ReadAllLines "23.input.txt" |> Seq.toList
+let part2 = part1 |> List.insertManyAt 3 [ "  #D#C#B#A#"; "  #D#B#A#C#" ]
+
+dijkstra { state = initializeState part1; cost = 0 }
+|> printfn "Part 1: %A"
+
+dijkstra { state = initializeState part2; cost = 0 }
+|> printfn "Part 2: %A"
