@@ -96,12 +96,15 @@ let repeat n fn = Seq.replicate n fn |> Seq.reduce (>>)
 
 let simulateUntilValid seed =
   let initialPopulation = [seed |> Seq.toList |> List.map (string >> int)]
-  let mutable best = initialPopulation
-  while (best |> List.head |> (fun x -> compute x <> 0)) do
-    // Reset every 200 generations back to seed/initial population
-    // to prevent getting stuck in local minimums
-    best <- initialPopulation |> repeat 200 selectForValidity
-  best |> List.head |> List.map string |> String.concat ""
+
+  let rec recurse() =
+    // Run many rounds of evolution to prevent being stuck in local minimum
+    let nextGen = initialPopulation |> repeat 300 selectForValidity
+    if nextGen |> List.head |> (fun x -> compute x = 0)
+    then nextGen
+    else recurse()
+
+  recurse() |> List.head |> List.map string |> String.concat ""
 
 let simulate seed generations evolver =
   seed
@@ -118,8 +121,8 @@ printfn "Some valid solution: %s" aValidSolution
 
 // Then we use the discovered valid value as a seed for the next two populations
 // Part 1: Evolve while selecting for max value
-simulate aValidSolution 5000 selectForMaxValue
+simulate aValidSolution 3000 selectForMaxValue
 |> printfn "Part 1: %s"
 // Part 2: Evolve while selecting for min value
-simulate aValidSolution 5000 selectForMinValue
+simulate aValidSolution 3000 selectForMinValue
 |> printfn "Part 2: %s"
