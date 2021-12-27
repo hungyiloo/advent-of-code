@@ -121,8 +121,8 @@ printfn "Some valid solution: %s" aValidSolution
 
 // Then we use the discovered valid value as a seed for the next two populations
 // Part 1: Evolve while selecting for max value
-simulate aValidSolution 3000 selectForMaxValue
+simulate aValidSolution 5000 selectForMaxValue
 |> printfn "Part 1: %s"
 // Part 2: Evolve while selecting for min value
-simulate aValidSolution 3000 selectForMinValue
+simulate aValidSolution 5000 selectForMinValue
 |> printfn "Part 2: %s"
