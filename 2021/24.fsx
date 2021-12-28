@@ -1,17 +1,13 @@
+#load "../lib/Parsing.fsx"
 #load "../lib/Memoization.fsx"
+open Parsing
 open Memoization
 open System.IO
-open System
 
 type Operator = int -> int -> int
 type Operand = Register of string | Literal of int
 type Instruction = Input of string | Operation of Operator * string * Operand
 type State = { registers: Map<string, int>; stack: int list }
-
-let (|Int|_|) (x: string) =
-  match Int32.TryParse x with
-  | true, i -> Some i
-  | _ -> None
 
 let (|Op|) (x: string) =
   match x with
