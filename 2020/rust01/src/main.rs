@@ -2,20 +2,26 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 fn main() {
-    let numbers = get_numbers().into_iter();
+    let numbers = get_numbers();
 
-    let pairs = numbers
-        .clone()
-        .flat_map(|n1| numbers.clone().map(move |n2| (n1, n2)));
-    let (n1, n2) = pairs.clone().find(|(n1, n2)| n1 + n2 == 2020).unwrap();
-    println!("Part 1: {}", n1 * n2);
+    let mut part1 = 0;
+    let mut part2 = 0;
 
-    let triplets = pairs.flat_map(|(n1, n2)| numbers.clone().map(move |n3| (n1, n2, n3)));
-    let (n1, n2, n3) = triplets
-        .clone()
-        .find(|(n1, n2, n3)| n1 + n2 + n3 == 2020)
-        .unwrap();
-    println!("Part 2: {}", n1 * n2 * n3);
+    for x in &numbers {
+        for y in &numbers {
+            if *x + *y == 2020 {
+                part1 = *x * *y;
+            }
+            for z in &numbers {
+                if *x + *y + *z == 2020 {
+                    part2 = *x * *y * *z;
+                }
+            }
+        }
+    }
+
+    println!("Part 1: {}", part1);
+    println!("Part 2: {}", part2);
 }
 
 fn get_numbers() -> Vec<i64> {
