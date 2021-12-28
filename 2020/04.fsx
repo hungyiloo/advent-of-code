@@ -31,6 +31,11 @@ let (|HexColor|_|) (x: string) =
   | Regex @"^#[a-f0-9]{6}$" color -> Some color
   | _ -> None
 
+let (|ExactlyNineDigits|_|) (x: string) =
+  match x with
+  | Regex @"^[0-9]{9}$" digits -> Some digits
+  | _ -> None
+
 let (|KnownColor|_|) (x: string) =
   match x with
   | "amb"
@@ -53,7 +58,7 @@ let isDataValid passport =
      | "hgt", Measurement(height, "in") -> 59 <= height && height <= 76
      | "hcl", HexColor _
      | "ecl", KnownColor _
-     | "pid", Regex @"^[0-9]{9}$" _
+     | "pid", ExactlyNineDigits _
      | "cid", _ -> true
      | _ -> false)
 
