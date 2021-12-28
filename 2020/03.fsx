@@ -15,11 +15,7 @@ let countTrees grid slope =
 
 countTrees grid (1, 3) |> printfn "Part 1: %d"
 
-[ 1, 1
-  1, 3
-  1, 5
-  1, 7
-  2, 1 ]
+[ (1, 1); (1, 3); (1, 5); (1, 7); (2, 1) ]
 |> Seq.map (countTrees grid)
 |> Seq.toList
 |> Seq.reduce (*)
