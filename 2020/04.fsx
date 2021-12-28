@@ -45,8 +45,7 @@ let (|KnownColor|_|) (x: string) =
 let isDataValid passport =
   passport
   |> Seq.forall
-    (fun pair ->
-     match pair with
+    (function
      | "byr", Int year -> 1920 <= year && year <= 2002
      | "iyr", Int year -> 2010 <= year && year <= 2020
      | "eyr", Int year -> 2020 <= year && year <= 2030
