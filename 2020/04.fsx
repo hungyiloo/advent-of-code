@@ -14,11 +14,11 @@ let passports =
           | Split ":" [ field; value; ] -> field, value
           | _ -> failwith "invalid passport field"))
 
-let requiredFields = [ "byr"; "iyr"; "eyr"; "hgt"; "hcl"; "ecl"; "pid" ]
+let requiredFields = Set([ "byr"; "iyr"; "eyr"; "hgt"; "hcl"; "ecl"; "pid" ])
 
 let hasRequiredFields passport =
   let passportFields = Set(passport |> Seq.map fst)
-  requiredFields |> Seq.forall (fun f -> Set.contains f passportFields)
+  Set.isSuperset passportFields requiredFields
 
 let (|Measurement|_|) (x: string) =
   match x.Substring(0, x.Length - 2), x.Substring(x.Length - 2) with
