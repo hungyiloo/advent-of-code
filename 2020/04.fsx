@@ -4,7 +4,7 @@ open System.IO
 
 let passports =
   File.ReadAllText "04.input.txt"
-  |> (fun input -> input.Split([| "\n\n" |], StringSplitOptions.RemoveEmptyEntries))
+  |> (function | Split "\n\n" records -> records)
   |> Seq.map
     (function
      | SplitMulti [" "; "\n"] pairs ->
@@ -47,14 +47,14 @@ let isDataValid passport =
   |> Seq.forall
     (fun pair ->
      match pair with
-     | "byr", Int year when 1920 <= year && year <= 2002 -> true
-     | "iyr", Int year when 2010 <= year && year <= 2020 -> true
-     | "eyr", Int year when 2020 <= year && year <= 2030 -> true
-     | "hgt", Measurement(height, "cm") when 150 <= height && height <= 193 -> true
-     | "hgt", Measurement(height, "in") when 59 <= height && height <= 76 -> true
-     | "hcl", HexColor _  -> true
-     | "ecl", KnownColor _  -> true
-     | "pid", Regex @"^[0-9]{9}$" _  -> true
+     | "byr", Int year -> 1920 <= year && year <= 2002
+     | "iyr", Int year -> 2010 <= year && year <= 2020
+     | "eyr", Int year -> 2020 <= year && year <= 2030
+     | "hgt", Measurement(height, "cm") -> 150 <= height && height <= 193
+     | "hgt", Measurement(height, "in") -> 59 <= height && height <= 76
+     | "hcl", HexColor _
+     | "ecl", KnownColor _
+     | "pid", Regex @"^[0-9]{9}$" _
      | "cid", _ -> true
      | _ -> false)
 
