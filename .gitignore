@@ -1,3 +1,9 @@
-/.ionide/
+**/.ionide/
 **.fake
 **.fsx.lock
+**/rust*/target/
+
+
+# Added by cargo
+
+/target
