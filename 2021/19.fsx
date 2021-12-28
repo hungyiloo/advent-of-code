@@ -1,4 +1,5 @@
-open System
+#load "../lib/Parsing.fsx"
+open Parsing
 open System.IO
 
 type Scanner =
@@ -115,10 +116,6 @@ let solve scanners =
     if List.isEmpty newlyLocated then
       failwith "There were no scanners located in this iteration. Stopping because this might loop indefinitely."
   located @ locatedToScan // return all the found scanners in a single list
-
-let (|Split|) (separator: string) (s: string) =
-  match s.Trim().Split([| separator |], StringSplitOptions.RemoveEmptyEntries) with
-  | arr -> arr |> Seq.toList
 
 let scanners =
   Seq.append (File.ReadLines "19.input.txt") [""]

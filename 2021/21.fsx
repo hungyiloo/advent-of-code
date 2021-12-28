@@ -1,11 +1,8 @@
+#load "../lib/Parsing.fsx"
 #load "../lib/Memoization.fsx"
+open Parsing
 open Memoization
 open System.IO
-open System
-
-let (|Split|) (separator: string) (s: string) =
-  match s.Trim().Split([| separator |], StringSplitOptions.RemoveEmptyEntries) with
-  | arr -> arr |> Seq.toList
 
 let p1Start, p2Start =
   File.ReadAllLines "21.input.txt"

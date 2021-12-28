@@ -1,13 +1,6 @@
-open System
+#load "../lib/Parsing.fsx"
+open Parsing
 open System.IO
-
-let (|Split|) (separator: string) (s: string) =
-  match s.Trim().Split([| separator |], StringSplitOptions.RemoveEmptyEntries) with
-  | arr -> arr |> Seq.toList
-
-let (|SplitMulti|) (separators: string seq) (s: string) =
-  match s.Trim().Split(separators |> Seq.toArray, StringSplitOptions.RemoveEmptyEntries) with
-  | arr -> arr |> Seq.toList
 
 let parseTarget =
   function
