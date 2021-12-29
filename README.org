@@ -42,7 +42,7 @@ F# (.NET)
 
 Rust
 1. ~cd rust/2020~
-2. ~cargo run --bin 01 (replace =01= with the day number)
+2. ~cargo run --bin 01~ (replace =01= with the day number)
 
 ** Don't have deno or F# installed?
 Follow the official instructions [[https://deno.land/#installation][for deno]] or [[https://dotnet.microsoft.com/en-us/download][for .NET]].
