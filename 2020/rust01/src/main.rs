@@ -9,12 +9,12 @@ fn main() {
 
     for x in &numbers {
         for y in &numbers {
-            if *x + *y == 2020 {
-                part1 = *x * *y;
+            if x + y == 2020 {
+                part1 = x * y;
             }
             for z in &numbers {
-                if *x + *y + *z == 2020 {
-                    part2 = *x * *y * *z;
+                if x + y + z == 2020 {
+                    part2 = x * y * z;
                 }
             }
         }
