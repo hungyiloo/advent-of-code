@@ -6,31 +6,22 @@ use std::{
 fn main() {
     let records = get_password_records();
 
-    let mut part1 = 0;
-    let mut part2 = 0;
-
-    for record in records {
-        if record_valid_by_letter_count(&record) {
-            part1 += 1;
-        }
-        if record_valid_by_letter_positions(&record) {
-            part2 += 1;
-        }
-    }
-
+    let part1 = records.iter().filter(record_valid_by_letter_count).count();
     println!("Part 1: {}", part1);
+
+    let part2 = records.iter().filter(record_valid_by_letter_positions).count();
     println!("Part 2: {}", part2);
 }
 
 struct PasswordRecord(usize, usize, char, String);
 
-fn record_valid_by_letter_count(record: &PasswordRecord) -> bool {
+fn record_valid_by_letter_count(record: &&PasswordRecord) -> bool {
     let PasswordRecord(low, high, letter, password) = record;
     let letter_count = password.chars().filter(|c| c == letter).count();
-    return low <= &letter_count && &letter_count <= high;
+    return *low <= letter_count && letter_count <= *high;
 }
 
-fn record_valid_by_letter_positions(record: &PasswordRecord) -> bool {
+fn record_valid_by_letter_positions(record: &&PasswordRecord) -> bool {
     let PasswordRecord(low, high, letter, password) = record;
     let low_match = match password.chars().nth(*low - 1) {
         Some(c) => c == *letter,
