@@ -16,6 +16,9 @@ fn main() {
                 if x + y + z == 2020 {
                     part2 = x * y * z;
                 }
+                if part1 != 0 && part2 != 0 {
+                    break;
+                }
             }
         }
     }
