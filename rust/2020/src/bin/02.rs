@@ -26,7 +26,7 @@ struct PasswordRecord(usize, usize, char, String);
 
 fn record_valid_by_letter_count(record: &PasswordRecord) -> bool {
     let PasswordRecord(low, high, letter, password) = record;
-    let letter_count = password.chars().filter(|c| c == letter).count() as usize;
+    let letter_count = password.chars().filter(|c| c == letter).count();
     return low <= &letter_count && &letter_count <= high;
 }
 
