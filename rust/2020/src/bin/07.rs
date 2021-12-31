@@ -33,7 +33,7 @@ fn find_all_possible_parents<'a>(
     return visited;
 }
 
-fn count_containing_bags<'a>(target: &str, links: &'a Vec<(String, usize, String)>) -> u64 {
+fn count_containing_bags(target: &str, links: &Vec<(String, usize, String)>) -> u64 {
     let mut total_count: u64 = 0;
     let mut current: Vec<(&str, u64)> = links
         .iter()
