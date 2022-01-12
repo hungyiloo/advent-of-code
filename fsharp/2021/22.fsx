@@ -46,10 +46,10 @@ let reduceCuboids existingCuboids cuboid =
       | Cuboid(existingPoints, existingState), Cuboid(points, _) ->
         match (overlap3D existingPoints points), existingState with
         // This is the trick:
-        // Overlapping cuboids need to be negated to "fix" the double counting
-        // If we're adding a cuboid (i.e. switching on) then the overlaps must be subtracted
-        // If we're subtracting a cuboid (i.e. switching off) then the overlaps must be added back,
-        // (since we already subtracted that region before)
+        // Overlapping need to be negated to "fix" the double counting
+        // If we're overlapping an "adding" cuboid then the overlap must be subtracted
+        // If we're overlapping a "subtracting" cuboid then the overlap must be added back,
+        // since we previously switched that region off
         | Some overlap, Add -> Cuboid(overlap, Subtract)::acc
         | Some overlap, Subtract -> Cuboid(overlap, Add)::acc
         | None, _ -> acc)
