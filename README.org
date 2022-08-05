@@ -28,8 +28,8 @@
 * Hung-Yi's Advent of Code
 In 2021, I felt like doing [[https://adventofcode.com/][Advent of Code]] using TypeScript [[https://deno.land/][(deno)]] and learn F# at
 the same time. I managed to complete all 25 puzzles, but not for every language.
-Have a look at the ~fsharp/2021~ and ~typescript/2021~ folders to see which
-puzzles were implemented in each language.
+Have a look under each of the language folders (=typescript/fsharp/rust/racket=)
+to see which puzzles were implemented in each language.
 
 ** How to run each puzzle
 TypeScript (deno)
@@ -44,8 +44,16 @@ Rust
 1. ~cd rust/2020~
 2. ~cargo run --bin 01~ (replace =01= with the day number)
 
-** Don't have deno or F# installed?
-Follow the official instructions [[https://deno.land/#installation][for deno]] or [[https://dotnet.microsoft.com/en-us/download][for .NET]].
+Racket
+1. ~cd racket/2020~
+2. ~racket 01.rkt~ (replace =01= with the day number)
+
+** Don't have a language installed?
+Follow the official instructions:
+- [[https://deno.land/#installation][for deno]] (TypeScript)
+- [[https://dotnet.microsoft.com/en-us/download][for .NET]] (F#)
+- [[https://www.rust-lang.org/tools/install][for Rust]]
+- [[https://download.racket-lang.org/][for Racket]]
 
 ** Checklists
 
@@ -79,30 +87,30 @@ Follow the official instructions [[https://deno.land/#installation][for deno]] o
 | 2021 Day 25 |            | ✅ |
 
 *** 2020
-| Day         | TypeScript | F# | Rust |
-|-------------+------------+----+------|
-| 2020 Day 01 |            | ✅ | ✅   |
-| 2020 Day 02 |            | ✅ | ✅   |
-| 2020 Day 03 |            | ✅ |      |
-| 2020 Day 04 |            | ✅ |      |
-| 2020 Day 05 |            |    | ✅   |
-| 2020 Day 06 |            |    | ✅   |
-| 2020 Day 07 |            |    | ✅   |
-| 2020 Day 08 |            |    | ✅   |
-| 2020 Day 09 |            |    |      |
-| 2020 Day 10 |            |    |      |
-| 2020 Day 11 |            |    |      |
-| 2020 Day 12 |            |    |      |
-| 2020 Day 13 | ✅         |    |      |
-| 2020 Day 14 |            |    |      |
-| 2020 Day 15 |            |    |      |
-| 2020 Day 16 |            |    |      |
-| 2020 Day 17 |            |    |      |
-| 2020 Day 18 |            |    |      |
-| 2020 Day 19 |            |    |      |
-| 2020 Day 20 |            |    |      |
-| 2020 Day 21 |            |    |      |
-| 2020 Day 22 |            |    |      |
-| 2020 Day 23 |            |    |      |
-| 2020 Day 24 |            |    |      |
-| 2020 Day 25 |            |    |      |
+| Day         | TypeScript | F# | Rust | Racket |
+|-------------+------------+----+------+--------|
+| 2020 Day 01 |            | ✅ | ✅   | ✅     |
+| 2020 Day 02 |            | ✅ | ✅   | ✅     |
+| 2020 Day 03 |            | ✅ |      |        |
+| 2020 Day 04 |            | ✅ |      |        |
+| 2020 Day 05 |            |    | ✅   |        |
+| 2020 Day 06 |            |    | ✅   |        |
+| 2020 Day 07 |            |    | ✅   |        |
+| 2020 Day 08 |            |    | ✅   |        |
+| 2020 Day 09 |            |    |      |        |
+| 2020 Day 10 |            |    |      |        |
+| 2020 Day 11 |            |    |      |        |
+| 2020 Day 12 |            |    |      |        |
+| 2020 Day 13 | ✅         |    |      |        |
+| 2020 Day 14 |            |    |      |        |
+| 2020 Day 15 |            |    |      |        |
+| 2020 Day 16 |            |    |      |        |
+| 2020 Day 17 |            |    |      |        |
+| 2020 Day 18 |            |    |      |        |
+| 2020 Day 19 |            |    |      |        |
+| 2020 Day 20 |            |    |      |        |
+| 2020 Day 21 |            |    |      |        |
+| 2020 Day 22 |            |    |      |        |
+| 2020 Day 23 |            |    |      |        |
+| 2020 Day 24 |            |    |      |        |
+| 2020 Day 25 |            |    |      |        |
