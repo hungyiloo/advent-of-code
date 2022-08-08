@@ -19,12 +19,10 @@
              [prev-num nums]
              #:final (not (member num (map sum combos))))
     (values num
-            (map
-             (lambda ([pair : (Listof Integer)])
-               (match pair
+            (for/list ([combo combos])
+              (match combo
                  [(list a b) #:when (= a prev-num) (list b num)]
-                 [else pair]))
-             combos))))
+                 [else combo])))))
 
 (displayln (format "Part 1: ~a" part1))
 
