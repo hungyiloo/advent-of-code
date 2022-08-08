@@ -13,7 +13,8 @@
 
 (define part1
   (for/fold ([answer : Integer 0]
-             [combos : (Listof (Listof Integer)) (combinations (take nums interval) 2)]
+             [combos : (Listof (Listof Integer))
+                     (combinations (take nums interval) 2)]
              #:result answer)
             ([num (drop nums interval)]
              [prev-num nums]
