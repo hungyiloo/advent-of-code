@@ -7,38 +7,37 @@
 
 (define (sum [xs : (Listof Integer)]) (apply + xs))
 
+(: xmas (-> (Listof Integer) (Listof Integer) (U False Integer)))
+(define (xmas preamble queue)
+  (define n (car queue))
+  (define sums (map sum (combinations preamble 2)))
+  (cond
+    [(empty? queue) #f]
+    [(member n sums)
+     (xmas (append (drop preamble 1) (list n))
+           (cdr queue))]
+    [else n]))
+
 (define part1
-  (for/fold ([answer : Integer 0]
-             [pairs : (Listof (Listof Integer))
-                     (combinations (take nums interval) 2)]
-             #:result answer)
-            ([num (drop nums interval)]
-             [prev-num nums]
-             #:final (not (member num (map sum pairs))))
-    (values num
-            (for/list ([pair pairs])
-              (match pair
-                 [(list a b) #:when (= a prev-num) (list b num)]
-                 [else pair])))))
+  (let ([preamble (take nums interval)]
+        [queue (drop nums interval)])
+    (assert (xmas preamble queue) number?)))
+
+(: search-inside (-> (Listof Integer) (Listof Integer) (U False Integer)))
+(define (search-inside xs ys)
+  (define subtotal (sum xs))
+  (cond
+    [(= subtotal part1) (+ (apply min xs) (apply max xs))]
+    [(> subtotal part1) #f]
+    [(empty? ys) #f]
+    [else (search-inside (cons (car ys) xs) (cdr ys))]))
+
+(: search-up (-> (Listof Integer) (U False Integer)))
+(define (search-up [xs : (Listof Integer)])
+  (or (search-inside '() xs)
+      (search-up (cdr xs))))
+
+(define part2 (assert (search-up nums) number?))
 
 (displayln (format "Part 1: ~a" part1))
-
-(define (part2)
-  (: search-inside (-> (Listof Integer) (Listof Integer) (U False Integer)))
-  (define (search-inside xs ys)
-    (define subtotal (sum xs))
-    (cond
-      [(= subtotal part1) (+ (apply min xs) (apply max xs))]
-      [(> subtotal part1) #f]
-      [(empty? ys) #f]
-      [else (search-inside (cons (car ys) xs) (cdr ys))]))
-
-  (: search-up (-> (Listof Integer) (U False Integer)))
-  (define (search-up [xs : (Listof Integer)])
-    (or (search-inside '() xs)
-        (search-up (cdr xs))))
-
-  (search-up nums))
-
-(match (part2)
-  [(? number? answer) (displayln (format "Part 2: ~a" answer))])
+(displayln (format "Part 2: ~a" part2))
