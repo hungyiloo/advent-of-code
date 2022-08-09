@@ -5,10 +5,9 @@
 (define (sums-to-2020? [nums : (Listof Number)])
   (= 2020 (apply + nums)))
 
-(let* ([lines : (Listof String) (file->lines "../../input/2020/01.txt")]
-       [nums (map string->exact-integer lines)]
-       [pairs (cartesian-product nums nums)]
-       [triplets (cartesian-product nums nums nums)]
+(let* ([nums (file->lines->integers "../../input/2020/01.txt")]
+       [pairs (combinations nums 2)]
+       [triplets (combinations nums 3)]
        [part1 (match (findf sums-to-2020? pairs)
                 [(list a b) (* a b)])]
        [part2 (match (findf sums-to-2020? triplets)
