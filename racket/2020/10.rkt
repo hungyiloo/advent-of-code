@@ -18,28 +18,26 @@
 
 (displayln (format "Part 1: ~a" part1))
 
-(: arrangements (-> Integer (Listof Integer) Integer))
-(define (arrangements prev tail)
-  ;; (displayln (list (reverse head) tail))
-  (match tail
-    ['() 1
-     ;; (begin
-     ;;   (displayln (reverse head))
-     ;;   1)
-     ]
-    [(list-rest a b c r)
-     #:when (and (<= (- a prev) 3) (<= (- b prev) 3) (<= (- c prev) 3))
-     (+ (arrangements a (append (list b c) r))
-        (arrangements b (cons c r))
-        (arrangements c r))]
-    [(list-rest a b r)
-     #:when (and (<= (- a prev) 3) (<= (- b prev) 3))
-     (+ (arrangements a (cons b r))
-        (arrangements b r))]
-    [(list-rest a r)
-     (arrangements a r)]))
+; lazy caterer's sequence
+(define (caterer [n : Integer])
+  (assert (+ 1 (/ (* n (+ n 1)) 2)) exact-integer?))
 
-(define part2
-  (arrangements 0 adapters))
+(: arrangements (-> (Listof Integer) Integer))
+(define (arrangements xs)
+  (match xs
+    [(list a _ ..3 b r ...)
+     #:when (<= (- b a) 4)
+     (* (caterer 3) (arrangements r))]
+    [(list a _ ..2 b r ...)
+     #:when (<= (- b a) 3)
+     (* (caterer 2) (arrangements r))]
+    [(list a _ ..1 b r ...)
+     #:when (<= (- b a) 2)
+     (* (caterer 1) (arrangements r))]
+    [(list _ r ...)
+     (arrangements r)]
+    ['() (caterer 0)]))
+
+(define part2 (arrangements (cons 0 adapters)))
 
 (displayln (format "Part 2: ~a" part2))
