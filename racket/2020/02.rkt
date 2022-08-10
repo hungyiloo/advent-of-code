@@ -8,11 +8,10 @@
 (define (check-password policy? definition)
   (match (regexp-split #rx":?[ -]" definition)
     [(list pos1 pos2 letter password)
-     (let ([pos1 (string->exact-integer pos1)]
-           [pos2 (string->exact-integer pos2)]
-           [letter (string-ref letter 0)]
-           [password (string->list password)])
-       (policy? pos1 pos2 letter password))]
+     (policy? (string->exact-integer pos1)
+              (string->exact-integer pos2)
+              (string-ref letter 0)
+              (string->list password))]
     [else #f]))
 
 (: part1-policy? Policy)
