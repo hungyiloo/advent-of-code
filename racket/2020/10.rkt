@@ -6,8 +6,8 @@
 (define differences
   (map
    (lambda ([a : Integer] [b : Integer]) (- b a))
-   (cons 0 adapters)
-   (append adapters (list (+ 3 (apply max adapters))))))
+   (cons 0 adapters) ; charging outlet is always at 0
+   (append adapters (list (+ 3 (apply max adapters)))))) ; built-in adapter is max + 3
 
 (define (eq [n : Integer])
   (lambda ([m : Integer]) (= n m)))
