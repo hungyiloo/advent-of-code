@@ -19,8 +19,9 @@
 (displayln (format "Part 1: ~a" part1))
 
 ; lazy caterer's sequence
+(: caterer (-> Integer Integer))
 (define (caterer [n : Integer])
-  (assert (+ 1 (/ (* n (+ n 1)) 2)) exact-integer?))
+  (if (> n 0) (+ n (caterer (- n 1))) 1))
 
 (: arrangements (-> (Listof Integer) Integer))
 (define (arrangements xs)

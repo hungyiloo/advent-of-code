@@ -98,7 +98,7 @@ Follow the official instructions:
 | 2020 Day 07 |            |    | ✅   |        |
 | 2020 Day 08 |            |    | ✅   |        |
 | 2020 Day 09 |            |    |      | ✅     |
-| 2020 Day 10 |            |    |      |        |
+| 2020 Day 10 |            |    |      | ✅     |
 | 2020 Day 11 |            |    |      |        |
 | 2020 Day 12 |            |    |      |        |
 | 2020 Day 13 | ✅         |    |      |        |
