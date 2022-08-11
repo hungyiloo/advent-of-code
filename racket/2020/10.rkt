@@ -23,22 +23,15 @@
 (define (caterer [n : Integer])
   (if (> n 0) (+ n (caterer (- n 1))) 1))
 
-(: arrangements (-> (Listof Integer) Integer))
-(define (arrangements xs)
+(: arrange (-> (Listof Integer) Integer))
+(define (arrange xs)
   (match xs
-    [(list a _ ..3 b r ...)
-     #:when (<= (- b a) 4)
-     (* (caterer 3) (arrangements r))]
-    [(list a _ ..2 b r ...)
-     #:when (<= (- b a) 3)
-     (* (caterer 2) (arrangements r))]
-    [(list a _ ..1 b r ...)
-     #:when (<= (- b a) 2)
-     (* (caterer 1) (arrangements r))]
-    [(list _ r ...)
-     (arrangements r)]
-    ['() (caterer 0)]))
+    [(list 1 1 1 1 r ...) (* (caterer 3) (arrange r))]
+    [(list 1 1 1 r ...) (* (caterer 2) (arrange r))]
+    [(list 1 1 r ...) (* (caterer 1) (arrange r))]
+    [(list _ r ...) (arrange r)]
+    ['() 1]))
 
-(define part2 (arrangements (cons 0 adapters)))
+(define part2 (arrange differences))
 
 (displayln (format "Part 2: ~a" part2))
