@@ -9,12 +9,11 @@
    (cons 0 adapters) ; charging outlet is always at 0
    (append adapters (list (+ 3 (apply max adapters)))))) ; built-in adapter is max + 3
 
-(define (eq [n : Integer])
-  (lambda ([m : Integer]) (= n m)))
+(define (eq? [n : Number]) (lambda ([m : Number]) (= n m)))
 
 (define part1
-  (* (count (eq 1) differences)
-     (count (eq 3) differences)))
+  (* (count (eq? 1) differences)
+     (count (eq? 3) differences)))
 
 (displayln (format "Part 1: ~a" part1))
 
