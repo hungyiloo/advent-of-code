@@ -7,7 +7,7 @@
   (map
    (lambda ([a : Integer] [b : Integer]) (- b a))
    (cons 0 adapters) ; charging outlet is always at 0
-   (append adapters (list (+ 3 (apply max adapters)))))) ; built-in adapter is max + 3
+   (append adapters (list (+ 3 (last adapters)))))) ; built-in adapter is max + 3
 
 (define (eq? [n : Number]) (lambda ([m : Number]) (= n m)))
 
