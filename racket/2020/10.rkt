@@ -5,11 +5,11 @@
 
 (define differences
   (map
-   (lambda ([a : Integer] [b : Integer]) (- b a))
-   (cons 0 adapters) ; charging outlet is always at 0
-   (append adapters (list (+ 3 (last adapters)))))) ; built-in adapter is max + 3
+   (ann - (-> Integer Integer Integer))
+   (append adapters (list (+ 3 (last adapters)))) ; built-in adapter is max + 3
+   (cons 0 adapters))) ; charging outlet is always at 0
 
-(define (eq? [n : Number]) (lambda ([m : Number]) (= n m)))
+(define eq? (curry (ann = (-> Number Number Boolean))))
 
 (define part1
   (* (count (eq? 1) differences)
