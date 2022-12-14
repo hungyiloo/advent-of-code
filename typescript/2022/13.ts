@@ -62,15 +62,16 @@ const part1 = pairs.reduce(
   0
 );
 
+const DIV1 = [[2]];
+const DIV2 = [[6]];
+
 const packets = pairs
   .flatMap(pair => pair)  // flatten
-  .concat([[[2]], [[6]]]) // add dividers
+  .concat([DIV1, DIV2])   // add dividers
   .sort(compare);         // sort
 
-const dividerPos1 = packets.findIndex(x => JSON.stringify(x) === '[[2]]') + 1;
-const dividerPos2 = packets.findIndex(x => JSON.stringify(x) === '[[6]]') + 1;
-
-const part2 = dividerPos1 * dividerPos2;
+const part2 =
+  (packets.indexOf(DIV1) + 1) * (packets.indexOf(DIV2) + 1);
 
 console.log('Part 1:', part1);
 console.log('Part 2:', part2);
