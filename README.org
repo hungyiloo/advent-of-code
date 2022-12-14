@@ -72,8 +72,8 @@ Follow the official instructions:
 | 2022 Day 10 | ✅         |
 | 2022 Day 11 | ✅         |
 | 2022 Day 12 | ✅         |
-| 2022 Day 13 |            |
-| 2022 Day 14 |            |
+| 2022 Day 13 | ✅         |
+| 2022 Day 14 | ✅         |
 | 2022 Day 15 |            |
 | 2022 Day 16 |            |
 | 2022 Day 17 |            |
