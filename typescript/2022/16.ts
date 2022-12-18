@@ -107,16 +107,16 @@ function explore(time: number) {
       });
     }
   }
-  return bestStates;
+  return [...bestStates.values()];
 }
 
-const part1 = Math.max(...[...explore(30).values()].map((s) => s.released));
+const part1 = Math.max(...explore(30).map((s) => s.released));
 
 const part2States = explore(26);
 let part2 = 0;
-for (const human of part2States.values()) {
+for (const human of part2States) {
   const { opened: opened1, released: released1 } = human;
-  for (const elephant of part2States.values()) {
+  for (const elephant of part2States) {
     const { opened: opened2, released: released2 } = elephant;
     if (!opened1.some((o) => opened2.includes(o))) {
       part2 = Math.max(released1 + released2, part2);
