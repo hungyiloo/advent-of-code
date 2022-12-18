@@ -19,9 +19,9 @@ const NODES = puzzleInput
   .sort((a, b) => b.flow - a.flow);
 
 const NODES_WITH_FLOW = NODES.filter((n) => n.flow > 0);
-
 const NODE_MAP = new Map(NODES.map((n) => [n.id, n]));
 
+// A priority queue mechanism for dijkstra search
 const insertByMinCost = (ps: Node[], p: Node, costs: Map<string, number>) => {
   const queue = ps.filter((x) => x !== p);
   const pos = ps.findIndex((x) => costs.get(x.id)! > costs.get(p.id)!);
@@ -29,10 +29,14 @@ const insertByMinCost = (ps: Node[], p: Node, costs: Map<string, number>) => {
   return queue;
 };
 
-const dijkstraMap = new Map<string, number>();
+// The shortest path map provides memoization of the dijkstra
+// shortest path search, so that we can call it repeatedly
+// on the same start/end inputs but not have to incur the
+// cost of actually searching them again.
+const shortestPathMap = new Map<string, number>();
 const dijkstra = (start: Node, end: Node) => {
   const key = `${start.id},${end.id}`;
-  if (dijkstraMap.get(key)) return dijkstraMap.get(key)!;
+  if (shortestPathMap.has(key)) return shortestPathMap.get(key)!;
 
   const costs = new Map<string, number>();
   costs.set(start.id, 0);
@@ -50,62 +54,77 @@ const dijkstra = (start: Node, end: Node) => {
     visited.add(p.id);
   } while (p !== end);
 
-  const result = costs.get(p.id)!;
-  dijkstraMap.set(key, result);
-  return result;
+  for (const [endId, cost] of costs.entries()) {
+    shortestPathMap.set(`${start.id},${endId}`, cost);
+  }
+  return costs.get(p.id)!;
 };
 
 type State = {
-  me: string;
+  at: string;
   time: number;
   opened: string[];
   released: number;
 };
 
 function explore(
-  initState: State,
+  time: number,
 ) {
+  const initState = {
+    at: "AA",
+    time,
+    opened: [],
+    released: 0,
+  };
   const queue: State[] = [initState];
-  const visited = new Set<string>([JSON.stringify(initState)]);
-  let result = -Infinity;
+  const bestStates = new Map<string, State>();
   while (queue.length > 0) {
     const s = queue.pop()!;
-    const currentNode = NODE_MAP.get(s.me)!;
-    for (const nextNode of NODES_WITH_FLOW) {
-      const distance = dijkstra(currentNode, nextNode) + 1;
+    const release = s.opened.reduce((s, x) => s + NODE_MAP.get(x)!.flow, 0);
 
-      if (
-        nextNode === currentNode || s.opened.includes(nextNode.id) ||
-        distance > s.time
-      ) {
-        const released = s.released +
-          s.opened.reduce((s, x) => s + NODE_MAP.get(x)!.flow, 0) * s.time;
-        result = Math.max(result, released);
-        continue;
-      }
+    // Save the best result for each unique combination of opened valves.
+    // This comes in handy later for part 2, but also guarantees that we
+    // can search through every possible best result for part 1.
+    const key = [...s.opened].sort().join(",");
+    const released = s.released + release * s.time;
+    const previousResult = bestStates.get(key);
+    if (!previousResult || previousResult.released < released) {
+      bestStates.set(key, { ...s, released });
+    }
 
-      const nextState: State = {
-        me: nextNode.id,
+    // Loop through each valid "next node" option and push
+    // the next state onto the exploration queue
+    const currentNode = NODE_MAP.get(s.at)!;
+    const candidates = NODES_WITH_FLOW.filter((n) =>
+      n !== currentNode && !s.opened.includes(n.id)
+    );
+    for (const n of candidates) {
+      const distance = dijkstra(currentNode, n) + 1;
+      if (distance > s.time) continue;
+      queue.push({
+        at: n.id,
         time: s.time - distance,
-        released: s.released +
-          s.opened.reduce((s, x) => s + NODE_MAP.get(x)!.flow, 0) * distance,
-        opened: [...s.opened, nextNode.id],
-      };
-
-      if (!visited.has(JSON.stringify(nextState))) {
-        queue.push(nextState);
-        visited.add(JSON.stringify(nextState));
-      }
+        released: s.released + release * distance,
+        opened: [...s.opened, n.id],
+      });
     }
   }
-  return result;
+  return bestStates;
 }
 
-const part1 = explore({
-  me: "AA",
-  time: 30,
-  opened: [],
-  released: 0,
-});
+const part1 = Math.max(...[...explore(30).values()].map((s) => s.released));
 
-console.log(part1);
+const part2States = explore(26);
+let part2 = 0;
+for (const human of part2States.values()) {
+  const { opened: opened1, released: released1 } = human;
+  for (const elephant of part2States.values()) {
+    const { opened: opened2, released: released2 } = elephant;
+    if (!opened1.some((o) => opened2.includes(o))) {
+      part2 = Math.max(released1 + released2, part2);
+    }
+  }
+}
+
+console.log("Part 1:", part1);
+console.log("Part 2:", part2);
