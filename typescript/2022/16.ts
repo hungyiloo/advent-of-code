@@ -67,9 +67,7 @@ type State = {
   released: number;
 };
 
-function explore(
-  time: number,
-) {
+function explore(time: number) {
   const initState = {
     at: "AA",
     time,
