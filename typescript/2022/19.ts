@@ -48,16 +48,25 @@ function simulate(blueprint: Blueprint, timeLimit: number) {
     const guaranteedGeodes = s.robots.geode * timeLeft
     const potentialGeodes = timeLeft*(timeLeft - 1) / 2
 
-    return currentGeodes + guaranteedGeodes + potentialGeodes
+    return (currentGeodes + guaranteedGeodes + potentialGeodes)// * 100 + (s.robots.ore + s.robots.clay + s.robots.obsidian + s.robots.geode) * 10 + (s.resources.ore + s.resources.clay + s.resources.obsidian)
   }
 
-  function shouldExplore(s: State) {
+  function shouldExplore(s: State, see = false) {
     const key = `${s.resources.ore}|${s.resources.clay}|${s.resources.obsidian}|${s.resources.geode}||${s.robots.ore}|${s.robots.clay}|${s.robots.obsidian}|${s.robots.geode}`;
     if ((seen.get(key) ?? Infinity) <= s.time) return false;
-    seen.set(key, s.time);
+    if (see) seen.set(key, s.time);
 
     if (!max) return true
     return score(s) > score(max)
+  }
+
+  function addToQueue(next: State) {
+    if (!shouldExplore(next)) return;
+    queue.push(next)
+    // const nextScore = score(next)
+    // const nextPlace = queue.findIndex(s => nextScore < score(s))
+    // // console.log(queue.map(s => score(s)))
+    // queue.splice(nextPlace === -1 ? queue.length : nextPlace, 0, next)
   }
 
   let max: State | null = null;
@@ -66,6 +75,7 @@ function simulate(blueprint: Blueprint, timeLimit: number) {
     // idx++;
     // if (idx % 10000 === 0) console.log(queue.length);
     const s = queue.pop()!;
+    if (!shouldExplore(s, true)) continue;
     const robots = { ...s.robots };
     const resources = { ...s.resources };
 
@@ -99,19 +109,21 @@ function simulate(blueprint: Blueprint, timeLimit: number) {
       next.resources.clay -= robotCosts.clay ?? 0
       next.resources.obsidian -= robotCosts.obsidian ?? 0
       next.robots[robotType as Resource]++;
-      if (shouldExplore(next)) queue.push(next);
+      addToQueue(next)
     }
-    const next = {
+    addToQueue({
       resources,
       robots,
       time,
-    }
-    if (shouldExplore(next)) queue.push(next);
+    })
   }
 
-  console.log("max", max);
-  return (max?.resources.geode ?? 0) * Number(blueprint.id);
+  console.log(blueprint.id, max);
+  return { blueprint, geodes: max?.resources.geode ?? 0 };
 }
 
-const part1 = BLUEPRINTS.map(b => simulate(b, 24)).reduce((s, x) => s + x);
+const part1 = BLUEPRINTS.map(b => simulate(b, 24)).reduce((s, { blueprint, geodes }) => s + (Number(blueprint.id) * geodes), 0);
 console.log(part1);
+
+const part2 = BLUEPRINTS.slice(0,3).map(b => simulate(b, 32)).reduce((m, { geodes }) => m * geodes, 1);
+console.log(part2);
