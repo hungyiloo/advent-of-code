@@ -9,28 +9,22 @@ enum Resource {
 
 type Blueprint = {
   id: string;
-  robots: {
-    robotType: Resource;
-    costs: {
-      resource: Resource;
-      cost: number;
-    }[];
-  }[];
+  robots: Record<Resource, Record<Resource, number>>;
 };
 
-const BLUEPRINTS: Blueprint[] = puzzleInput.split("\n\n").map((blueprint) => {
-  const [heading, ...rest] = blueprint.split("\n");
-  const [, id] = heading.split(/Blueprint |:/);
+const BLUEPRINTS: Blueprint[] = puzzleInput.split("\n").map((blueprint) => {
+  const [heading, ...rest] = blueprint.split(/[:\.] /);
+  const id = heading.replace(/Blueprint /, "");
   const robots = rest.map((line) => {
     const [, robotType, costsSpec] = line.split(/Each | robot costs /);
-    const costs = costsSpec.replace(/\.$/, "").split(" and ").map(
+    const costs = costsSpec.split(" and ").map(
       (costSpec) => {
         const [cost, resource] = costSpec.split(" ");
-        return { cost: Number(cost), resource: resource as Resource };
+        return [resource.replace(".", ""), Number(cost)];
       },
-    );
-    return { robotType: robotType as Resource, costs };
-  });
+    ).reduce((acc, [resource, cost]) => ({ ...acc, [resource]: cost }), {} as Record<Resource, number>);
+    return [robotType as Resource, costs] as const;
+  }).reduce((acc, [resource, costs]) => ({ ...acc, [resource]: costs }), {} as Blueprint['robots']);
   return { id, robots };
 });
 
@@ -44,36 +38,48 @@ function simulate(blueprint: Blueprint, timeLimit: number) {
   const queue: State[] = [{
     resources: { ore: 0, clay: 0, obsidian: 0, geode: 0 },
     robots: { ore: 1, clay: 0, obsidian: 0, geode: 0 },
-    time: 1,
+    time: 0,
   }];
   const seen = new Map<string, number>();
 
-  let max = 0;
+  function score(s: State) {
+    const timeLeft = timeLimit - s.time
+    const currentGeodes = s.resources.geode
+    const guaranteedGeodes = s.robots.geode * timeLeft
+    const potentialGeodes = timeLeft*(timeLeft - 1) / 2
+
+    return currentGeodes + guaranteedGeodes + potentialGeodes
+  }
+
+  function shouldExplore(s: State) {
+    const key = `${s.resources.ore}|${s.resources.clay}|${s.resources.obsidian}|${s.resources.geode}||${s.robots.ore}|${s.robots.clay}|${s.robots.obsidian}|${s.robots.geode}`;
+    if ((seen.get(key) ?? Infinity) <= s.time) return false;
+    seen.set(key, s.time);
+
+    if (!max) return true
+    return score(s) > score(max)
+  }
+
+  let max: State | null = null;
   // let idx = 0;
   while (queue.length > 0) {
     // idx++;
     // if (idx % 10000 === 0) console.log(queue.length);
     const s = queue.pop()!;
-    const key = JSON.stringify(s.resources) + JSON.stringify(s.robots);
-    if (seen.get(key) ?? 0 > s.time) continue;
-    seen.set(key, s.time);
     const robots = { ...s.robots };
     const resources = { ...s.resources };
 
-    if (s.time > timeLimit) {
-      if (resources.geode > max) {
-        max = resources.geode;
+    if (s.time >= timeLimit) {
+      if (!max || resources.geode > max.resources.geode) {
+        max = {...s};
+        // console.log(max)
       }
       continue;
     }
 
     const time = s.time + 1;
-    const canBuy = blueprint.robots.filter((r) => {
-      const totalCost = r.costs.reduce(
-        (totalCost, c) => { totalCost[c.resource] += c.cost; return totalCost },
-        { ore: 0, clay: 0, obsidian: 0 } as Record<Resource, number>
-      )
-      return resources.ore >= totalCost.ore && resources.clay >= totalCost.clay && resources.obsidian >= totalCost.obsidian;
+    const canBuy = Object.entries(blueprint.robots).filter(([_resource, costs]) => {
+      return resources.ore >= (costs.ore ?? 0) && resources.clay >= (costs.clay ?? 0) && resources.obsidian >= (costs.obsidian ?? 0);
     });
 
     Object.keys(s.robots).forEach((key) => {
@@ -88,20 +94,23 @@ function simulate(blueprint: Blueprint, timeLimit: number) {
         robots: { ...robots },
         time,
       };
-      robot.costs.forEach((c) => next.resources[c.resource] -= c.cost);
-      next.robots[robot.robotType]++;
-      // console.log(next);
-      queue.push(next);
+      const [robotType, robotCosts] = robot
+      next.resources.ore -= robotCosts.ore ?? 0
+      next.resources.clay -= robotCosts.clay ?? 0
+      next.resources.obsidian -= robotCosts.obsidian ?? 0
+      next.robots[robotType as Resource]++;
+      if (shouldExplore(next)) queue.push(next);
     }
-    queue.push({
+    const next = {
       resources,
       robots,
       time,
-    });
+    }
+    if (shouldExplore(next)) queue.push(next);
   }
 
-  console.log(max);
-  return max * Number(blueprint.id);
+  console.log("max", max);
+  return (max?.resources.geode ?? 0) * Number(blueprint.id);
 }
 
 const part1 = BLUEPRINTS.map(b => simulate(b, 24)).reduce((s, x) => s + x);
