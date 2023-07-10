@@ -1,85 +1,95 @@
 const puzzleInput = (await Deno.readTextFile("../../input/2022/21.txt")).trim();
-type Computer = (want?: number) => Promise<number | null>;
+type Monkey = (want?: number) => number | null;
 
-async function solve(part2 = false) {
-  let humanAnswer: number | null = null;
+function solve(part2 = false) {
+  let solutionForHumn: number | null = null;
 
-  const monkeys: Map<string, Computer> = new Map(
+  const monkeys: Map<string, Monkey> = new Map(
     puzzleInput.split('\n').map((line) => {
       const [name, yell] = line.split(": ")
       const n = Number(yell)
       if (isNaN(n)) {
         const [left, operator, right] = yell.split(" ")
-        const a = (w?: number) => monkeys.get(left)?.(w)!
-        const b = (w?: number) => monkeys.get(right)?.(w)!
         return [
           name,
-          compute(a, b, operator, name === 'root' && part2)
+          combineMonkeys(
+            (want?: number) => monkeys.get(left)?.(want)!,
+            (want?: number) => monkeys.get(right)?.(want)!,
+            operator,
+            name === 'root' && part2
+          )
         ]
       } else if (name === 'humn' && part2) {
-        return [name, (want?: number) => new Promise(resolve => {
-          if (want) {
-            humanAnswer = want;
-            resolve(want);
-          } else {
-            resolve(null)
+        return [
+          name,
+          (want?: number) => {
+            if (want === undefined) return null;
+            solutionForHumn = want;
+            return want;
           }
-        })]
+        ]
       } else {
-        return [name, () => new Promise(resolve => resolve(n))] as const
+        return [name, () => n]
       }
     })
   );
 
-  function compute(a: Computer, b: Computer, operator: string, isRoot = false): Computer {
-    return (want?: number) => Promise.all([a(), b()]).then(([left, right]) => {
-      if (isRoot) {
+  function combineMonkeys(
+    monkeyLeft: Monkey,
+    monkeyRight: Monkey,
+    operator: string,
+    performEquality = false
+  ): Monkey {
+    return (want?: number) => {
+      const left = monkeyLeft()
+      const right = monkeyRight()
+      if (performEquality) {
         if (left === null && right !== null) {
-          return a(right)
+          return monkeyLeft(right)
         } else if (left !== null && right === null) {
-          return b(left)
+          return monkeyRight(left)
         } else {
           throw new Error(`Cannot equate ${left} and ${right}`)
         }
-      } else {
-        if (left !== null && right !== null) {
-          switch (operator) {
-            case "+": return left + right
-            case "-": return left - right
-            case "/": return left / right
-            case "*": return left * right
-            default: throw new Error()
-          }
-        } else if (left === null && right !== null) {
-          switch (operator) {
-            case "+": return !want ? null : a(want - right) // want = x + right
-            case "-": return !want ? null : a(want + right) // want = x - right
-            case "/": return !want ? null : a(want * right) // want = x / right
-            case "*": return !want ? null : a(want / right) // want = x * right
-            default: throw new Error()
-          }
-        } else if (left !== null && right === null) {
-          switch (operator) {
-            case "+": return !want ? null : b(want - left) // want = left + x
-            case "-": return !want ? null : b(left - want) // want = left - x
-            case "/": return !want ? null : b(left / want) // want = left / x
-            case "*": return !want ? null : b(want / left) // want = left * x
-            default: throw new Error()
-          }
-        } else {
-          throw new Error(`Cannot resolve ${left} ${operator} ${right}`)
+      } else if (left !== null && right !== null) {
+        switch (operator) {
+          case "+": return left + right
+          case "-": return left - right
+          case "/": return left / right
+          case "*": return left * right
+          default: throw new Error()
         }
+      } else if (want === undefined) {
+        return null;
+      } else if (left === null && right !== null) {
+        switch (operator) {
+          case "+": return monkeyLeft(want - right) // want = x + right
+          case "-": return monkeyLeft(want + right) // want = x - right
+          case "/": return monkeyLeft(want * right) // want = x / right
+          case "*": return monkeyLeft(want / right) // want = x * right
+          default: throw new Error(`Cannot recognize operator ${operator}`)
+        }
+      } else if (left !== null && right === null) {
+        switch (operator) {
+          case "+": return monkeyRight(want - left) // want = left + x
+          case "-": return monkeyRight(left - want) // want = left - x
+          case "/": return monkeyRight(left / want) // want = left / x
+          case "*": return monkeyRight(want / left) // want = left * x
+          default: throw new Error(`Cannot recognize operator ${operator}`)
+        }
+      } else {
+        throw new Error(`Cannot resolve ${left} ${operator} ${right} wanting value ${want}`)
       }
-    })
+    }
   }
 
   if (part2) {
-    await monkeys.get('root')?.()
-    return humanAnswer
+    monkeys.get('root')?.()
+    return solutionForHumn
   } else {
-    return await monkeys.get('root')?.()
+    return monkeys.get('root')?.()
   }
 }
 
-console.log("Part 1:", await solve())
-console.log("Part 2:", await solve(true))
+console.log("Part 1:", solve())
+console.log("Part 2:", solve(true))
