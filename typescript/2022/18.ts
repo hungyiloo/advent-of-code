@@ -2,7 +2,7 @@ const puzzleInput = (await Deno.readTextFile("../../input/2022/18.txt")).trim();
 
 type Point = { x: number; y: number; z: number };
 
-const POINTS = puzzleInput.split("\n").map((line) => {
+const POINTS = puzzleInput.split(/\r?\n/).map((line) => {
   const [x, y, z] = line.split(",").map(Number);
   return { x, y, z } as Point;
 });

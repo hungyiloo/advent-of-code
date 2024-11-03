@@ -5,7 +5,7 @@ type Packet = number | Packet[];
 const pairs = puzzleInput
   .split('\n\n')
   .map(lines => lines
-  .split('\n')
+  .split(/\r?\n/)
   .map(line => JSON.parse(line) as Packet));
 
 const isNumber = (x: Packet) => typeof x === 'number';

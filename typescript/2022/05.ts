@@ -1,6 +1,6 @@
 const puzzleInput = (await Deno.readTextFile("../../input/2022/05.txt")).trim();
 
-const lines: string[] = puzzleInput.split('\n');
+const lines: string[] = puzzleInput.split(/\r?\n/);
 const blankLinePosition = lines.findIndex(line => line === '');
 const stackData = lines.slice(0, blankLinePosition - 1);
 const stackIds = lines[blankLinePosition - 1];

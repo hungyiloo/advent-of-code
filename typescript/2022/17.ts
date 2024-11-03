@@ -46,7 +46,7 @@ const PROTO_ROCKS = `
   .trim()
   .split("\n\n")
   .map((grid) =>
-    grid.split("\n").reverse().map((row) =>
+    grid.split(/\r?\n/).reverse().map((row) =>
       row.trim().split("").map((c) => c === "#")
     )
   )

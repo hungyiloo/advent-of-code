@@ -11,7 +11,7 @@ type Point = {
 
 const makeHeightmap = () =>
   puzzleInput
-    .split('\n')
+    .split(/\r?\n/)
     .map((line, x) => line
     .split('')
     .map((letter, y) => ({

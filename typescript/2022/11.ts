@@ -15,7 +15,7 @@ class Monkey {
     const [
       idInput, itemsInput, operationInput,
       divisorInput, passInput, failInput
-    ] = input.split('\n');
+    ] = input.split(/\r?\n/);
 
     this.id = idInput.replace(/[^\d]/g, '');
 

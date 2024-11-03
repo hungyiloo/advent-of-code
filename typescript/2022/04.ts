@@ -4,7 +4,7 @@ interface Range { lo: number; hi: number; }
 interface Pair { left: Range; right: Range; }
 
 const pairs: Pair[] = puzzleInput
-  .split('\n')
+  .split(/\r?\n/)
   .map(line => line
     .split(',')
     .map(member => member.split('-').map(x => parseInt(x)))

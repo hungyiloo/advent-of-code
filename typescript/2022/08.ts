@@ -2,7 +2,7 @@ const puzzleInput = (await Deno.readTextFile("../../input/2022/08.txt")).trim();
 
 // The forest of tree heights
 const FOREST = puzzleInput
-  .split('\n')
+  .split(/\r?\n/)
   .map(row => row
     .split('')
     .map(n => parseInt(n)))

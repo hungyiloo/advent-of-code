@@ -1,6 +1,6 @@
 const puzzleInput = (await Deno.readTextFile("../../input/2022/10.txt")).trim();
 
-const instructions = puzzleInput.split('\n')
+const instructions = puzzleInput.split(/\r?\n/)
   .map(line => line.split(' '))
   .map(([cmd, arg]) => ({cmd, arg: parseInt(arg)}));
 

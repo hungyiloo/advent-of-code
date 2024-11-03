@@ -20,7 +20,7 @@ function resourceEntries<T>(r: ResourceRecord<T>) {
   return Object.entries(r).map(([resource, item]) => [resource as Resource, item] as const)
 }
 
-const BLUEPRINTS: Blueprint[] = puzzleInput.split("\n").map((blueprint) => {
+const BLUEPRINTS: Blueprint[] = puzzleInput.split(/\r?\n/).map((blueprint) => {
   const [heading, ...rest] = blueprint.split(/[:\.] /);
   const id = heading.replace(/Blueprint /, "");
   const robots = rest.map((line) => {

@@ -17,7 +17,7 @@ function parseInput(): { board: Board, path: Move[] } {
   const [boardRaw, pathRaw] = puzzleInput.split('\n\n')
   const pathRegex = /(\d+)([RL]?)/g
   return {
-    board: boardRaw.split('\n').map(line => line.split('')) as Board,
+    board: boardRaw.split(/\r?\n/).map(line => line.split('')) as Board,
     path: [...pathRaw.matchAll(pathRegex)].map(m => ({ distance: m[1], rotation: m[2] } as unknown as Move))
   }
 }

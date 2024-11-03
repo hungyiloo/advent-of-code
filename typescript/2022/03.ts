@@ -1,6 +1,6 @@
 const puzzleInput = (await Deno.readTextFile("../../input/2022/03.txt")).trim();
 
-const rucksacks: string[] = puzzleInput.split('\n');
+const rucksacks: string[] = puzzleInput.split(/\r?\n/);
 
 function intersection(...xs: string[]): string[] {
   // Create sets of characters for each string.

@@ -1,6 +1,6 @@
 const puzzleInput = (await Deno.readTextFile("../../input/2022/02.txt")).trim();
 
-const strategy: string[] = puzzleInput.split('\n');
+const strategy: string[] = puzzleInput.split(/\r?\n/);
 
 const scoreReducer = (lookup: [string, number][]) => {
   const lookupTable = new Map<string, number>(lookup);

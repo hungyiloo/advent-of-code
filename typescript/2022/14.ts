@@ -6,7 +6,7 @@ type Wall = Coord[];
 type Cave = Map<string, Cell>;
 
 const WALLS: Wall[] = puzzleInput
-  .split("\n")
+  .split(/\r?\n/)
   .map(
     (line) =>
       line

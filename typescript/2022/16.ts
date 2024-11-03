@@ -7,7 +7,7 @@ type Node = {
 };
 
 const NODES = puzzleInput
-  .split("\n")
+  .split(/\r?\n/)
   .map((line) =>
     line.split(/Valve | has flow rate=|; tunnels? leads? to valves? /)
   )

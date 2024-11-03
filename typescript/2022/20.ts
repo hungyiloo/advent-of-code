@@ -1,7 +1,7 @@
 const puzzleInput = (await Deno.readTextFile("../../input/2022/20.txt")).trim();
 
 function parse(input: string, multiplier: number) {
-  return input.split("\n").map((n) => ({ n: Number(n) * multiplier }));
+  return input.split(/\r?\n/).map((n) => ({ n: Number(n) * multiplier }));
 }
 
 function mix(repeats = 1, decryptionKey = 1) {

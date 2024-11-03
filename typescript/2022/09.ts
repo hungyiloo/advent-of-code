@@ -1,6 +1,6 @@
 const puzzleInput = (await Deno.readTextFile("../../input/2022/09.txt")).trim();
 
-const movements = puzzleInput.split('\n')
+const movements = puzzleInput.split(/\r?\n/)
   .map(line => ({
     direction: line[0],
     steps: parseInt(line.slice(2))

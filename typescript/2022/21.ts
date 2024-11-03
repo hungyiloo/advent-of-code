@@ -5,7 +5,7 @@ function solve(part2 = false) {
   let solutionForHumn: number | null = null;
 
   const monkeys: Map<string, Monkey> = new Map(
-    puzzleInput.split('\n').map((line) => {
+    puzzleInput.split(/\r?\n/).map((line) => {
       const [name, yell] = line.split(": ")
       const n = Number(yell)
       if (isNaN(n)) {

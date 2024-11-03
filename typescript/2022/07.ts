@@ -18,7 +18,7 @@ const pathJoin = (...paths: string[]) => paths
 // This code processes a string containing a sequence of
 // commands and files/directories, and returns an array
 // of sizes for each directory in the file system.
-const { dirSizeMap } = puzzleInput.split('\n').reduce(
+const { dirSizeMap } = puzzleInput.split(/\r?\n/).reduce(
   ({ cwd, dirSizeMap }, line) => {
     if (line.startsWith("$")) {
       // Terminal Input

@@ -8,7 +8,7 @@ const manhattan = (x1: number, y1: number, x2: number, y2: number) =>
   Math.abs(x1 - x2) + Math.abs(y1 - y2);
 
 const FIELD = puzzleInput
-  .split("\n")
+  .split(/\r?\n/)
   .map((line) => line.replace(/(Sensor at|x=|y=|closest beacon is at| )/g, ""))
   .map((line) => line.split(/[,:]/).map(Number));
 

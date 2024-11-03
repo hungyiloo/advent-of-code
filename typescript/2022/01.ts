@@ -1,7 +1,7 @@
 const puzzleInput = (await Deno.readTextFile("../../input/2022/01.txt")).trim();
 
 const elves: number[] = puzzleInput
-  .split('\n')
+  .split(/\r?\n/)
   .reduce(
     (acc: number[], curr: string) => {
       if (curr === '') {
