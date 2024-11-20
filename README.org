@@ -63,7 +63,7 @@ Follow the official instructions:
 | 2023 Day 01 | ✅         |
 | 2023 Day 02 | ✅         |
 | 2023 Day 03 |            |
-| 2023 Day 04 |            |
+| 2023 Day 04 | ✅         |
 | 2023 Day 05 |            |
 | 2023 Day 06 |            |
 | 2023 Day 07 |            |
