@@ -43,13 +43,13 @@ const sss = {
     };
   },
 
-  array<T>(
+  array<T = string>(
     separator: string | RegExp,
-    mapper: (s: string) => T,
+    mapper: (s: string) => T = (s => s) as (s: string) => T,
   ) {
     const fn = (s: string) => s.split(separator).map(mapper);
 
-    fn.nth = (n: number) => (s: string) => fn(s)[n]
+    fn.nth = (n: number) => (s: string) => mapper(s.split(separator)[n])
 
     fn.dict = <K extends key, V>(keySelector: (x: T) => K, valueSelector: (x: T) => V) => 
       (s: string) => 
