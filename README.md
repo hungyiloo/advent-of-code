@@ -1,4 +1,4 @@
-#+begin_example
+```text
    *             ,
                 _/^\_
                <     >
@@ -23,47 +23,52 @@
   '`         \)_`"""""`
           .--' ')
         o(  )_-\
-#+end_example
+```
 
-* Hung-Yi's Advent of Code
-In 2021, I felt like doing [[https://adventofcode.com/][Advent of Code]] using TypeScript [[https://deno.land/][(deno)]] and learn F# at
-the same time. I managed to complete all 25 puzzles, but not for every language.
-Have a look under each of the language folders (=typescript/fsharp/rust/racket=)
-to see which puzzles were implemented in each language.
+# Hung-Yi's Advent of Code
 
-** How to run each puzzle
+In 2021, I felt like doing [Advent of Code](https://adventofcode.com/) using
+TypeScript [(deno)](https://deno.land/) and learning F# at the same time. I
+managed to complete all 25 puzzles, but not for every language. Have a look
+under each of the language folders (`typescript`, `fsharp`, `rust`, `racket`) to see
+which puzzles were implemented in each language.
+
+## How to run each puzzle
+
 TypeScript (deno)
-1. ~cd typescript/2022~
-2. ~deno run --allow-read=../.. 01.ts~ (replace =01= with the day number)
+1. `cd typescript/2022`
+2. `deno run --allow-read=../.. 01.ts` (replace `01` with the day number)
 
 F# (.NET)
-1. ~cd fsharp/2021~
-2. ~dotnet fsi 01.fsx~ (replace =01= with the day number)
+1. `cd fsharp/2021`
+2. `dotnet fsi 01.fsx` (replace `01` with the day number)
 
 Rust
-1. ~cd rust/2020~
-2. ~cargo run --bin 01~ (replace =01= with the day number)
+1. `cd rust/2020`
+2. `cargo run --bin 01` (replace `01` with the day number)
 
 Racket
-1. ~cd racket/2020~
-2. ~racket 01.rkt~ (replace =01= with the day number)
+1. `cd racket/2020`
+2. `racket 01.rkt` (replace `01` with the day number)
 
-** Don't have a language installed?
+## Don't have a language installed?
+
 Follow the official instructions:
-- [[https://deno.land/#installation][for deno]] (TypeScript)
-- [[https://dotnet.microsoft.com/en-us/download][for .NET]] (F#)
-- [[https://www.rust-lang.org/tools/install][for Rust]]
-- [[https://download.racket-lang.org/][for Racket]]
+- [for deno](https://deno.land/#installation) (TypeScript)
+- [for .NET](https://dotnet.microsoft.com/en-us/download) (F#)
+- [for Rust](https://www.rust-lang.org/tools/install)
+- [for Racket](https://download.racket-lang.org/)
 
-** Checklists
+## Checklists
 
-*** 2023
+### 2024
+
 | Day         | TypeScript |
-|-------------+------------|
+|-------------|------------|
 | 2023 Day 01 | ✅         |
 | 2023 Day 02 | ✅         |
-| 2023 Day 03 |            |
-| 2023 Day 04 | ✅         |
+| 2023 Day 03 | ✅         |
+| 2023 Day 04 |            |
 | 2023 Day 05 |            |
 | 2023 Day 06 |            |
 | 2023 Day 07 |            |
@@ -86,9 +91,40 @@ Follow the official instructions:
 | 2023 Day 24 |            |
 | 2023 Day 25 |            |
 
-*** 2022
+### 2023
+
 | Day         | TypeScript |
-|-------------+------------|
+|-------------|------------|
+| 2023 Day 01 | ✅         |
+| 2023 Day 02 | ✅         |
+| 2023 Day 03 | ✅         |
+| 2023 Day 04 | ✅         |
+| 2023 Day 05 | ✅         |
+| 2023 Day 06 |            |
+| 2023 Day 07 |            |
+| 2023 Day 08 |            |
+| 2023 Day 09 |            |
+| 2023 Day 10 |            |
+| 2023 Day 11 |            |
+| 2023 Day 12 |            |
+| 2023 Day 13 |            |
+| 2023 Day 14 |            |
+| 2023 Day 15 |            |
+| 2023 Day 16 |            |
+| 2023 Day 17 |            |
+| 2023 Day 18 |            |
+| 2023 Day 19 |            |
+| 2023 Day 20 |            |
+| 2023 Day 21 |            |
+| 2023 Day 22 |            |
+| 2023 Day 23 |            |
+| 2023 Day 24 |            |
+| 2023 Day 25 |            |
+
+### 2022
+
+| Day         | TypeScript |
+|-------------|------------|
 | 2022 Day 01 | ✅         |
 | 2022 Day 02 | ✅         |
 | 2022 Day 03 | ✅         |
@@ -115,9 +151,10 @@ Follow the official instructions:
 | 2022 Day 24 |            |
 | 2022 Day 25 |            |
 
-*** 2021
+### 2021
+
 | Day         | TypeScript | F# |
-|-------------+------------+----|
+|-------------|------------|----|
 | 2021 Day 01 | ✅         | ✅ |
 | 2021 Day 02 | ✅         | ✅ |
 | 2021 Day 03 | ✅         | ✅ |
@@ -144,9 +181,10 @@ Follow the official instructions:
 | 2021 Day 24 |            | ✅ |
 | 2021 Day 25 |            | ✅ |
 
-*** 2020
+### 2020
+
 | Day         | TypeScript | F# | Rust | Racket |
-|-------------+------------+----+------+--------|
+|-------------|------------|----|------|--------|
 | 2020 Day 01 |            | ✅ | ✅   | ✅     |
 | 2020 Day 02 |            | ✅ | ✅   | ✅     |
 | 2020 Day 03 |            | ✅ |      | ✅     |

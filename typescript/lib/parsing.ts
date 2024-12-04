@@ -62,6 +62,23 @@ const sss = {
         {} as Record<K, V>,
       )
 
+    fn.matches = (filter?: string | RegExp) => {
+      if (!filter) {
+        filter = separator
+      }
+
+      return (s: string) => s
+        .split(separator)
+        .filter(segment => {
+          if (typeof filter === "string") {
+            return segment === filter
+          } else {
+            return filter.test(segment)
+          }
+        })
+        .map(mapper)
+    }
+
     return fn
   },
 
