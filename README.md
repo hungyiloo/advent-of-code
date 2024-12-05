@@ -69,7 +69,7 @@ Follow the official instructions:
 | 2024 Day 02 | ✅         |
 | 2024 Day 03 | ✅         |
 | 2024 Day 04 | ✅         |
-| 2024 Day 05 |            |
+| 2024 Day 05 | ✅         |
 | 2024 Day 06 |            |
 | 2024 Day 07 |            |
 | 2024 Day 08 |            |
