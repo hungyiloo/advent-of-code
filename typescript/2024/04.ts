@@ -4,7 +4,15 @@ const puzzleInput = (await Deno.readTextFile("../../input/2024/04.txt")).trim()
 const parse = sss.array(/\r?\n/)
 const grid = parse(puzzleInput)
 
-function findXmasAt(row: number, col: number): number {
+function countMatches(matcher: (row: number, col: number) => number) {
+  let count = 0;
+  for (let row = 0; row < grid.length; row++)
+    for (let col = 0; col < grid[row].length; col++)
+      count += matcher(row, col);
+  return count
+}
+
+function findXmasAt(row: number, col: number) {
   // Only look at positions where there is an 'X'
   if (grid[row][col] !== 'X') return 0;
 
@@ -23,15 +31,11 @@ function findXmasAt(row: number, col: number): number {
   return count;
 }
 
-let part1 = 0;
-for (let row = 0; row < grid.length; row++)
-  for (let col = 0; col < grid[row].length; col++)
-    part1 += findXmasAt(row, col);
-console.log("Part 1:", part1);
+console.log("Part 1:", countMatches(findXmasAt));
 
-function findMasXAt(row: number, col: number): boolean {
+function findMasXAt(row: number, col: number) {
   // Only look at positions where there is an 'A' as the center of the Mas-X
-  if (grid[row][col] !== 'A') return false;
+  if (grid[row][col] !== 'A') return 0;
 
   // Check for MAS or SAM on each axis of the X
   const axis1 =
@@ -43,12 +47,7 @@ function findMasXAt(row: number, col: number): boolean {
     (grid[row-1]?.[col+1] === 'S' && grid[row+1]?.[col-1] === 'M');
 
   // Both axes must exist for this to count
-  return axis1 && axis2
+  return axis1 && axis2 ? 1 : 0
 }
 
-let part2 = 0;
-for (let row = 0; row < grid.length; row++)
-  for (let col = 0; col < grid[row].length; col++)
-    if (findMasXAt(row, col))
-      part2++
-console.log("Part 2:", part2);
+console.log("Part 2:", countMatches(findMasXAt));
