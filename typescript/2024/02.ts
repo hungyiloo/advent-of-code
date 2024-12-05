@@ -6,26 +6,14 @@ const parse = sss.array(/\r?\n/, sss.array(/ /, Number));
 const reports = parse(puzzleInput);
 
 function isSafe(report: (typeof reports)[0]) {
-  let safe = true;
-  let order: null | "increasing" | "decreasing" = null;
-  for (let ii = 1; ii < report.length; ii++) {
-    const delta = report[ii] - report[ii - 1];
-    if (Math.abs(delta) < 1 || Math.abs(delta) > 3) {
-      safe = false;
-      break;
-    }
-    if (!order) {
-      order = delta > 0 ? "increasing" : "decreasing";
-    } else if (
-      (order === "increasing" && delta < 0) ||
-      (order === "decreasing" && delta > 0)
-    ) {
-      safe = false;
-      break;
-    }
-  }
+  const ascending = report
+    .slice(1)
+    .every((level, ii) => level > report[ii] && level - report[ii] <= 3);
+  const descending = report
+    .slice(1)
+    .every((level, ii) => level < report[ii] && report[ii] - level <= 3);
 
-  return safe;
+  return ascending || descending;
 }
 
 console.log(
