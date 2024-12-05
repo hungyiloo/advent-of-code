@@ -3,27 +3,27 @@ import sss from "../lib/parsing.ts";
 const puzzleInput = (await Deno.readTextFile("../../input/2024/05.txt")).trim()
 const parse = sss.partition(
   /(?:\r?\n){2}/,
-  'rules', sss.array(/\r?\n/, sss.array(/\|/, Number)),
+  'rules', sss.array(/\r?\n/, sss.object(/\|/, 'left', Number, 'right', Number)),
   'updates', sss.array(/\r?\n/, sss.array(/,/, Number)),
 )
 const { rules, updates } = parse(puzzleInput)
 
-function checkRule(update: typeof updates[0]) {
-  return (rule: typeof rules[0]) => {
-    const left = update.indexOf(rule[0])
-    const right = update.indexOf(rule[1])
-    if (left === -1 || right === -1) {
-      return true
-    } else {
-      return left < right
+const ruleCheckerFor =
+  (update: typeof updates[0]) =>
+    (rule: typeof rules[0]) => {
+      const leftPos = update.indexOf(rule.left)
+      const rightPos = update.indexOf(rule.right)
+      if (leftPos === -1 || rightPos === -1) {
+        return true
+      } else {
+        return leftPos < rightPos
+      }
     }
-  }
-}
 
 const correctness = 
   (isCorrect: boolean) => 
     (update: typeof updates[0]) =>
-      rules.every(checkRule(update)) ? isCorrect : !isCorrect;
+      rules.every(ruleCheckerFor(update)) ? isCorrect : !isCorrect;
 
 const middleOf = (update: typeof updates[0]) => update[Math.floor(update.length / 2)];
 const sum = (s: number, x: number) => s + x
@@ -36,21 +36,21 @@ console.log(
     .reduce(sum)
 )
 
-function swap<T>(arr: T[], x: number, y: number) {
-  const temp = arr[x]
-  arr[x] = arr[y]
-  arr[y] = temp
+function swap<T>(arr: T[], pos1: number, pos2: number) {
+  const temp = arr[pos1]
+  arr[pos1] = arr[pos2]
+  arr[pos2] = temp
 }
 
 function fixUp(update: typeof updates[0]) {
-  const getFirstFailingRule = () => rules.find(r => !checkRule(update)(r))
+  const getFirstFailingRule = () => rules.find(r => !ruleCheckerFor(update)(r))
 
-  let failure = getFirstFailingRule()
-  while (failure) {
-    const left = update.indexOf(failure[0])
-    const right = update.indexOf(failure[1])
-    swap(update, left, right)
-    failure = getFirstFailingRule()
+  let failingRule = getFirstFailingRule()
+  while (failingRule) {
+    const leftPos = update.indexOf(failingRule.left)
+    const rightPos = update.indexOf(failingRule.right)
+    swap(update, leftPos, rightPos)
+    failingRule = getFirstFailingRule()
   }
 
   return update // a bit redundant, since we mutated the update array anyway
