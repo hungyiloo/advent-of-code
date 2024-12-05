@@ -13,14 +13,11 @@ console.log(
   pairs.reduce((sum, [l, r]) => sum + Math.abs(l - r), 0),
 );
 
-const counts = left.reduce(
-  (counts, x) => {
-    counts[x] = (counts[x] ?? 0) + 1;
-    return counts;
-  },
-  {} as Record<number, number>,
+const counts = right.reduce(
+  (counts, x) => counts.set(x, (counts.get(x) ?? 0) + 1),
+  new Map<number, number>()
 );
 console.log(
   "Part 2:",
-  left.reduce((score, l) => score + l * (counts[l] ?? 0), 0),
+  left.reduce((score, l) => score + l * (counts.get(l) ?? 0), 0),
 );
