@@ -16,20 +16,21 @@ const parseAllInstructions = sss
   .array(/(mul\(\d+,\d+\)|do(?:n't)?\(\))/)
   .matches();
 
-const { part2 } = parseAllInstructions(puzzleInput).reduce(
-  ({ enabled, part2 }, curr) => {
-    if (curr === "do()") {
-      return { enabled: true, part2 };
-    } else if (curr === "don't()") {
-      return { enabled: false, part2 };
-    } else if (enabled) {
-      const [a, b] = parseFactors(curr);
-      return { enabled, part2: part2 + a * b };
-    } else {
-      return { enabled, part2 };
-    }
-  },
-  { enabled: true, part2: 0 },
+console.log(
+  "Part 2:",
+  parseAllInstructions(puzzleInput).reduce(
+    ({ enabled, answer }, curr) => {
+      if (curr === "do()") {
+        return { enabled: true, answer };
+      } else if (curr === "don't()") {
+        return { enabled: false, answer };
+      } else if (enabled) {
+        const [a, b] = parseFactors(curr);
+        return { enabled, answer: answer + a * b };
+      } else {
+        return { enabled, answer };
+      }
+    },
+    { enabled: true, answer: 0 },
+  ).answer
 );
-
-console.log("Part 2:", part2);
