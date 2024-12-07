@@ -50,12 +50,15 @@ function step(pos: Position, direction: Direction, blocks: Position[]): 'exit' |
 }
 
 function simulate(pos: Position, blocks: Position[]) {
-  let direction = Direction.Up
-  let nextPos = step(pos, direction, blocks)
+  // Loop detection
   let loop = false
-  const visited = new Set([String(pos)])
   const blockedAt = new Set<string>()
   let lastBlockedAt = ''
+
+  // Starting conditions
+  let direction = Direction.Up
+  let nextPos = step(pos, direction, blocks)
+  const visited = new Set([String(pos)])
 
   while (nextPos !== 'exit') {
     if (nextPos === 'blocked') {
