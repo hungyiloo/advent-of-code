@@ -82,6 +82,20 @@ const sss = {
     return fn
   },
 
+  grid<T = string>(
+    separator1: string | RegExp,
+    separator2: string | RegExp,
+    mapper: (s: string, x: number, y: number) => T = (s => s) as (s: string) => T,
+  ) {
+    return this.array(
+      separator1,
+      (row, x) => this.array(
+        separator2,
+        (cell, y) => mapper(cell, x, y)
+      )(row)
+    )
+  },
+
   partition<N1 extends Key, T1, N2 extends Key, T2>(
     separator: string | RegExp,
     n1: N1, t1: ((x: string) => T1),

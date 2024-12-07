@@ -4,15 +4,13 @@ const puzzleInput = (await Deno.readTextFile("../../input/2024/06.txt")).trim();
 
 type Position = [number, number]
 
-const parse = sss.array(
+const parse = sss.grid(
   /\r?\n/,
-  (line, row) => sss.array(
-    '',
-    (char, col) => ({
-      type: char,
-      position: [row, col] as Position
-    })
-  )(line)
+  '',
+  (char, row, col) => ({
+    type: char,
+    position: [row, col] as Position
+  })
 );
 
 const grid = parse(puzzleInput);

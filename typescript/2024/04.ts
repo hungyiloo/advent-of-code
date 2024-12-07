@@ -1,7 +1,7 @@
 import sss from "../lib/parsing.ts";
 
 const puzzleInput = (await Deno.readTextFile("../../input/2024/04.txt")).trim()
-const parse = sss.array(/\r?\n/)
+const parse = sss.grid(/\r?\n/, '')
 const grid = parse(puzzleInput)
 
 function countMatches(matcher: (row: number, col: number) => number) {
