@@ -60,18 +60,17 @@ function simulate(pos: [number, number], blocks: [number, number][]) {
   let lastBlockedAt = ''
 
   while (nextPos !== 'exit') {
-    const posKey = String(pos)
     if (nextPos === 'blocked') {
-      if (lastBlockedAt !== posKey && blockedAt.has(posKey)) {
+      if (lastBlockedAt !== String(pos) && blockedAt.has(String(pos))) {
         loop = true
         break
       }
-      blockedAt.add(posKey)
-      lastBlockedAt = posKey
+      blockedAt.add(String(pos))
+      lastBlockedAt = String(pos)
       direction = turn(direction)
     } else {
       pos = nextPos
-      visited.add(posKey)
+      visited.add(String(pos))
     }
     nextPos = step(pos, direction, blocks)
   }
