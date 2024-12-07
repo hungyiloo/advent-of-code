@@ -1,24 +1,28 @@
 import sss from "../lib/parsing.ts";
 
 const puzzleInput = (await Deno.readTextFile("../../input/2024/06.txt")).trim();
-const parse = sss.array(/\r?\n/, sss.array(""));
+
+type Position = [number, number]
+
+const parse = sss.array(
+  /\r?\n/,
+  (line, row) => sss.array(
+    '',
+    (char, col) => ({
+      type: char,
+      position: [row, col] as Position
+    })
+  )(line)
+);
+
 const grid = parse(puzzleInput);
 const gridMaxRow = grid.length - 1
 const gridMaxCol = grid[0].length - 1
-
-enum EntityType {
-  Guard = "^",
-  Obstacle = "#",
-  Empty = ".",
-}
-type Entity = {
-  type: EntityType;
-  position: [number, number]
-};
+const entities = grid.flat();
 
 enum Direction { Left, Right, Up, Down }
 
-const DirectionVectors: Record<Direction, [number, number]> = {
+const DirectionVectors: Record<Direction, Position> = {
   [Direction.Left]: [0, -1],
   [Direction.Right]: [0, 1],
   [Direction.Up]: [-1, 0],
@@ -34,11 +38,7 @@ function turn(direction: Direction) {
   }
 }
 
-function step(
-  pos: [number, number],
-  direction: Direction,
-  blocks: [number,number][],
-): 'exit' | 'blocked' | [number, number] {
+function step(pos: Position, direction: Direction, blocks: Position[]): 'exit' | 'blocked' | Position {
   const vector = DirectionVectors[direction]
   const row = pos[0] + vector[0]
   const col = pos[1] + vector[1]
@@ -51,7 +51,7 @@ function step(
   }
 }
 
-function simulate(pos: [number, number], blocks: [number, number][]) {
+function simulate(pos: Position, blocks: Position[]) {
   let direction = Direction.Up
   let nextPos = step(pos, direction, blocks)
   let loop = false
@@ -78,37 +78,34 @@ function simulate(pos: [number, number], blocks: [number, number][]) {
   return { visited, loop }
 }
 
-function rewritableLog(message?: string, maxLength = 25) { 
+function stdout(message?: string, maxLength = 25) { 
   Deno.stdout.writeSync(new TextEncoder().encode(new Array(maxLength).fill('\b').join(''))) 
   if (message) {
     Deno.stdout.writeSync(new TextEncoder().encode(message.padEnd(maxLength, ' '))) 
   }
 }
 
-const entities = grid.flatMap((line, row) =>
-  line.map((cell, col) => ({ type: cell, position: [row, col] }) as Entity),
-);
-const guard = entities.find((e) => e.type === EntityType.Guard)!.position;
-const obstacles = entities.filter((e) => e.type === EntityType.Obstacle).map(o => o.position);
+const guard = entities.find((e) => e.type === '^')!.position;
+const obstacles = entities.filter((e) => e.type === '#').map(o => o.position);
 const visited = simulate(guard, obstacles).visited
 console.log("Part 1:", visited.size)
 
 const potentialObstacles = entities
-  .filter((e) => e.type === EntityType.Empty)
+  .filter((e) => e.type === '.')
   .map(s => s.position)
   // Only positions visited in Part 1 need to be considered.
   // Why? Putting an obstacle where the guard never would have walked makes no difference!
   .filter(p => visited.has(String(p))); 
 
-rewritableLog("Searching for loops...")
+stdout("Searching for loops...")
 let loopCount = 0
 for (const potentialObstacle of potentialObstacles) {
   if (simulate(guard, obstacles.concat([potentialObstacle])).loop) { 
     loopCount++
-    rewritableLog(`Searching... (${loopCount})`)
+    stdout(`Searching... (${loopCount})`)
   }
 }
-rewritableLog(new Array(25).fill(' ').join(''))
-rewritableLog()
+stdout(new Array(25).fill(' ').join(''))
+stdout()
 
 console.log("Part 2:", loopCount)
