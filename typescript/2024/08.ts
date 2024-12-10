@@ -2,17 +2,19 @@ import sss from "../lib/parsing.ts";
 
 const puzzleInput = (await Deno.readTextFile("../../input/2024/08.txt")).trim();
 
+type Position = { row: number, col: number }
+type Antenna = Position & { freq: string }
+
 const parse = sss.grid(
   /\r?\n/,
   '',
-  (freq, row, col) => ({ freq, row, col })
+  (freq, row, col) => ({ freq, row, col } as Antenna)
 )
 
 const grid = parse(puzzleInput)
 const gridMaxRow = grid.length - 1
 const gridMaxCol = grid[0].length - 1
 const antennae = grid.flat().filter(e => e.freq !== '.')
-type Antenna = typeof antennae[0]
 
 function groupBy<T, K extends string | number>(arr: T[], keySelector: (x: T) => K) {
   return arr.reduce(
@@ -32,7 +34,7 @@ function* findPairs<T>(arr: T[]) {
       yield [arr[ii], arr[jj]] as const
 }
 
-function* findAntinodes(a: Antenna, b: Antenna) {
+function* findAntinodes(a: Position, b: Position) {
   const dRow = b.row - a.row
   const dCol = b.col - a.col
   // Can't be bothered generating antinodes precisely to the edge of the map,
@@ -46,11 +48,11 @@ function* findAntinodes(a: Antenna, b: Antenna) {
     yield [
       { row: a.row - dRow*harmonic, col: a.col - dCol*harmonic },
       { row: b.row + dRow*harmonic, col: b.col + dCol*harmonic }
-    ]
+    ] as [Position, Position]
   }
 }
 
-function inBounds({ row, col }: { row: number, col: number }) {
+function inBounds({ row, col }: Position) {
   return 0 <= row && row <= gridMaxRow && 0 <= col && col <= gridMaxCol
 }
 
