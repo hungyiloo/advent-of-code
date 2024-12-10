@@ -20,9 +20,7 @@ function groupBy<T, K extends string | number>(arr: T[], keySelector: (x: T) => 
   return arr.reduce(
     (groups, curr) => {
       const key = keySelector(curr)
-      const group = groups.get(key) ?? groups.set(key, []).get(key)!
-      group.push(curr)
-      return groups
+      return groups.set(key, (groups.get(key) ?? []).concat([curr]))
     },
     new Map<K, T[]>()
   )
