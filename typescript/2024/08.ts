@@ -37,13 +37,18 @@ function* findAntinodes(a: Antenna, b: Antenna) {
   const dRow = b.row - a.row
   const dCol = b.col - a.col
   // Can't be bothered generating antinodes precisely to the edge of the map,
-  // so I just generate them in excess to cover the map, and filter them later
-  // with a bounds check.
-  for (let harmonic = 1; harmonic < Math.max(gridMaxRow, gridMaxCol); harmonic++) 
+  // so I just generate approximately to cover the map in excess, and filter
+  // them later with a bounds check.
+  for (
+    let harmonic = 1;
+    harmonic * Math.abs(dRow) <= gridMaxRow || harmonic * Math.abs(dCol) <= gridMaxCol;
+    harmonic++
+  ) {
     yield [
       { row: a.row - dRow*harmonic, col: a.col - dCol*harmonic },
       { row: b.row + dRow*harmonic, col: b.col + dCol*harmonic }
     ]
+  }
 }
 
 function inBounds({ row, col }: { row: number, col: number }) {
