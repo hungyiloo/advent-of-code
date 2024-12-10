@@ -11,8 +11,7 @@ const parse = sss.grid(
 const grid = parse(puzzleInput)
 const gridMaxRow = grid.length - 1
 const gridMaxCol = grid[0].length - 1
-const entities = grid.flat()
-const antennae = entities.filter(e => e.freq !== '.')
+const antennae = grid.flat().filter(e => e.freq !== '.')
 type Antenna = typeof antennae[0]
 
 function groupBy<T, K extends string | number>(arr: T[], keySelector: (x: T) => K) {
