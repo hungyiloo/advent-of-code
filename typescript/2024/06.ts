@@ -79,34 +79,32 @@ function simulate(pos: Position, blocks: Position[]) {
   return { visited, loop }
 }
 
-function stdout(message?: string, maxLength = 25) { 
+// deno-lint-ignore no-explicit-any
+function stdout(...messages: any[]) {
+  const maxLength = 25
   Deno.stdout.writeSync(new TextEncoder().encode(new Array(maxLength).fill('\b').join(''))) 
-  if (message) {
-    Deno.stdout.writeSync(new TextEncoder().encode(message.padEnd(maxLength, ' '))) 
+  if (messages?.length) {
+    Deno.stdout.writeSync(new TextEncoder().encode(messages.map(String).join(' ').padEnd(maxLength, ' ')))
   }
 }
 
 const guard = entities.find((e) => e.type === '^')!.position;
 const obstacles = entities.filter((e) => e.type === '#').map(o => o.position);
 const visited = simulate(guard, obstacles).visited
-console.log("Part 1:", visited.size)
-
-const potentialObstacles = entities
-  .filter((e) => e.type === '.')
-  .map(s => s.position)
-  // Only positions visited in Part 1 need to be considered.
-  // Why? Putting an obstacle where the guard never would have walked makes no difference!
-  .filter(p => visited.has(String(p))); 
-
-stdout("Searching for loops...")
-let loopCount = 0
-for (const potentialObstacle of potentialObstacles) {
-  if (simulate(guard, obstacles.concat([potentialObstacle])).loop) { 
-    loopCount++
-    stdout(`Searching... (${loopCount})`)
-  }
-}
-stdout(new Array(25).fill(' ').join(''))
-stdout()
-
-console.log("Part 2:", loopCount)
+stdout("Part 1:", visited.size, "\n")
+stdout(
+  "Part 2:",
+  entities
+    .filter((e) => e.type === '.')
+    .map(s => s.position)
+    // Only positions visited in Part 1 need to be considered.
+    // Why? Putting an obstacle where the guard never would have walked makes no difference!
+    .filter(p => visited.has(String(p)))
+    .reduce((loopCount, potentialObstacle) => {
+      if (simulate(guard, obstacles.concat([potentialObstacle])).loop) {
+        loopCount++;
+        stdout(`Part 2: ${loopCount}`)
+      }
+      return loopCount
+    }, 0),
+)
