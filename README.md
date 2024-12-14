@@ -74,8 +74,8 @@ Follow the official instructions:
 | 2024 Day 07 | ✅         |
 | 2024 Day 08 | ✅         |
 | 2024 Day 09 | ✅         |
-| 2024 Day 10 |            |
-| 2024 Day 11 |            |
+| 2024 Day 10 | ✅         |
+| 2024 Day 11 | ✅         |
 | 2024 Day 12 |            |
 | 2024 Day 13 |            |
 | 2024 Day 14 |            |
